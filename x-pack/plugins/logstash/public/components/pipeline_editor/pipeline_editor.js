@@ -44,7 +44,7 @@ class PipelineEditorUi extends React.Component {
     } = this.props;
 
     const pipelineWorkersSet = typeof settings['pipeline.workers'] === 'number';
-    const pipelineWorkers = pipelineWorkersSet ? settings['pipeline.workers'] : 1;
+    const pipelineWorkers = pipelineWorkersSet ? settings['pipeline.workers'] : null;
     this.state = {
       maxBytesNumber: settings['queue.max_bytes.number'],
       maxBytesUnit: settings['queue.max_bytes.units'],
@@ -344,6 +344,7 @@ class PipelineEditorUi extends React.Component {
             >
               <EuiFieldNumber
                 data-test-subj="inputWorkers"
+                min={0}
                 onChange={e => this.handleNumberChange('pipeline.workers', e.target.value)}
                 value={this.state.pipeline.settings['pipeline.workers']}
               />
@@ -358,6 +359,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputBatchSize"
+                  min={0}
                   onChange={e => this.handleNumberChange('pipeline.batch.size', e.target.value)}
                   value={this.state.pipeline.settings['pipeline.batch.size']}
                 />
@@ -371,6 +373,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputBatchDelay"
+                  min={0}
                   onChange={e => this.handleNumberChange('pipeline.batch.delay', e.target.value)}
                   value={this.state.pipeline.settings['pipeline.batch.delay']}
                 />
@@ -400,6 +403,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputQueueMaxBytesNumber"
+                  min={0}
                   onChange={e => this.handleMaxByteNumberChange(e.target.value)}
                   value={this.state.maxBytesNumber}
                 />
@@ -421,6 +425,7 @@ class PipelineEditorUi extends React.Component {
               >
                 <EuiFieldNumber
                   data-test-subj="inputQueueCheckpointWrites"
+                  min={0}
                   onChange={e => this.handleNumberChange('queue.checkpoint.writes', e.target.value)}
                   value={this.state.pipeline.settings['queue.checkpoint.writes']}
                 />
