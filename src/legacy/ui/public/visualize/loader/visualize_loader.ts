@@ -78,9 +78,11 @@ export class VisualizeLoader {
   public embedVisualizationWithSavedObject(
     el: HTMLElement,
     savedObj: VisSavedObject,
-    params: VisualizeLoaderParams
+    params: VisualizeLoaderParams,
+    onComplete: () => void
   ) {
-    return this.renderVis(el, savedObj, params);
+    console.log('VisualizeLoader embedVisualizationWithSavedObject - start / end');
+    return this.renderVis(el, savedObj, params, onComplete);
   }
 
   /**
@@ -96,9 +98,11 @@ export class VisualizeLoader {
   private renderVis(
     container: HTMLElement,
     savedObj: VisSavedObject,
-    params: VisualizeLoaderParams
+    params: VisualizeLoaderParams,
+    onComplete: () => void
   ) {
     const { vis, description, searchSource } = savedObj;
+    console.log('VisualizeLoader renderVis - start');
 
     vis.description = description;
     vis.searchSource = searchSource;
@@ -137,7 +141,8 @@ export class VisualizeLoader {
       Private: this.Private,
     };
 
-    return new EmbeddedVisualizeHandler(element, savedObj, handlerParams);
+    console.log('VisualizeLoader renderVis - end before return');
+    return new EmbeddedVisualizeHandler(element, savedObj, handlerParams, onComplete);
   }
 }
 

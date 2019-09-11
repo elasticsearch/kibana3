@@ -129,7 +129,8 @@ export class EmbeddedVisualizeHandler {
   constructor(
     private readonly element: HTMLElement,
     savedObject: VisSavedObject,
-    params: EmbeddedVisualizeHandlerParams
+    params: EmbeddedVisualizeHandlerParams,
+    onComplete: () => void
   ) {
     const { searchSource, vis } = savedObject;
 
@@ -158,7 +159,12 @@ export class EmbeddedVisualizeHandler {
 
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
-      this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
+      // HORSE
+      this.listeners.once(RENDER_COMPLETE_EVENT, () => {
+        console.log('element', element);
+        onComplete();
+        resolve();
+      });
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
