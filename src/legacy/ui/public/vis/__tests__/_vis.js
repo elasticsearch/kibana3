@@ -23,6 +23,7 @@ import expect from '@kbn/expect';
 import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
+import { registerVisTypes } from '../../../../core_plugins/kbn_vislib_vis_types/public/kbn_vislib_vis_types';
 
 describe('Vis Class', function () {
   let indexPattern;
@@ -45,7 +46,8 @@ describe('Vis Class', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    visTypes = Private(VisTypesRegistryProvider);
+    registerVisTypes(Private);
+    visTypes = VisTypesRegistryProvider;
   }));
 
   beforeEach(function () {
@@ -57,7 +59,7 @@ describe('Vis Class', function () {
     expect(vis.aggs.aggs).to.have.length(3);
 
     expect(vis).to.have.property('type');
-    expect(vis.type).to.eql(visTypes.byName.pie);
+    expect(vis.type).to.eql(visTypes.get('pie'));
 
     expect(vis).to.have.property('params');
     expect(vis.params).to.have.property('isDonut', true);
@@ -87,7 +89,7 @@ describe('Vis Class', function () {
     it('should set the state to defaults', function () {
       const vis = new Vis(indexPattern);
       expect(vis).to.have.property('type');
-      expect(vis.type).to.eql(visTypes.byName.histogram);
+      expect(vis.type).to.eql(visTypes.get('histogram'));
       expect(vis).to.have.property('aggs');
       expect(vis.aggs.aggs).to.have.length(1);
       expect(vis).to.have.property('params');

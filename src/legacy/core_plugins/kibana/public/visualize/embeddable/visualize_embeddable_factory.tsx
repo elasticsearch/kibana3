@@ -44,9 +44,8 @@ import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { Legacy } from 'kibana';
-import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisTypesPluginContract, VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { IPrivate } from 'ui/private';
 import { SavedObjectAttributes } from 'kibana/server';
 import {
   EmbeddableFactory,
@@ -73,41 +72,41 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private readonly visTypes: VisTypesRegistry;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get<IPrivate>('Private');
-    const visTypes = Private(VisTypesRegistryProvider);
-
-    return new VisualizeEmbeddableFactory(visTypes);
+    return new VisualizeEmbeddableFactory(() => VisTypesRegistryProvider);
   }
 
-  constructor(visTypes: VisTypesRegistry) {
+  constructor(private readonly getVisTypesRegistry: () => VisTypesPluginContract) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
         type: 'visualization',
         getIconForSavedObject: savedObject => {
+          const visTypes = getVisTypesRegistry();
           if (!visTypes) {
             return 'visualizeApp';
+          } else {
+            const visStateType = visTypes.get(JSON.parse(savedObject.attributes.visState).type);
+            return visStateType ? visStateType.icon : 'visualizeApp';
           }
-          return (
-            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
-          );
         },
         getTooltipForSavedObject: savedObject => {
+          const visTypes = getVisTypesRegistry();
           if (!visTypes) {
             return '';
           }
-          return `${savedObject.attributes.title} (${visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
+          const visStateType = visTypes.get(JSON.parse(savedObject.attributes.visState).type);
+          return `${savedObject.attributes.title} (
+            ${visStateType ? visStateType.title : ''})`;
         },
         showSavedObject: savedObject => {
+          const visTypes = getVisTypesRegistry();
           if (!visTypes) {
             return false;
           }
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = visTypes.byName[typeName];
+          const visType = visTypes.get(typeName);
           if (!visType) {
             return false;
           }
@@ -118,8 +117,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         },
       },
     });
-
-    this.visTypes = visTypes;
   }
 
   public isEditable() {
@@ -173,10 +170,11 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public async create() {
+    const visTypes = this.getVisTypesRegistry();
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    if (this.visTypes) {
-      showNewVisModal(this.visTypes, {
+    if (visTypes) {
+      showNewVisModal(visTypes.getAll(), {
         editorParams: ['addToDashboard'],
       });
     }
