@@ -28,6 +28,7 @@ export interface EmbeddableInput {
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
+  queryEmitterId?: string;
 }
 
 export interface EmbeddableOutput {

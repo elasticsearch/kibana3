@@ -18,6 +18,7 @@
  */
 import { isEqual, cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
+import { skip } from 'rxjs/operators';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
@@ -49,6 +50,10 @@ export abstract class Embeddable<
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
+  private queryEmitterSubscription?: Rx.Subscription;
+
+  private currentQueryEmitterId?: string;
+
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
     this.output = {
@@ -71,6 +76,19 @@ export abstract class Embeddable<
 
         const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
         this.onResetInput(newInput);
+      });
+      if (this.input.queryEmitterId) {
+        this.subscribeToQueryEmitter();
+      }
+
+      this.getInput$().subscribe(() => {
+        if (this.input.queryEmitterId !== this.currentQueryEmitterId) {
+          if (this.queryEmitterSubscription) {
+            this.queryEmitterSubscription.unsubscribe();
+          }
+
+          this.subscribeToQueryEmitter();
+        }
       });
     }
   }
@@ -168,10 +186,42 @@ export abstract class Embeddable<
     }
   }
 
+  private subscribeToQueryEmitter() {
+    if (!this.parent) {
+      return;
+    }
+    this.currentQueryEmitterId = this.input.queryEmitterId;
+    Object.keys(this.parent.getInput().panels).forEach(panelId => {
+      if (!this.parent) {
+        return;
+      }
+      const child = this.parent.getChild(panelId);
+      if (child && child.id === this.input.queryEmitterId) {
+        this.queryEmitterSubscription = child
+          .getInput$()
+          .pipe(skip(1))
+          .subscribe(input => {
+            this.updateInput({
+              query: input.query,
+              filters: input.filters,
+              indexPattern: input.indexPattern,
+            });
+          });
+      }
+    });
+  }
+
   private onResetInput(newInput: TEmbeddableInput) {
     if (!isEqual(this.input, newInput)) {
       if (this.input.lastReloadRequestTime !== newInput.lastReloadRequestTime) {
         this.reload();
+      }
+      if (this.input.queryEmitterId !== newInput.queryEmitterId) {
+        if (this.queryEmitterSubscription) {
+          this.queryEmitterSubscription.unsubscribe();
+        }
+
+        this.subscribeToQueryEmitter();
       }
       this.input = newInput;
       this.input$.next(newInput);
