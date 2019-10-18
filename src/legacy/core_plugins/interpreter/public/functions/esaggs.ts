@@ -253,12 +253,17 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
-    const indexPattern = await indexPatterns.get(args.index);
+    let indexPattern;
+    try {
+      indexPattern = await indexPatterns.get(args.index);
+    } catch (e) {
+      indexPattern = args.index;
+    }
     const aggs = new AggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
     const searchSource = new SearchSourceClass();
-    searchSource.setField('index', indexPattern);
+    searchSource.setField('index', indexPattern.id ? indexPattern : args.index);
     searchSource.setField('size', 0);
 
     const response = await handleCourierRequest({
