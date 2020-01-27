@@ -70,8 +70,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
-          await testSubjects.existOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
+          await testSubjects.existOrFail('~configureSourceButton');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -94,22 +94,22 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
+          await testSubjects.existOrFail('~waffleMap');
         });
 
         describe('context menu', () => {
           before(async () => {
-            await testSubjects.click('nodeContainer');
+            await testSubjects.click('~nodeContainer');
           });
 
           it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-            await testSubjects.missingOrFail('viewLogsContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
           });
 
           it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-            await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
           });
         });
 
@@ -121,13 +121,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`metrics page is visible`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'infraOps',
-          '/metrics/host/demo-stack-redis-01',
+          '/infrastructure/metrics/host/demo-stack-redis-01',
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('infraMetricsPage');
+        await testSubjects.existOrFail('~infraMetricsPage');
       });
     });
 
@@ -183,8 +183,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infrastructureViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infrastructureViewSetupInstructionsButton');
+          await testSubjects.missingOrFail('~configureSourceButton');
         });
 
         it(`shows read-only badge`, async () => {
@@ -207,22 +207,22 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
+          await testSubjects.existOrFail('~waffleMap');
         });
 
         describe('context menu', () => {
           before(async () => {
-            await testSubjects.click('nodeContainer');
+            await testSubjects.click('~nodeContainer');
           });
 
           it(`does not show link to view logs`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-            await testSubjects.missingOrFail('viewLogsContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
           });
 
           it(`does not show link to view apm traces`, async () => {
-            await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-            await testSubjects.missingOrFail('viewApmTracesContextMenuItem');
+            await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
           });
         });
 
@@ -234,13 +234,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`metrics page is visible`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'infraOps',
-          '/metrics/host/demo-stack-redis-01',
+          '/infrastructure/metrics/host/demo-stack-redis-01',
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('infraMetricsPage');
+        await testSubjects.existOrFail('~infraMetricsPage');
       });
     });
 
@@ -301,11 +301,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
-          await testSubjects.click('nodeContainer');
+          await testSubjects.existOrFail('~waffleMap');
+          await testSubjects.click('~nodeContainer');
           await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-          await testSubjects.click('viewLogsContextMenuItem');
-          await testSubjects.existOrFail('infraLogsPage');
+          await testSubjects.click('~viewLogsContextMenuItem');
+          await testSubjects.existOrFail('~infraLogsPage');
         });
       });
     });
@@ -367,11 +367,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           });
           await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('waffleMap');
-          await testSubjects.click('nodeContainer');
-          await retry.waitFor('context menu', () => testSubjects.exists('nodeContextMenu'));
-          await testSubjects.click('viewApmTracesContextMenuItem');
-          await testSubjects.existOrFail('apmMainContainer');
+          await testSubjects.existOrFail('~waffleMap');
+          await testSubjects.click('~nodeContainer');
+          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+          await testSubjects.click('~viewApmTracesContextMenuItem');
+          await testSubjects.existOrFail('~apmMainContainer');
         });
       });
     });
@@ -422,7 +422,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`infrastructure home page renders not found page`, async () => {
@@ -430,7 +430,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`infrastructure landing page renders not found page`, async () => {
@@ -438,7 +438,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`infrastructure snapshot page renders not found page`, async () => {
@@ -446,7 +446,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`metrics page renders not found page`, async () => {
@@ -458,7 +458,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
     });
   });

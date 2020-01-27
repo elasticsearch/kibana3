@@ -54,9 +54,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infraLogsPage');
-          await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.existOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infraLogsPage');
+          await testSubjects.existOrFail('~logsViewSetupInstructionsButton');
+          await testSubjects.existOrFail('~configureSourceButton');
         });
       });
     });
@@ -92,7 +92,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
     });
   });
