@@ -7,5 +7,6 @@
 export enum ProcessorEvent {
   transaction = 'transaction',
   error = 'error',
-  metric = 'metric'
+  metric = 'metric',
+  span = 'span'
 }
