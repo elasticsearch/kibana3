@@ -23,7 +23,7 @@ import { DataPublicPluginStart } from '../../../../../../../../../plugins/data/p
 import { MatchedIndex } from '../types';
 
 export async function getIndices(
-  es: DataPublicPluginStart['search']['__LEGACY']['esClient'],
+  es: DataPublicPluginStart['search']['__LEGACY']['esClient'], // todo consider move to new platform api
   indexPatternCreationType: IndexPatternCreationConfig,
   rawPattern: string,
   limit: number
@@ -46,11 +46,6 @@ export async function getIndices(
   // ES does not like just a `,*` and will throw a `[string_index_out_of_bounds_exception] String index out of range: 0`
   if (pattern.startsWith(',')) {
     return [];
-  }
-
-  // We need to always provide a limit and not rely on the default
-  if (!limit) {
-    throw new Error('`getIndices()` was called without the required `limit` parameter.');
   }
 
   const params = {
@@ -84,7 +79,7 @@ export async function getIndices(
         .map((indexName: string) => {
           return {
             name: indexName,
-            tags: indexPatternCreationType.getIndexTags(indexName),
+            tags: indexPatternCreationType.getIndexTags(indexName), // todo just returns empty array
           };
         }),
       'name'
