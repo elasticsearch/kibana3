@@ -74,6 +74,7 @@ export interface ActionGroup {
   id: string;
   name: string;
 }
+
 export interface AlertType {
   id: string;
   name: string;
@@ -95,6 +96,7 @@ export interface AlertTypeModel {
   validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.FunctionComponent<any>;
   defaultActionMessage?: string;
+  defaultActionGroup?: string;
 }
 
 export interface IErrorObject {

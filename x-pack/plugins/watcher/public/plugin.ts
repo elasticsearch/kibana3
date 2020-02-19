@@ -15,6 +15,7 @@ import { ILicense, LICENSE_CHECK_STATE } from '../../licensing/public';
 import { TimeBuckets } from './legacy';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
+import { getAlertType } from './application/sections/watch_edit/components/threshold_watch_edit/example_alert_type';
 
 const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
   const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
@@ -27,9 +28,11 @@ const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
 export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
-    { licensing, management, data, home, charts }: Dependencies
+    { licensing, management, data, home, charts, triggers_actions_ui }: Dependencies
   ) {
     const esSection = management.sections.getSection('elasticsearch');
+
+    triggers_actions_ui.alertTypeRegistry.register(getAlertType());
 
     const watcherESApp = esSection!.registerApp({
       id: 'watcher',
@@ -41,7 +44,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         const [core] = await getStartServices();
         const { i18n: i18nDep, docLinks, savedObjects } = core;
         const { boot } = await import('./application/boot');
-
         return boot({
           // Skip the first license status, because that's already been used to determine
           // whether to include Watcher.
@@ -52,10 +54,13 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           uiSettings,
           docLinks,
           setBreadcrumbs,
+          charts,
           theme: charts.theme,
           savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
+          dataFieldsFormats: data.fieldFormats,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
+          triggers_actions_ui,
         });
       },
     });
@@ -77,7 +82,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       path: '/app/kibana#/management/elasticsearch/watcher/watches',
       showOnHomePage: false,
     };
-
     home.featureCatalogue.register(watcherHome);
 
     licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
