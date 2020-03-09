@@ -28,7 +28,7 @@ export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
-  const PageObjects = getPageObjects(['context']);
+  const PageObjects = getPageObjects(['context', 'common']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/53888
   describe.skip('context size', function contextSize() {
@@ -37,6 +37,7 @@ export default function({ getService, getPageObjects }) {
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
       });
+      await PageObjects.common.navigateToApp('discover');
     });
 
     it('should default to the `context:defaultSize` setting', async function() {
