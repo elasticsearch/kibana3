@@ -185,6 +185,8 @@ module.exports = async ({ config }) => {
     KIBANA_ROOT,
     'packages/kbn-interpreter/target/common/registries'
   );
+  config.node = config.node || {};
+  config.node.fs = 'empty';
 
   return config;
 };
