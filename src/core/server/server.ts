@@ -162,6 +162,10 @@ export class Server {
       plugins: pluginsSetup,
     });
 
+    if (this.env.cliArgs.dryRunMigration) {
+      return coreSetup;
+    }
+
     await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
       plugins: mapToObject(pluginsSetup.contracts),
@@ -175,20 +179,23 @@ export class Server {
   public async start() {
     this.log.debug('starting server');
     const savedObjectsStart = await this.savedObjects.start({});
+
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-
-    const pluginsStart = await this.plugins.start({
-      capabilities: capabilitiesStart,
-      savedObjects: savedObjectsStart,
-      uiSettings: uiSettingsStart,
-    });
 
     this.coreStart = {
       capabilities: capabilitiesStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
     };
+
+    // Dry run migrations should not start plugins as this can produce
+    // unwanted side-effects.
+    if (this.env.cliArgs.dryRunMigration) {
+      return this.coreStart;
+    }
+
+    const pluginsStart = await this.plugins.start(this.coreStart);
 
     await this.legacy.start({
       core: {

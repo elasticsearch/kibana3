@@ -17,32 +17,10 @@
  * under the License.
  */
 
-// Test helpers to simplify mocking environment options.
+import { PluginsService as PluginServiceType } from '..';
+import { pluginServiceMock } from '../plugins_service.mock';
 
-import { EnvOptions } from '../env';
-
-type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>;
-};
-
-export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
-  return {
-    configs: options.configs || [],
-    cliArgs: {
-      dev: true,
-      open: false,
-      quiet: false,
-      silent: false,
-      watch: false,
-      repl: false,
-      basePath: false,
-      optimize: false,
-      oss: false,
-      runExamples: false,
-      dryRunMigration: false,
-      ...(options.cliArgs || {}),
-    },
-    isDevClusterMaster:
-      options.isDevClusterMaster !== undefined ? options.isDevClusterMaster : false,
-  };
-}
+const mock = pluginServiceMock.create();
+export const PluginsService = jest.fn<PublicMethodsOf<PluginServiceType>, []>(function() {
+  return mock;
+});

@@ -357,13 +357,19 @@ export class SavedObjectsService
     }
 
     this.logger.debug('Starting SavedObjects service');
+    const cliArgs = this.coreContext.env.cliArgs;
 
     const kibanaConfig = await this.coreContext.configService
       .atPath<KibanaConfigType>('kibana')
       .pipe(first())
       .toPromise();
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
-    const migrator = this.createMigrator(kibanaConfig, this.config.migration, migrationsRetryDelay);
+    const migrator = this.createMigrator(
+      kibanaConfig,
+      this.config.migration,
+      cliArgs.dryRunMigration,
+      migrationsRetryDelay
+    );
 
     this.migrator$.next(migrator);
 
@@ -377,7 +383,6 @@ export class SavedObjectsService
      * HTTP server running without an Elasticsearch server being available.
      * So, when the `migrations.skip` is true, we skip migrations altogether.
      */
-    const cliArgs = this.coreContext.env.cliArgs;
     const skipMigrations = cliArgs.optimize || this.config.migration.skip;
 
     if (skipMigrations) {
@@ -401,8 +406,20 @@ export class SavedObjectsService
         take(1)
       ).toPromise();
 
-      this.logger.info('Starting saved objects migrations');
-      await migrator.runMigrations();
+      const results = await migrator.runMigrations();
+
+      if (cliArgs.dryRunMigration) {
+        results.forEach(r => {
+          if (r.status === 'skipped') {
+            if (r.reason != null) this.logger.warn('Dry run migration skipped: ' + r.reason);
+            else
+              this.logger.info(
+                `Dry run migration skipped: ${r.alias} has no outstanding migrations.`
+              );
+          }
+        });
+        this.logger.info('Dry run migrations completed, exiting Kibana.');
+      }
     }
 
     const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
@@ -455,6 +472,7 @@ export class SavedObjectsService
   private createMigrator(
     kibanaConfig: KibanaConfigType,
     savedObjectsConfig: SavedObjectsMigrationConfigType,
+    dryRunMigration: boolean,
     migrationsRetryDelay?: number
   ): KibanaMigrator {
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
@@ -466,6 +484,7 @@ export class SavedObjectsService
       savedObjectsConfig,
       savedObjectValidations: this.validations,
       kibanaConfig,
+      dryRunMigration,
       callCluster: migrationsRetryCallCluster(
         adminClient.callAsInternalUser,
         this.logger,
