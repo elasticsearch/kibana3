@@ -19,7 +19,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
-import { useEditorActionContext, useServicesContext } from '../../contexts';
+import { useServicesContext, useTextObjectsActionContext } from '../../contexts';
+import { sortTextObjectsAsc } from '../../../../common/text_object';
 
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);
@@ -36,27 +37,38 @@ export const useDataInit = () => {
     services: { objectStorageClient, history },
   } = useServicesContext();
 
-  const dispatch = useEditorActionContext();
+  const dispatch = useTextObjectsActionContext();
 
   useEffect(() => {
     const load = async () => {
       try {
         await migrateToTextObjects({ history, objectStorageClient });
-        const results = await objectStorageClient.text.findAll();
+        const results = await objectStorageClient.text.findAll([
+          'id',
+          'name',
+          'isScratchPad',
+          'createdAt',
+          'updatedAt',
+        ]);
         if (!results.length) {
           const newObject = await objectStorageClient.text.create({
+            // Do not set a text value here so that the default text value
+            // is used.
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            text: '',
+            isScratchPad: true,
           });
-          dispatch({ type: 'setCurrentTextObject', payload: newObject });
+          dispatch({ type: 'upsertAndSetCurrent', payload: newObject });
         } else {
+          const [defaultTextObject, ...otherObjects] = sortTextObjectsAsc(results);
+          if (!defaultTextObject.isScratchPad) {
+            defaultTextObject.isScratchPad = true;
+          }
           dispatch({
-            type: 'setCurrentTextObject',
-            // For backwards compatibility, we sort here according to date created to
-            // always take the first item created.
-            payload: results.sort((a, b) => a.createdAt - b.createdAt)[0],
+            type: 'upsertAndSetCurrent',
+            payload: defaultTextObject,
           });
+          dispatch({ type: 'upsertMany', payload: otherObjects });
         }
       } catch (e) {
         setError(e);

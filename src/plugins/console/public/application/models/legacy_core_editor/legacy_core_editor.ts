@@ -219,8 +219,13 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   off(event: EditorEvent, listener: () => void) {
-    if (event === 'changeSelection') {
+    if (event === 'changeCursor') {
+      this.editor.getSession().selection.off(event, listener);
+    } else if (event === 'changeSelection') {
       this.editor.off(event, listener);
+    } else {
+      // .off is not documented in types for getSession but does exist
+      (this.editor.getSession() as any).off(event, listener);
     }
   }
 
@@ -296,6 +301,21 @@ export class LegacyCoreEditor implements CoreEditor {
       name: opts.name,
       bindKey: opts.keys,
     });
+  }
+
+  destroy() {
+    const langTools = ace.acequire('ace/ext/language_tools');
+
+    langTools.setCompleters([
+      {
+        identifierRegexps: [
+          /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
+        ],
+        getCompletions: () => [],
+      },
+    ]);
+
+    this.editor.destroy();
   }
 
   legacyUpdateUI(range: any) {

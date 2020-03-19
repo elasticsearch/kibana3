@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiLoadingContent, EuiPageContent } from '@elastic/eui';
+import * as t from 'io-ts';
 
-export const EditorContentSpinner: FunctionComponent = () => {
-  return (
-    <EuiPageContent className="conApp__editor__spinner">
-      <EuiLoadingContent lines={10} />
-    </EuiPageContent>
-  );
+export const idObjectProps = {
+  /**
+   * An ID that uniquely identifies this object.
+   */
+  id: t.string,
 };
+
+export const idObjectSchema = t.type(idObjectProps);
+
+export type IdObject = t.TypeOf<typeof idObjectSchema>;

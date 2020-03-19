@@ -19,31 +19,38 @@
 
 import { useRef, useCallback } from 'react';
 import { throttle } from 'lodash';
-import { useEditorReadContext, useServicesContext } from '../contexts';
+import { useServicesContext } from '../../contexts';
+import { TextObjectWithId } from '../../../../common/text_object';
+
+import { useTextObjectsCRUD } from './use_text_objects_crud';
 
 const WAIT_MS = 500;
 
-export const useSaveCurrentTextObject = () => {
+/**
+ * For a given saved object, we want to make sure that edits are saved in
+ * the sequence which they arrive, not the rate at which they are stored.
+ */
+export const useSequencedSaveTextObjectText = (textObject: TextObjectWithId) => {
   const promiseChainRef = useRef(Promise.resolve());
 
   const {
     services: { objectStorageClient },
   } = useServicesContext();
 
-  const { currentTextObject } = useEditorReadContext();
+  const crud = useTextObjectsCRUD();
 
   return useCallback(
     throttle(
       (text: string) => {
         const { current: promise } = promiseChainRef;
-        if (!currentTextObject) return;
-        promise.finally(() =>
-          objectStorageClient.text.update({ ...currentTextObject, text, updatedAt: Date.now() })
-        );
+        // Update remote
+        promise.finally(() => {
+          return crud.update({ textObject: { id: textObject.id, text, updatedAt: Date.now() } });
+        });
       },
       WAIT_MS,
       { trailing: true }
     ),
-    [objectStorageClient, currentTextObject]
+    [objectStorageClient]
   );
 };

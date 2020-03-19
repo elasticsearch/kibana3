@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { pick } from 'lodash';
 import uuid from 'uuid';
-import { ObjectStorage, IdObject } from '../../../common/types';
+import { ObjectStorage } from '../../../common/types';
+import { IdObject } from '../../../common/id_object';
 import { Storage } from '../../services';
 
 export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> {
@@ -28,25 +29,45 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
     this.prefix = `console_local_${type}`;
   }
 
+  private getFullEntryName(id: string) {
+    return `${this.prefix}_${id}`;
+  }
+
   async create(obj: Omit<O, 'id'>): Promise<O> {
     const id = uuid.v4();
     const newObj = { id, ...obj } as O;
-    this.client.set(`${this.prefix}_${id}`, newObj);
+    this.client.set(this.getFullEntryName(id), newObj);
     return newObj;
   }
 
-  async update(obj: O): Promise<void> {
-    this.client.set(`${this.prefix}_${obj.id}`, obj);
+  async get<F extends keyof O>(id: string, fieldsToInclude?: F[]): Promise<Pick<O, F>> {
+    const object = await this.client.get<O>(this.getFullEntryName(id));
+    if (!object) {
+      throw new Error(`${id} not found`);
+    }
+
+    return fieldsToInclude ? pick(object, fieldsToInclude) : object;
   }
 
-  async findAll(): Promise<O[]> {
+  async update(obj: Partial<O> & IdObject): Promise<void> {
+    const objIdName = this.getFullEntryName(obj.id);
+    const currentObj = this.client.get(objIdName);
+    this.client.set(objIdName, { ...currentObj, ...obj });
+  }
+
+  async delete(id: string) {
+    this.client.delete(this.getFullEntryName(id));
+  }
+
+  async findAll<F extends keyof O>(fieldsToInclude?: F[]): Promise<Array<Pick<O, F>>> {
     const allLocalKeys = this.client.keys().filter(key => {
-      return key.includes(this.prefix);
+      return key.indexOf(this.prefix) === 0;
     });
 
     const result = [];
     for (const key of allLocalKeys) {
-      result.push(this.client.get<O>(key));
+      const object = this.client.get<O>(key);
+      result.push(fieldsToInclude ? pick(object, fieldsToInclude) : object);
     }
     return result;
   }

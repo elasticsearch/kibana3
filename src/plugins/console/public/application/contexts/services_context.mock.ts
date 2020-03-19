@@ -30,12 +30,20 @@ export const serviceContextMock = {
     return {
       elasticsearchUrl: 'test',
       services: {
-        trackUiMetric: { count: () => {}, load: () => {} },
+        trackUiMetric: { count: jest.fn(), load: jest.fn() },
         storage,
         settings: new SettingsMock(storage),
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),
-        objectStorageClient: {} as any,
+        objectStorageClient: {
+          text: {
+            create: jest.fn(),
+            get: jest.fn(),
+            findAll: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+          },
+        },
       },
       docLinkVersion: 'NA',
     };

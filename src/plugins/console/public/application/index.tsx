@@ -20,7 +20,12 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { NotificationsSetup } from 'src/core/public';
-import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
+import {
+  ServicesContextProvider,
+  EditorContextProvider,
+  RequestContextProvider,
+  TextObjectsContextProvider,
+} from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings } from '../services';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
@@ -71,11 +76,13 @@ export function renderApp({
           },
         }}
       >
-        <RequestContextProvider>
-          <EditorContextProvider settings={settings.toJSON()}>
-            <Main />
-          </EditorContextProvider>
-        </RequestContextProvider>
+        <TextObjectsContextProvider>
+          <RequestContextProvider>
+            <EditorContextProvider settings={settings.toJSON()}>
+              <Main />
+            </EditorContextProvider>
+          </RequestContextProvider>
+        </TextObjectsContextProvider>
       </ServicesContextProvider>
     </I18nContext>,
     element

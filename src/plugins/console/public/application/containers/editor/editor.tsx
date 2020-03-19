@@ -17,30 +17,53 @@
  * under the License.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useState, useEffect } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiControlBar, EuiLoadingSpinner } from '@elastic/eui';
 
-import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
-import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import {
+  useServicesContext,
+  useRequestReadContext,
+  useTextObjectsReadContext,
+} from '../../contexts';
+
+import { addDefaultValues } from '../file_tree/file_tree';
+import { NetworkRequestStatusBar, FileSaveErrorIcon, FileSavedIcon } from '../../components';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
-interface Props {
-  loading: boolean;
-}
+const DEFAULT_INPUT_VALUE = `GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}`;
 
-export const Editor = memo(({ loading }: Props) => {
+export const Editor = memo(() => {
   const {
-    services: { storage },
+    services: { storage, objectStorageClient },
   } = useServicesContext();
 
-  const { currentTextObject } = useEditorReadContext();
-  const { requestInFlight } = useRequestReadContext();
+  const [initialTextValue, setInitialTextValue] = useState<string | undefined>();
+
+  const {
+    textObjects,
+    currentTextObjectId,
+    persistingTextObjectWithId,
+    textObjectsSaveError,
+  } = useTextObjectsReadContext();
+
+  const {
+    requestInFlight,
+    lastResult: { data: requestData, error: requestError },
+  } = useRequestReadContext();
+  const lastDatum = requestData?.[requestData.length - 1] ?? requestError;
+
+  const currentTextObject = textObjects[currentTextObjectId];
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
@@ -54,7 +77,14 @@ export const Editor = memo(({ loading }: Props) => {
     []
   );
 
-  if (!currentTextObject) return null;
+  useEffect(() => {
+    setInitialTextValue(undefined);
+    if (currentTextObjectId) {
+      objectStorageClient.text
+        .get(currentTextObjectId, ['text'])
+        .then(({ text }) => setInitialTextValue(text ?? DEFAULT_INPUT_VALUE));
+    }
+  }, [currentTextObjectId, objectStorageClient]);
 
   return (
     <>
@@ -68,17 +98,91 @@ export const Editor = memo(({ loading }: Props) => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={firstPanelWidth}
         >
-          {loading ? (
-            <EditorContentSpinner />
-          ) : (
-            <EditorUI initialTextValue={currentTextObject.text} />
+          {currentTextObject && initialTextValue != null && (
+            <>
+              <EditorUI textObject={{ ...currentTextObject, text: initialTextValue }} />
+              <EuiControlBar
+                size="s"
+                position="absolute"
+                controls={[
+                  {
+                    iconType: 'document',
+                    id: 'root_icon',
+                    controlType: 'icon',
+                    'aria-label': 'Project Root',
+                  },
+                  {
+                    controlType: 'breadcrumbs',
+                    id: 'current_file_path',
+                    responsive: true,
+                    breadcrumbs: [
+                      {
+                        text: addDefaultValues([currentTextObject])[0].name,
+                      },
+                    ],
+                  },
+                  {
+                    controlType: 'spacer',
+                  },
+                  {
+                    controlType: 'text',
+                    id: 'saving_status',
+                    text: (
+                      <div className="conApp__controlBar__saveSpinner">
+                        {persistingTextObjectWithId === currentTextObjectId ? (
+                          <EuiLoadingSpinner size="m" />
+                        ) : textObjectsSaveError[currentTextObjectId] ? (
+                          <FileSaveErrorIcon
+                            errorMessage={textObjectsSaveError[currentTextObjectId]}
+                          />
+                        ) : (
+                          <FileSavedIcon />
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+            </>
           )}
         </Panel>
         <Panel
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={secondPanelWidth}
         >
-          {loading ? <EditorContentSpinner /> : <EditorOutput />}
+          <>
+            <EditorOutput />
+            <EuiControlBar
+              size="s"
+              position="absolute"
+              controls={[
+                {
+                  controlType: 'spacer',
+                },
+                {
+                  controlType: 'text',
+                  id: 'saving_status',
+                  text: (
+                    <NetworkRequestStatusBar
+                      className="conApp__networkRequestBar"
+                      requestInProgress={requestInFlight}
+                      requestResult={
+                        lastDatum
+                          ? {
+                              method: lastDatum.request.method.toUpperCase(),
+                              endpoint: lastDatum.request.path,
+                              statusCode: lastDatum.response.statusCode,
+                              statusText: lastDatum.response.statusText,
+                              timeElapsedMs: lastDatum.response.timeMs,
+                            }
+                          : undefined
+                      }
+                    />
+                  ),
+                },
+              ]}
+            />
+          </>
         </Panel>
       </PanelsContainer>
     </>

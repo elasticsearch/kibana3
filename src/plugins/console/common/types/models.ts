@@ -17,33 +17,37 @@
  * under the License.
  */
 
-import { TextObject } from '../text_object';
-
-export interface IdObject {
-  id: string;
-}
+import { TextObjectWithId } from '../text_object';
+import { IdObject } from '../id_object';
 
 export interface ObjectStorage<O extends IdObject> {
   /**
-   * Creates a new object in the underlying persistance layer.
+   * Creates a new object in the underlying persistence layer.
    *
    * @remarks Does not accept an ID, a new ID is generated and returned with the newly created object.
    */
   create(obj: Omit<O, 'id'>): Promise<O>;
 
+  get<F extends keyof O>(id: string, fieldsToInclude?: F[]): Promise<Pick<O, F>>;
+
   /**
-   * This method should update specific object in the persistance layer.
+   * This method should update specific object in the persistence layer.
    */
-  update(obj: O): Promise<void>;
+  update(obj: Partial<O>): Promise<void>;
+
+  /**
+   * Delete a text object from the persistence layer
+   */
+  delete(id: string): Promise<void>;
 
   /**
    * A function that will return all of the objects in the persistance layer.
    *
    * @remarks Unless an error is thrown this function should always return an array (empty if there are not objects present).
    */
-  findAll(): Promise<O[]>;
+  findAll<F extends keyof O>(fieldsToInclude?: F[]): Promise<Array<Pick<O, F>>>;
 }
 
 export interface ObjectStorageClient {
-  text: ObjectStorage<TextObject>;
+  text: ObjectStorage<TextObjectWithId>;
 }

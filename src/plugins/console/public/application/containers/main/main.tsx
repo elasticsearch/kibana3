@@ -23,16 +23,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eu
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
+import { FileTree } from '../file_tree';
 
-import {
-  TopNavMenu,
-  WelcomePanel,
-  HelpPanel,
-  SomethingWentWrongCallout,
-  NetworkRequestStatusBar,
-} from '../../components';
+import { TopNavMenu, WelcomePanel, HelpPanel, SomethingWentWrongCallout } from '../../components';
 
-import { useServicesContext, useEditorReadContext, useRequestReadContext } from '../../contexts';
+import { useServicesContext, useEditorContext } from '../../contexts';
 import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
@@ -42,12 +37,7 @@ export function Main() {
     services: { storage },
   } = useServicesContext();
 
-  const { ready: editorsReady } = useEditorReadContext();
-
-  const {
-    requestInFlight: requestInProgress,
-    lastResult: { data: requestData, error: requestError },
-  } = useRequestReadContext();
+  const [{ ready: editorsReady }] = useEditorContext();
 
   const [showWelcome, setShowWelcomePanel] = useState(
     () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
@@ -56,6 +46,7 @@ export function Main() {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showFileTree, setShowFileTree] = useState(false);
 
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
@@ -70,16 +61,9 @@ export function Main() {
     );
   }
 
-  const lastDatum = requestData?.[requestData.length - 1] ?? requestError;
-
   return (
     <div id="consoleRoot">
-      <EuiFlexGroup
-        className="consoleContainer"
-        gutterSize="none"
-        direction="column"
-        responsive={false}
-      >
+      <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
@@ -88,38 +72,33 @@ export function Main() {
               })}
             </h1>
           </EuiTitle>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem>
-              <TopNavMenu
-                disabled={!done}
-                items={getTopNavConfig({
-                  onClickHistory: () => setShowHistory(!showingHistory),
-                  onClickSettings: () => setShowSettings(true),
-                  onClickHelp: () => setShowHelp(!showHelp),
-                })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="conApp__tabsExtension">
-              <NetworkRequestStatusBar
-                requestInProgress={requestInProgress}
-                requestResult={
-                  lastDatum
-                    ? {
-                        method: lastDatum.request.method.toUpperCase(),
-                        endpoint: lastDatum.request.path,
-                        statusCode: lastDatum.response.statusCode,
-                        statusText: lastDatum.response.statusText,
-                        timeElapsedMs: lastDatum.response.timeMs,
-                      }
-                    : undefined
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <TopNavMenu
+            disabled={!done}
+            items={getTopNavConfig({
+              onClickFiles: () => setShowFileTree(!showFileTree),
+              onClickHistory: () => setShowHistory(!showingHistory),
+              onClickSettings: () => setShowSettings(true),
+              onClickHelp: () => setShowHelp(!showHelp),
+            })}
+          />
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} />
+          <EuiFlexGroup
+            responsive={false}
+            style={{ height: '100%' }}
+            direction="row"
+            gutterSize="none"
+          >
+            {showFileTree && (
+              <EuiFlexItem grow={false}>
+                <FileTree />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <Editor />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
