@@ -13,12 +13,7 @@ interface FormState {
   description: string;
   metricAlias: string;
   logAlias: string;
-  containerField: string;
-  hostField: string;
   messageField: string[];
-  podField: string;
-  tiebreakerField: string;
-  timestampField: string;
 }
 
 type FormStateChanges = Partial<FormState>;
@@ -70,81 +65,14 @@ export const useIndicesConfigurationFormState = ({
       }),
     [formState.metricAlias]
   );
-  const containerFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.containerField),
-        name: `containerField`,
-        onChange: containerField =>
-          setFormStateChanges(changes => ({ ...changes, containerField })),
-        value: formState.containerField,
-      }),
-    [formState.containerField]
-  );
-  const hostFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.hostField),
-        name: `hostField`,
-        onChange: hostField => setFormStateChanges(changes => ({ ...changes, hostField })),
-        value: formState.hostField,
-      }),
-    [formState.hostField]
-  );
-  const podFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.podField),
-        name: `podField`,
-        onChange: podField => setFormStateChanges(changes => ({ ...changes, podField })),
-        value: formState.podField,
-      }),
-    [formState.podField]
-  );
-  const tiebreakerFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.tiebreakerField),
-        name: `tiebreakerField`,
-        onChange: tiebreakerField =>
-          setFormStateChanges(changes => ({ ...changes, tiebreakerField })),
-        value: formState.tiebreakerField,
-      }),
-    [formState.tiebreakerField]
-  );
-  const timestampFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.timestampField),
-        name: `timestampField`,
-        onChange: timestampField =>
-          setFormStateChanges(changes => ({ ...changes, timestampField })),
-        value: formState.timestampField,
-      }),
-    [formState.timestampField]
-  );
 
   const fieldProps = useMemo(
     () => ({
       name: nameFieldProps,
       logAlias: logAliasFieldProps,
       metricAlias: metricAliasFieldProps,
-      containerField: containerFieldFieldProps,
-      hostField: hostFieldFieldProps,
-      podField: podFieldFieldProps,
-      tiebreakerField: tiebreakerFieldFieldProps,
-      timestampField: timestampFieldFieldProps,
     }),
-    [
-      nameFieldProps,
-      logAliasFieldProps,
-      metricAliasFieldProps,
-      containerFieldFieldProps,
-      hostFieldFieldProps,
-      podFieldFieldProps,
-      tiebreakerFieldFieldProps,
-      timestampFieldFieldProps,
-    ]
+    [nameFieldProps, logAliasFieldProps, metricAliasFieldProps]
   );
 
   const errors = useMemo(
@@ -176,10 +104,5 @@ const defaultFormState: FormState = {
   description: '',
   logAlias: '',
   metricAlias: '',
-  containerField: '',
-  hostField: '',
   messageField: [],
-  podField: '',
-  tiebreakerField: '',
-  timestampField: '',
 };
