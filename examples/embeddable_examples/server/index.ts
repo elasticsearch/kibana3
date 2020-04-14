@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+import { PluginInitializer } from 'kibana/server';
+
+import { EmbeddableExamplesPlugin } from './plugin';
+
+export const plugin: PluginInitializer<void, void> = () => new EmbeddableExamplesPlugin();

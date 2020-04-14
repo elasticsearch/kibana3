@@ -17,9 +17,12 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+import { SavedObjectAttributes } from '../../../src/core/types';
+
+export const NOTE_SAVED_OBJECT = 'note';
+
+export interface NoteSavedObjectAttributes extends SavedObjectAttributes {
+  to?: string;
+  from?: string;
+  message: string;
+}

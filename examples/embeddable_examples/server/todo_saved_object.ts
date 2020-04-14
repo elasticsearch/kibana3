@@ -17,9 +17,24 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+import { SavedObjectsType } from 'kibana/server';
+
+export const todoSavedObject: SavedObjectsType = {
+  name: 'todo',
+  hidden: false,
+  namespaceAgnostic: true,
+  mappings: {
+    properties: {
+      title: {
+        type: 'keyword',
+      },
+      task: {
+        type: 'text',
+      },
+      icon: {
+        type: 'keyword',
+      },
+    },
+  },
+  migrations: {},
+};

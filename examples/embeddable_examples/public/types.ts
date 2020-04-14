@@ -17,9 +17,10 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+import { SavedObjectAttributes } from 'kibana/public';
+
+export interface TodoSavedObjectAttributes extends SavedObjectAttributes {
+  task: string;
+  icon?: string;
+  title?: string;
+}

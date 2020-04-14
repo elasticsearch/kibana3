@@ -17,9 +17,16 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+import { EmbeddableInput, EmbeddableOutput } from '..';
+
+export interface SavedObjectEmbeddableInput extends EmbeddableInput {
+  savedObjectId: string;
+}
+
+export type SavedObjectEmbeddableOutput = EmbeddableOutput;
+
+export function isSavedObjectEmbeddableInput(
+  input: EmbeddableInput | SavedObjectEmbeddableInput
+): input is SavedObjectEmbeddableInput {
+  return (input as SavedObjectEmbeddableInput).savedObjectId !== undefined;
+}

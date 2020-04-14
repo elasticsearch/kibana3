@@ -17,9 +17,17 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
+import { todoSavedObject } from './todo_saved_object';
+import { noteSavedObject } from './note_saved_object';
+
+export class EmbeddableExamplesPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.savedObjects.registerType(todoSavedObject);
+    core.savedObjects.registerType(noteSavedObject);
+  }
+
+  public start(core: CoreStart) {}
+
+  public stop() {}
+}

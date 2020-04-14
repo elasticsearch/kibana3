@@ -17,9 +17,25 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+import { SavedObjectsType } from 'kibana/server';
+import { NOTE_SAVED_OBJECT } from '../common';
+
+export const noteSavedObject: SavedObjectsType = {
+  name: NOTE_SAVED_OBJECT,
+  hidden: false,
+  namespaceAgnostic: true,
+  mappings: {
+    properties: {
+      message: {
+        type: 'text',
+      },
+      to: {
+        type: 'keyword',
+      },
+      from: {
+        type: 'keyword',
+      },
+    },
+  },
+  migrations: {},
+};

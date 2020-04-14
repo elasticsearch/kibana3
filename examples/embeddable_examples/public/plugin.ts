@@ -17,28 +17,66 @@
  * under the License.
  */
 
-import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../src/plugins/embeddable/public';
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from './hello_world';
 import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoInput, TodoOutput } from './todo';
-import { MULTI_TASK_TODO_EMBEDDABLE, MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+import {
+  MULTI_TASK_TODO_EMBEDDABLE,
+  MultiTaskTodoEmbeddableFactory,
+  MultiTaskTodoInput,
+  MultiTaskTodoOutput,
+} from './multi_task_todo';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainerFactory,
 } from './searchable_list_container';
 import { LIST_CONTAINER, ListContainerFactory } from './list_container';
+import { createSampleData } from './create_sample_data';
+import { TodoRefInput, TodoRefOutput, TODO_REF_EMBEDDABLE } from './todo/todo_ref_embeddable';
+import { TodoRefEmbeddableFactory } from './todo/todo_ref_embeddable_factory';
+import {
+  ACTION_EDIT_NOTE,
+  NoteEmbeddable,
+  NOTE_EMBEDDABLE,
+  NoteEmbeddableInput,
+  NoteEmbeddableOutput,
+  NoteEmbeddableFactory,
+  createEditNoteAction,
+} from './note';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
+  uiActions: UiActionsStart;
 }
 
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
 }
 
+export interface EmbeddableExamplesStart {
+  createSampleData: (overwrite: boolean) => Promise<void>;
+}
+
+declare module '../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_EDIT_NOTE]: { embeddable: NoteEmbeddable };
+  }
+}
+
 export class EmbeddableExamplesPlugin
   implements
-    Plugin<void, void, EmbeddableExamplesSetupDependencies, EmbeddableExamplesStartDependencies> {
+    Plugin<
+      void,
+      EmbeddableExamplesStart,
+      EmbeddableExamplesSetupDependencies,
+      EmbeddableExamplesStartDependencies
+    > {
   public setup(
     core: CoreSetup<EmbeddableExamplesStartDependencies>,
     deps: EmbeddableExamplesSetupDependencies
@@ -48,7 +86,7 @@ export class EmbeddableExamplesPlugin
       new HelloWorldEmbeddableFactory()
     );
 
-    deps.embeddable.registerEmbeddableFactory(
+    deps.embeddable.registerEmbeddableFactory<MultiTaskTodoInput, MultiTaskTodoOutput>(
       MULTI_TASK_TODO_EMBEDDABLE,
       new MultiTaskTodoEmbeddableFactory()
     );
@@ -73,9 +111,38 @@ export class EmbeddableExamplesPlugin
         openModal: (await core.getStartServices())[0].overlays.openModal,
       }))
     );
+
+    deps.embeddable.registerEmbeddableFactory<TodoRefInput, TodoRefOutput>(
+      TODO_REF_EMBEDDABLE,
+      new TodoRefEmbeddableFactory(async () => ({
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+      }))
+    );
+
+    deps.embeddable.registerEmbeddableFactory<NoteEmbeddableInput, NoteEmbeddableOutput>(
+      NOTE_EMBEDDABLE,
+      new NoteEmbeddableFactory(async () => ({
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+        openModal: (await core.getStartServices())[0].overlays.openModal,
+      }))
+    );
+
+    const editNoteAction = createEditNoteAction(async () => ({
+      openModal: (await core.getStartServices())[0].overlays.openModal,
+      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+      getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+    }));
+    deps.uiActions.registerAction(editNoteAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editNoteAction);
   }
 
-  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {}
+  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {
+    return {
+      createSampleData: () => createSampleData(core.savedObjects.client),
+    };
+  }
 
   public stop() {}
 }

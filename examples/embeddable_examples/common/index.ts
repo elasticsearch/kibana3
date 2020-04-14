@@ -17,9 +17,5 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+export { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
+export { NoteSavedObjectAttributes, NOTE_SAVED_OBJECT } from './note_saved_object_attributes';

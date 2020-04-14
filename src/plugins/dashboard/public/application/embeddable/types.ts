@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PanelState, EmbeddableInput } from '../../embeddable_plugin';
+import { PanelState, EmbeddableInput, SavedObjectEmbeddableInput } from '../../embeddable_plugin';
 export type PanelId = string;
 export type SavedObjectId = string;
 
@@ -28,7 +28,8 @@ export interface GridData {
   i: string;
 }
 
-export interface DashboardPanelState<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>
-  extends PanelState<TEmbeddableInput> {
+export interface DashboardPanelState<
+  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+> extends PanelState<TEmbeddableInput> {
   readonly gridData: GridData;
 }

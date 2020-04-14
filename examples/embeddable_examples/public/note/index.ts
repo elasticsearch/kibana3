@@ -17,9 +17,6 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+export * from './note_embeddable';
+export * from './note_embeddable_factory';
+export * from './edit_note_action';

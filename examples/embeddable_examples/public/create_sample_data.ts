@@ -17,9 +17,33 @@
  * under the License.
  */
 
-export {
-  SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableContainerInput,
-} from './searchable_list_container';
-export { SearchableListContainerFactory } from './searchable_list_container_factory';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { TodoSavedObjectAttributes, NOTE_SAVED_OBJECT, NoteSavedObjectAttributes } from '../common';
+
+export async function createSampleData(client: SavedObjectsClientContract, overwrite = true) {
+  await client.create<TodoSavedObjectAttributes>(
+    'todo',
+    {
+      task: 'Take the garbage out',
+      title: 'Garbage',
+      icon: 'trash',
+    },
+    {
+      id: 'sample-todo-saved-object',
+      overwrite,
+    }
+  );
+
+  await client.create<NoteSavedObjectAttributes>(
+    NOTE_SAVED_OBJECT,
+    {
+      to: 'Sue',
+      from: 'Bob',
+      message: 'Remember to pick up more bleach.',
+    },
+    {
+      id: 'sample-note-saved-object',
+      overwrite,
+    }
+  );
+}
