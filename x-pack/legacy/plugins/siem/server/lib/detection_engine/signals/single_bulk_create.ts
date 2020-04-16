@@ -62,6 +62,10 @@ export interface SingleBulkCreateResponse {
   createdItemsCount: number;
 }
 
+function stringBreviate(text, count, insertDots){
+  return text.slice(0, count) + (((text.length > count) && insertDots) ? "..." : "");
+}
+
 // Bulk Index documents.
 export const singleBulkCreate = async ({
   someResult,
@@ -134,13 +138,14 @@ export const singleBulkCreate = async ({
   logger.debug(`took property says bulk took: ${response.took} milliseconds`);
 
   if (response.errors) {
-    const itemsWithErrors = response.items.filter(item => item.create.error);
+    const itemsWithErrors = response.items.filter(item => item.create.error).filter(item => item.create.status !== 409);
     const errorCountsByStatus = countBy(itemsWithErrors, item => item.create.status);
     delete errorCountsByStatus['409']; // Duplicate signals are expected
 
     if (!isEmpty(errorCountsByStatus)) {
+      const errmsg = stringBreviate(JSON.stringify(itemsWithErrors), 1000, true);
       logger.error(
-        `[-] bulkResponse had errors with response statuses:counts of...\n${JSON.stringify(
+        `[-] bulkResponse had errors ${errmsg} with response statuses:counts of...\n${JSON.stringify(
           errorCountsByStatus,
           null,
           2
