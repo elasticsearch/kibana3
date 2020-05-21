@@ -20,12 +20,7 @@ export const useSourceConfigurationFormState = (configuration?: SourceConfigurat
               description: configuration.description,
               logAlias: configuration.logAlias,
               metricAlias: configuration.metricAlias,
-              containerField: configuration.fields.container,
-              hostField: configuration.fields.host,
               messageField: configuration.fields.message,
-              podField: configuration.fields.pod,
-              tiebreakerField: configuration.fields.tiebreaker,
-              timestampField: configuration.fields.timestamp,
             }
           : undefined,
       [configuration]
@@ -70,13 +65,6 @@ export const useSourceConfigurationFormState = (configuration?: SourceConfigurat
       description: indicesConfigurationFormState.formState.description,
       logAlias: indicesConfigurationFormState.formState.logAlias,
       metricAlias: indicesConfigurationFormState.formState.metricAlias,
-      fields: {
-        container: indicesConfigurationFormState.formState.containerField,
-        host: indicesConfigurationFormState.formState.hostField,
-        pod: indicesConfigurationFormState.formState.podField,
-        tiebreaker: indicesConfigurationFormState.formState.tiebreakerField,
-        timestamp: indicesConfigurationFormState.formState.timestampField,
-      },
       logColumns: logColumnsConfigurationFormState.formState.logColumns,
     }),
     [indicesConfigurationFormState.formState, logColumnsConfigurationFormState.formState]
@@ -88,13 +76,6 @@ export const useSourceConfigurationFormState = (configuration?: SourceConfigurat
       description: indicesConfigurationFormState.formStateChanges.description,
       logAlias: indicesConfigurationFormState.formStateChanges.logAlias,
       metricAlias: indicesConfigurationFormState.formStateChanges.metricAlias,
-      fields: {
-        container: indicesConfigurationFormState.formStateChanges.containerField,
-        host: indicesConfigurationFormState.formStateChanges.hostField,
-        pod: indicesConfigurationFormState.formStateChanges.podField,
-        tiebreaker: indicesConfigurationFormState.formStateChanges.tiebreakerField,
-        timestamp: indicesConfigurationFormState.formStateChanges.timestampField,
-      },
       logColumns: logColumnsConfigurationFormState.formStateChanges.logColumns,
     }),
     [

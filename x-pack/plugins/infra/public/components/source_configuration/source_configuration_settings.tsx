@@ -19,7 +19,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import { Source } from '../../containers/source';
-import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
@@ -122,19 +121,6 @@ export const SourceConfigurationSettings = ({
               logAliasFieldProps={indicesConfigurationProps.logAlias}
               metricAliasFieldProps={indicesConfigurationProps.metricAlias}
               readOnly={!isWriteable}
-              displaySettings={displaySettings}
-            />
-          </EuiPanel>
-          <EuiSpacer />
-          <EuiPanel paddingSize="l">
-            <FieldsConfigurationPanel
-              containerFieldProps={indicesConfigurationProps.containerField}
-              hostFieldProps={indicesConfigurationProps.hostField}
-              isLoading={isLoading}
-              podFieldProps={indicesConfigurationProps.podField}
-              readOnly={!isWriteable}
-              tiebreakerFieldProps={indicesConfigurationProps.tiebreakerField}
-              timestampFieldProps={indicesConfigurationProps.timestampField}
               displaySettings={displaySettings}
             />
           </EuiPanel>
