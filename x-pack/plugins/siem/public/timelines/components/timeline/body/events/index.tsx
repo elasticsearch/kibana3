@@ -31,7 +31,6 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
-  containerElementRef: HTMLDivElement;
   data: TimelineItem[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -57,7 +56,6 @@ const EventsComponent: React.FC<Props> = ({
   browserFields,
   columnHeaders,
   columnRenderers,
-  containerElementRef,
   data,
   eventIdToNoteIds,
   getNotesByIds,
@@ -79,7 +77,6 @@ const EventsComponent: React.FC<Props> = ({
   <EventsTbody data-test-subj="events">
     {data.map((event, i) => (
       <StatefulEvent
-        containerElementRef={containerElementRef}
         actionsColumnWidth={actionsColumnWidth}
         addNoteToEvent={addNoteToEvent}
         browserFields={browserFields}
@@ -92,7 +89,6 @@ const EventsComponent: React.FC<Props> = ({
         isEventViewer={isEventViewer}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
-        maxDelay={maxDelay(i)}
         onColumnResized={onColumnResized}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}

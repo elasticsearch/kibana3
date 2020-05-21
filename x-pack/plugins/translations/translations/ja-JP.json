@@ -14265,8 +14265,6 @@
     "xpack.siem.timeline.eventsSelect.actions.selectPinned": "ピン付け済み",
     "xpack.siem.timeline.eventsSelect.actions.selectUnpinned": "ピンが外されました",
     "xpack.siem.timeline.eventsSelect.actions.unpinSelected": "選択項目のピンを外す",
-    "xpack.siem.timeline.expandableEvent.copyToClipboardToolTip": "クリップボードにコピー",
-    "xpack.siem.timeline.expandableEvent.eventToolTipTitle": "イベント",
     "xpack.siem.timeline.fieldTooltip": "フィールド",
     "xpack.siem.timeline.flyout.header.closeTimelineButtonLabel": "タイムラインを閉じる",
     "xpack.siem.timeline.flyout.pane.removeColumnButtonLabel": "列を削除",

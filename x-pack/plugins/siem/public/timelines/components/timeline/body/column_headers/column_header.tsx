@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPortal } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
@@ -18,6 +19,12 @@ import { Sort } from '../sort';
 import { Header } from './header';
 
 const RESIZABLE_ENABLE = { right: true };
+
+export const ConditionalPortal = React.memo<{ children: React.ReactNode; usePortal: boolean }>(
+  ({ children, usePortal }) => (usePortal ? <EuiPortal>{children}</EuiPortal> : <>{children}</>)
+);
+
+ConditionalPortal.displayName = 'ConditionalPortal';
 
 interface ColumneHeaderProps {
   draggableIndex: number;
@@ -94,24 +101,26 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         index={draggableIndex}
         key={header.id}
       >
-        {dragProvided => (
-          <EventsTh
-            data-test-subj="draggable-header"
-            {...dragProvided.draggableProps}
-            {...dragProvided.dragHandleProps}
-            ref={dragProvided.innerRef}
-          >
-            <EventsThContent>
-              <Header
-                timelineId={timelineId}
-                header={header}
-                onColumnRemoved={onColumnRemoved}
-                onColumnSorted={onColumnSorted}
-                onFilterChange={onFilterChange}
-                sort={sort}
-              />
-            </EventsThContent>
-          </EventsTh>
+        {(dragProvided, dragSnapshot) => (
+          <ConditionalPortal usePortal={dragSnapshot.isDragging}>
+            <EventsTh
+              data-test-subj="draggable-header"
+              {...dragProvided.draggableProps}
+              {...dragProvided.dragHandleProps}
+              ref={dragProvided.innerRef}
+            >
+              <EventsThContent>
+                <Header
+                  timelineId={timelineId}
+                  header={header}
+                  onColumnRemoved={onColumnRemoved}
+                  onColumnSorted={onColumnSorted}
+                  onFilterChange={onFilterChange}
+                  sort={sort}
+                />
+              </EventsThContent>
+            </EventsTh>
+          </ConditionalPortal>
         )}
       </Draggable>
     </Resizable>

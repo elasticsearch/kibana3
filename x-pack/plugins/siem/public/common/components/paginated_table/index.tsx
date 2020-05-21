@@ -19,7 +19,7 @@ import {
   Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { FC, memo, useState, useEffect, ComponentType } from 'react';
+import React, { FC, useMemo, memo, useState, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
@@ -228,6 +228,19 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     ));
   const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
 
+  const basicTableSorting = useMemo(
+    () =>
+      sorting
+        ? {
+            sort: {
+              field: sorting.field as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+              direction: sorting.direction,
+            },
+          }
+        : undefined,
+    [sorting]
+  );
+
   return (
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
@@ -252,16 +265,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
               compressed
               items={pageOfItems}
               onChange={onChange}
-              sorting={
-                sorting
-                  ? {
-                      sort: {
-                        field: sorting.field,
-                        direction: sorting.direction,
-                      },
-                    }
-                  : undefined
-              }
+              sorting={basicTableSorting}
             />
             <FooterAction>
               <EuiFlexItem>

@@ -29,6 +29,7 @@ export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
+  display: flex;
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -64,7 +65,11 @@ export const EventsTable = styled.div.attrs<EventsTableProps>(
       minWidth: `${columnWidths}px`,
     },
   })
-)<EventsTableProps>``;
+)<EventsTableProps>`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
 
 /* EVENTS HEAD */
 
@@ -155,7 +160,7 @@ export const EventsTbody = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tbody ${className}`,
   role: 'rowgroup',
 }))`
-  overflow-x: hidden;
+  // overflow-x: hidden;
 `;
 
 export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({

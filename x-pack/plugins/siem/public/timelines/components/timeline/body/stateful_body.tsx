@@ -40,7 +40,7 @@ import { plainRowRenderer } from './renderers/plain_row_renderer';
 interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
-  height?: number;
+  height: number;
   id: string;
   isEventViewer?: boolean;
   sort: Sort;

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useCallback } from 'react';
+import { VariableSizeList, areEqual } from 'react-window';
 
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -22,14 +23,15 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
+import { TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
-import { Events } from './events';
+import { eventIsPinned } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 import { useTimelineTypeContext } from '../timeline_context';
+import { StatefulEvent } from './events/stateful_event';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -38,7 +40,7 @@ export interface BodyProps {
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   getNotesByIds: (noteIds: string[]) => Note[];
-  height?: number;
+  height: number;
   id: string;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
@@ -61,6 +63,8 @@ export interface BodyProps {
   toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
+
+const listRef = React.createRef<VariableSizeList>();
 
 /** Renders the timeline body */
 export const Body = React.memo<BodyProps>(
@@ -94,12 +98,10 @@ export const Body = React.memo<BodyProps>(
     toggleColumn,
     updateNote,
   }) => {
-    const containerElementRef = useRef<HTMLDivElement>(null);
     const timelineTypeContext = useTimelineTypeContext();
-    const additionalActionWidth = useMemo(
-      () => timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0,
-      [timelineTypeContext.timelineActions]
-    );
+    const additionalActionWidth =
+      timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0;
+
     const actionsColumnWidth = useMemo(
       () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
       [isEventViewer, showCheckboxes, additionalActionWidth]
@@ -111,56 +113,96 @@ export const Body = React.memo<BodyProps>(
       [actionsColumnWidth, columnHeaders]
     );
 
-    return (
-      <>
-        <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
-          <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
-            <ColumnHeaders
-              actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              isEventViewer={isEventViewer}
-              isSelectAllChecked={isSelectAllChecked}
-              onColumnRemoved={onColumnRemoved}
-              onColumnResized={onColumnResized}
-              onColumnSorted={onColumnSorted}
-              onFilterChange={onFilterChange}
-              onSelectAll={onSelectAll}
-              onUpdateColumns={onUpdateColumns}
-              showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
-              sort={sort}
-              timelineId={id}
-              toggleColumn={toggleColumn}
-            />
+    const rowHeights: number[] = [];
 
-            <Events
-              containerElementRef={containerElementRef.current!}
+    const getItemSize = (index: number) => rowHeights[index] || 33;
+
+    const Row = React.memo(({ index, style }) => {
+      const ref = useRef();
+      const event = data[index];
+      const isEventPinned = eventIsPinned({
+        eventId: event._id,
+        pinnedEventIds,
+      });
+
+      const measure = useCallback(() => {
+        if (ref && ref.current) {
+          rowHeights[index] = ref.current.getBoundingClientRect().height;
+          if (listRef.current) listRef.current.resetAfterIndex(index);
+        }
+      }, [ref]);
+
+      return (
+        <div style={{ ...style, top: style.top + 33, overflow: 'hidden' }}>
+          <div ref={ref}>
+            <StatefulEvent
               actionsColumnWidth={actionsColumnWidth}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
-              data={data}
+              event={event}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
-              id={id}
+              isEventPinned={isEventPinned}
               isEventViewer={isEventViewer}
+              key={event._id}
               loadingEventIds={loadingEventIds}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onRowSelected={onRowSelected}
-              onUpdateColumns={onUpdateColumns}
               onUnPinEvent={onUnPinEvent}
-              pinnedEventIds={pinnedEventIds}
+              onUpdateColumns={onUpdateColumns}
               rowRenderers={rowRenderers}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
+              timelineId={id}
               toggleColumn={toggleColumn}
               updateNote={updateNote}
+              measure={measure}
             />
-          </EventsTable>
-        </TimelineBody>
+          </div>
+        </div>
+      );
+    }, areEqual);
+
+    const innerElementType = ({ children, style }) => (
+      <div style={{ position: 'relative', minWidth: columnWidths }}>
+        <ColumnHeaders
+          actionsColumnWidth={actionsColumnWidth}
+          browserFields={browserFields}
+          columnHeaders={columnHeaders}
+          isEventViewer={isEventViewer}
+          isSelectAllChecked={isSelectAllChecked}
+          onColumnRemoved={onColumnRemoved}
+          onColumnResized={onColumnResized}
+          onColumnSorted={onColumnSorted}
+          onFilterChange={onFilterChange}
+          onSelectAll={onSelectAll}
+          onUpdateColumns={onUpdateColumns}
+          showEventsSelect={false}
+          showSelectAllCheckbox={showCheckboxes}
+          sort={sort}
+          timelineId={id}
+          toggleColumn={toggleColumn}
+        />
+        <div style={style}>{children}</div>
+      </div>
+    );
+
+    return (
+      <>
+        <VariableSizeList
+          ref={listRef}
+          height={height}
+          itemCount={data.length}
+          itemSize={getItemSize}
+          innerElementType={innerElementType}
+          width="100%"
+          overscanCount={0}
+        >
+          {Row}
+        </VariableSizeList>
         <TimelineBodyGlobalStyle />
       </>
     );

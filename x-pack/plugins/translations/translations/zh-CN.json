@@ -14272,8 +14272,6 @@
     "xpack.siem.timeline.eventsSelect.actions.selectPinned": "已固定",
     "xpack.siem.timeline.eventsSelect.actions.selectUnpinned": "取消固定",
     "xpack.siem.timeline.eventsSelect.actions.unpinSelected": "取消固定所选",
-    "xpack.siem.timeline.expandableEvent.copyToClipboardToolTip": "复制到剪贴板",
-    "xpack.siem.timeline.expandableEvent.eventToolTipTitle": "时间",
     "xpack.siem.timeline.fieldTooltip": "字段",
     "xpack.siem.timeline.flyout.header.closeTimelineButtonLabel": "关闭时间线",
     "xpack.siem.timeline.flyout.pane.removeColumnButtonLabel": "删除列",
