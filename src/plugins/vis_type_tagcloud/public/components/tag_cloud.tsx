@@ -20,61 +20,105 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
 import { EventEmitter } from 'events';
+import { D3ScalingFunction } from '../types';
 
-const ORIENTATIONS = {
+const ORIENTATIONS: any = {
   single: () => 0,
-  'right angled': tag => {
+  'right angled': (tag: any) => {
     return hashWithinRange(tag.text, 2) * 90;
   },
-  multiple: tag => {
-    return hashWithinRange(tag.text, 12) * 15 - 90; //fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
+  multiple: (tag: any) => {
+    return hashWithinRange(tag.text, 12) * 15 - 90; // fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
   },
 };
-const D3_SCALING_FUNCTIONS = {
+const D3_SCALING_FUNCTIONS: D3ScalingFunction = {
   linear: () => d3.scale.linear(),
   log: () => d3.scale.log(),
   'square root': () => d3.scale.sqrt(),
 };
 
 export class TagCloud extends EventEmitter {
-  constructor(domNode, colorScale) {
+  _element: HTMLElement;
+  _d3SvgContainer: any;
+  _svgGroup: any;
+  _size: [number, number];
+
+  _fontFamily: string;
+  _fontStyle: string;
+  _fontWeight: string;
+  _spiral: string;
+  _timeInterval: number;
+  _padding: number;
+
+  _orientation: string;
+  _minFontSize: number;
+  _maxFontSize: number;
+  _textScale: string;
+  _optionsAsString: string | null;
+
+  _words: any;
+
+  _colorScale: string;
+  _setTimeoutId: any;
+  _pendingJob: any;
+  _layoutIsUpdating: boolean | null;
+  _allInViewBox: boolean;
+  _DOMisUpdating: boolean;
+
+  _cloudWidth: number;
+  _cloudHeight: number;
+
+  _completedJob: any;
+  tag: any;
+
+  STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
+
+  constructor(domNode: HTMLElement, colorScale: string) {
     super();
 
-    //DOM
+    // DOM
     this._element = domNode;
     this._d3SvgContainer = d3.select(this._element).append('svg');
     this._svgGroup = this._d3SvgContainer.append('g');
     this._size = [1, 1];
     this.resize();
 
-    //SETTING (non-configurable)
+    // SETTING (non-configurable)
     this._fontFamily = 'Open Sans, sans-serif';
     this._fontStyle = 'normal';
     this._fontWeight = 'normal';
-    this._spiral = 'archimedean'; //layout shape
-    this._timeInterval = 1000; //time allowed for layout algorithm
+    this._spiral = 'archimedean'; // layout shape
+    this._timeInterval = 1000; // time allowed for layout algorithm
     this._padding = 5;
 
-    //OPTIONS
+    // OPTIONS
     this._orientation = 'single';
     this._minFontSize = 10;
     this._maxFontSize = 36;
     this._textScale = 'linear';
     this._optionsAsString = null;
 
-    //DATA
+    // DATA
     this._words = null;
 
-    //UTIL
+    // UTIL
     this._colorScale = colorScale;
     this._setTimeoutId = null;
     this._pendingJob = null;
     this._layoutIsUpdating = null;
     this._allInViewBox = false;
     this._DOMisUpdating = false;
+
+    this._cloudWidth = 0;
+    this._cloudHeight = 0;
+
+    this._completedJob = null;
+
+    this.STATUS.COMPLETE = 0;
+    this.STATUS.INCOMPLETE = 0;
   }
 
-  setOptions(options) {
+  setOptions(options: any) {
     if (JSON.stringify(options) === this._optionsAsString) {
       return;
     }
@@ -105,7 +149,7 @@ export class TagCloud extends EventEmitter {
     }
   }
 
-  setData(data) {
+  setData(data: string) {
     this._words = data;
     this._invalidate(false);
   }
@@ -116,7 +160,7 @@ export class TagCloud extends EventEmitter {
   }
 
   getStatus() {
-    return this._allInViewBox ? TagCloud.STATUS.COMPLETE : TagCloud.STATUS.INCOMPLETE;
+    return this._allInViewBox ? this.STATUS.COMPLETE : this.STATUS.INCOMPLETE;
   }
 
   _updateContainerSize() {
@@ -140,7 +184,7 @@ export class TagCloud extends EventEmitter {
     }
 
     this._completedJob = null;
-    const job = await this._pickPendingJob();
+    const job: any = await this._pickPendingJob();
     if (job.words.length) {
       if (job.refreshLayout) {
         await this._updateLayout(job);
@@ -159,7 +203,7 @@ export class TagCloud extends EventEmitter {
     }
 
     if (this._pendingJob) {
-      this._processPendingJob(); //pick up next job
+      this._processPendingJob(); // pick up next job
     } else {
       this._completedJob = job;
       this.emit('renderComplete');
@@ -185,7 +229,7 @@ export class TagCloud extends EventEmitter {
     this._DOMisUpdating = false;
   }
 
-  async _updateDOM(job) {
+  async _updateDOM(job: any) {
     const canSkipDomUpdate = this._pendingJob || this._setTimeoutId;
     if (canSkipDomUpdate) {
       this._DOMisUpdating = false;
@@ -216,13 +260,13 @@ export class TagCloud extends EventEmitter {
 
       const self = this;
       enteringTags.on({
-        click: function(event) {
+        click(event: MouseEvent) {
           self.emit('select', event);
         },
-        mouseover: function() {
+        mouseover() {
           d3.select(this).style('cursor', 'pointer');
         },
-        mouseout: function() {
+        mouseout() {
           d3.select(this).style('cursor', 'default');
         },
       });
@@ -288,7 +332,7 @@ export class TagCloud extends EventEmitter {
     return {
       refreshLayout: false,
       size: this._size.slice(),
-      words: this._completedJob.words.map(tag => {
+      words: this._completedJob.words.map((tag: any) => {
         return {
           x: tag.x,
           y: tag.y,
@@ -302,7 +346,7 @@ export class TagCloud extends EventEmitter {
     };
   }
 
-  _invalidate(keepLayout) {
+  _invalidate(keepLayout: any) {
     if (!this._words) {
       return;
     }
@@ -314,7 +358,7 @@ export class TagCloud extends EventEmitter {
     this._processPendingJob();
   }
 
-  async _updateLayout(job) {
+  async _updateLayout(job: any) {
     if (job.size[0] <= 0 || job.size[1] <= 0) {
       // If either width or height isn't above 0 we don't relayout anything,
       // since the d3-cloud will be stuck in an infinite loop otherwise.
@@ -329,7 +373,7 @@ export class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.font(this._fontFamily);
     tagCloudLayoutGenerator.fontStyle(this._fontStyle);
     tagCloudLayoutGenerator.fontWeight(this._fontWeight);
-    tagCloudLayoutGenerator.fontSize(tag => mapSizeToFontSize(tag.value));
+    tagCloudLayoutGenerator.fontSize((tag: any) => mapSizeToFontSize(tag.value));
     tagCloudLayoutGenerator.random(seed);
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
@@ -350,10 +394,10 @@ export class TagCloud extends EventEmitter {
    * Returns debug info. For debugging only.
    * @return {*}
    */
-  getDebugInfo() {
-    const debug = {};
+  getDebugInfo(): any {
+    const debug: any = {};
     debug.positions = this._completedJob
-      ? this._completedJob.words.map(tag => {
+      ? this._completedJob.words.map((tag: any) => {
           return {
             displayText: tag.displayText,
             rawText: tag.rawText || tag.text,
@@ -370,43 +414,41 @@ export class TagCloud extends EventEmitter {
     return debug;
   }
 
-  getFill(tag) {
+  getFill(tag: any): string {
     return this._colorScale(tag.text);
   }
 }
 
-TagCloud.STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
-
-function seed() {
-  return 0.5; //constant seed (not random) to ensure constant layouts for identical data
+function seed(): number {
+  return 0.5; // constant seed (not random) to ensure constant layouts for identical data
 }
 
-function getText(word) {
+function getText(word: any): string {
   return word.rawText;
 }
 
-function getDisplayText(word) {
+function getDisplayText(word: any): string {
   return word.displayText;
 }
 
-function positionWord(xTranslate, yTranslate, word) {
+function positionWord(xTranslate: any, yTranslate: any, word: any): string {
   if (isNaN(word.x) || isNaN(word.y) || isNaN(word.rotate)) {
-    //move off-screen
+    // move off-screen
     return `translate(${xTranslate * 3}, ${yTranslate * 3})rotate(0)`;
   }
 
   return `translate(${word.x + xTranslate}, ${word.y + yTranslate})rotate(${word.rotate})`;
 }
 
-function getValue(tag) {
+function getValue(tag: any) {
   return tag.value;
 }
 
-function getSizeInPixels(tag) {
+function getSizeInPixels(tag: any): string {
   return `${tag.size}px`;
 }
 
-function hashWithinRange(str, max) {
+function hashWithinRange(str: string, max: any): number {
   str = JSON.stringify(str);
   let hash = 0;
   for (const ch of str) {

@@ -18,10 +18,11 @@
  */
 
 import React, { Component } from 'react';
+import { LabelComponentState } from '../types';
 
-export class Label extends Component {
-  constructor() {
-    super();
+export class Label extends Component<{}, LabelComponentState> {
+  constructor(props: {}) {
+    super(props);
     this.state = { label: '', shouldShowLabel: true };
   }
 

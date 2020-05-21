@@ -22,20 +22,32 @@ import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-
+import d3 from 'd3';
 import { getFormatService } from '../services';
-
 import { Label } from './label';
 import { TagCloud } from './tag_cloud';
 import { FeedbackMessage } from './feedback_message';
-import d3 from 'd3';
+import { VisParams } from '../../../visualizations/public';
 
 const MAX_TAG_COUNT = 200;
 
-export function createTagCloudVisualization({ colors }) {
-  const colorScale = d3.scale.ordinal().range(colors.seedColors);
+export function createTagCloudVisualization({ colors }: { colors: any }) {
+  const colorScale: d3.scale.Ordinal<number, string> = d3.scale
+    .ordinal<number, string>()
+    .range(colors.seedColors);
   return class TagCloudVisualization {
-    constructor(node, vis) {
+    _containerNode: HTMLElement;
+    _vis: any;
+    _truncated: boolean;
+    _tagCloud: TagCloud;
+    _visParams: any;
+    _renderComplete$: any;
+    _feedbackNode: HTMLElement;
+    _feedbackMessage: any;
+    _labelNode: HTMLElement;
+    _label: React.RefObject<Label> | null;
+
+    constructor(node: any, vis: any) {
       this._containerNode = node;
 
       const cloudRelativeContainer = document.createElement('div');
@@ -79,7 +91,7 @@ export function createTagCloudVisualization({ colors }) {
       render(<Label ref={this._label} />, this._labelNode);
     }
 
-    async render(data, visParams) {
+    async render(data: any, visParams: VisParams) {
       this._updateParams(visParams);
       this._updateData(data);
       this._resize();
@@ -94,25 +106,28 @@ export function createTagCloudVisualization({ colors }) {
         return;
       }
 
-      this._label.current.setState({
-        label: `${data.columns[0].name} - ${data.columns[1].name}`,
-        shouldShowLabel: visParams.showLabel,
-      });
+      if (this._label != null) {
+        this._label.current.setState({
+          label: `${data.columns[0].name} - ${data.columns[1].name}`,
+          shouldShowLabel: visParams.showLabel,
+        });
+      }
+
       this._feedbackMessage.current.setState({
         shouldShowTruncate: this._truncated,
-        shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE,
+        shouldShowIncomplete: this._tagCloud.getStatus() === this._tagCloud.STATUS.INCOMPLETE,
       });
     }
 
-    destroy() {
+    destroy(): void {
       this._tagCloud.destroy();
       unmountComponentAtNode(this._feedbackNode);
       unmountComponentAtNode(this._labelNode);
     }
 
-    _updateData(data) {
+    _updateData(data: any): void {
       if (!data || !data.rows.length) {
-        this._tagCloud.setData([]);
+        this._tagCloud.setData(data);
         return;
       }
 
@@ -121,16 +136,17 @@ export function createTagCloudVisualization({ colors }) {
       const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
       const tagColumn = bucket ? data.columns[bucket.accessor].id : -1;
       const metricColumn = data.columns[metric.accessor].id;
-      const tags = data.rows.map((row, rowIndex) => {
+      const tags = data.rows.map((row: any[], rowIndex: any) => {
         const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
+        // eslint-disable-next-line no-shadow
         const metric = row[metricColumn];
         return {
           displayText: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
           rawText: tag,
           value: metric,
           meta: {
-            data: data,
-            rowIndex: rowIndex,
+            data,
+            rowIndex,
           },
         };
       });
@@ -145,12 +161,12 @@ export function createTagCloudVisualization({ colors }) {
       this._tagCloud.setData(tags);
     }
 
-    _updateParams(visParams) {
+    _updateParams(visParams: any): void {
       this._visParams = visParams;
       this._tagCloud.setOptions(visParams);
     }
 
-    _resize() {
+    _resize(): void {
       this._tagCloud.resize();
     }
   };

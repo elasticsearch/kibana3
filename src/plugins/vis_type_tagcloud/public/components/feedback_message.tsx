@@ -20,10 +20,11 @@
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIconTip } from '@elastic/eui';
+import { FeedbackMessageComponentState } from '../types';
 
-export class FeedbackMessage extends Component {
-  constructor() {
-    super();
+export class FeedbackMessage extends Component<{}, FeedbackMessageComponentState> {
+  constructor(props: {}) {
+    super(props);
     this.state = { shouldShowTruncate: false, shouldShowIncomplete: false };
   }
 

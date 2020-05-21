@@ -24,3 +24,19 @@ export interface TagCloudVisParams {
   maxFontSize: number;
   showLabel: boolean;
 }
+
+export interface FeedbackMessageComponentState {
+  shouldShowTruncate: boolean;
+  shouldShowIncomplete: boolean;
+}
+
+export interface LabelComponentState {
+  label: string;
+  shouldShowLabel: boolean;
+}
+
+export interface D3ScalingFunction {
+  linear: any;
+  log: any;
+  'square root': any;
+}
