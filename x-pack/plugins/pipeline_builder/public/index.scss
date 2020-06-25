@@ -1,0 +1,70 @@
+.pipelineBuilderApp {
+  // $euiHeaderChildSize
+  min-height: calc(100vh - 48px);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.pipelineFrameLayout {
+  display: flex;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.pipelineFrameLayout__pageContent {
+  display: flex;
+  overflow: auto;
+  flex-grow: 1;
+  flex-direction: column;
+  padding: $euiSize;
+  border-right: 1px solid $euiColorLightShade;
+}
+
+.pipelineFrameLayout__sidebar {
+  margin: 0;
+  flex: 0 0 30%;
+  min-width: $euiSize * 24 + $euiSize;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: $euiSize;
+  overflow: auto;
+}
+
+.pipelineBuilder__node {
+  margin-top: $euiSize;
+}
+
+.pipelineBuilder__nodeOutput {
+  max-height: 200px;
+  overflow: auto;
+}
+
+.pipelineBuilder__startNode {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.pipelineBuilder__chain {
+  background: $euiColorLightShade;
+}
+
+.pipelineBuilder__createJoinButton {
+  border-top: 1px solid $euiColorLightShade;
+  padding: $euiSize;
+  margin-top: $euiSize;
+}
+
+.pipelineBuilder__tableRenderer {
+  overflow: auto;
+}
+
+.pipelineBuilder__tableConvert__column {
+  border-bottom: 1px solid $euiColorLightShade;
+}

@@ -36,6 +36,7 @@ import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
+import { EditorFrameState } from './state_management';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 export interface WorkspacePanelProps {
@@ -51,6 +52,7 @@ export interface WorkspacePanelProps {
       isLoading: boolean;
     }
   >;
+  state: EditorFrameState;
   framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
@@ -69,6 +71,7 @@ export function InnerWorkspacePanel({
   datasourceMap,
   datasourceStates,
   framePublicAPI,
+  state,
   dispatch,
   core,
   plugins,
@@ -121,6 +124,7 @@ export function InnerWorkspacePanel({
         datasourceMap,
         datasourceStates,
         framePublicAPI,
+        state,
       });
     } catch (e) {
       // Most likely an error in the expression provided by a datasource or visualization
@@ -134,6 +138,7 @@ export function InnerWorkspacePanel({
     framePublicAPI.dateRange,
     framePublicAPI.query,
     framePublicAPI.filters,
+    state.pipeline,
   ]);
 
   const onEvent = useCallback(

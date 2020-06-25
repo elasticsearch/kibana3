@@ -191,7 +191,6 @@ export function XYChart({
   onSelectRange,
 }: XYChartRenderProps) {
   const { legend, layers } = args;
-
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
       !xAccessor ||
@@ -232,45 +231,45 @@ export function XYChart({
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
-  function calculateMinInterval() {
-    // check all the tables to see if all of the rows have the same timestamp
-    // that would mean that chart will draw a single bar
-    const isSingleTimestampInXDomain = () => {
-      const firstRowValue =
-        data.tables[filteredLayers[0].layerId].rows[0][filteredLayers[0].xAccessor!];
-      for (const layer of filteredLayers) {
-        if (
-          layer.xAccessor &&
-          data.tables[layer.layerId].rows.some((row) => row[layer.xAccessor!] !== firstRowValue)
-        ) {
-          return false;
-        }
-      }
-      return true;
-    };
+  // function calculateMinInterval() {
+  //   // check all the tables to see if all of the rows have the same timestamp
+  //   // that would mean that chart will draw a single bar
+  //   const isSingleTimestampInXDomain = () => {
+  //     const firstRowValue =
+  //       data.tables[filteredLayers[0].layerId].rows[0][filteredLayers[0].xAccessor!];
+  //     for (const layer of filteredLayers) {
+  //       if (
+  //         layer.xAccessor &&
+  //         data.tables[layer.layerId].rows.some((row) => row[layer.xAccessor!] !== firstRowValue)
+  //       ) {
+  //         return false;
+  //       }
+  //     }
+  //     return true;
+  //   };
 
-    // add minInterval only for single point in domain
-    if (data.dateRange && isSingleTimestampInXDomain()) {
-      if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
-        return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
+  //   // add minInterval only for single point in domain
+  //   if (data.dateRange && isSingleTimestampInXDomain()) {
+  //     if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
+  //       return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
 
-      const { fromDate, toDate } = data.dateRange;
-      const duration = moment(toDate).diff(moment(fromDate));
-      const targetMs = duration / histogramBarTarget;
-      return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
-    }
-    return undefined;
-  }
+  //     const { fromDate, toDate } = data.dateRange;
+  //     const duration = moment(toDate).diff(moment(fromDate));
+  //     const targetMs = duration / histogramBarTarget;
+  //     return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
+  //   }
+  //   return undefined;
+  // }
 
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
 
-  const xDomain = isTimeViz
-    ? {
-        min: data.dateRange?.fromDate.getTime(),
-        max: data.dateRange?.toDate.getTime(),
-        minInterval: calculateMinInterval(),
-      }
-    : undefined;
+  // const xDomain = isTimeViz
+  //   ? {
+  //       min: data.dateRange?.fromDate.getTime(),
+  //       max: data.dateRange?.toDate.getTime(),
+  //       minInterval: calculateMinInterval(),
+  //     }
+  //   : undefined;
 
   return (
     <Chart>
@@ -280,7 +279,7 @@ export function XYChart({
         showLegendExtra={false}
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
-        xDomain={xDomain}
+        // xDomain={xDomain}
         onBrushEnd={({ x }) => {
           if (!x) {
             return;
@@ -344,7 +343,7 @@ export function XYChart({
 
           const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta
             ?.aggConfigParams?.field;
-          const timeFieldName = xDomain && xAxisFieldName;
+          const timeFieldName = xAxisFieldName;
 
           const context: LensFilterEvent['data'] = {
             data: points.map((point) => ({
@@ -447,7 +446,7 @@ export function XYChart({
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
               // * If single Y, the seriesKey will be the acccessor, so we show the human-readable name
-              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
+              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? 'no';
             },
           };
 

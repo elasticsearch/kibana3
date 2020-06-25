@@ -23,6 +23,7 @@ export interface Document {
     visualization: unknown;
     query: Query;
     filters: Filter[];
+    pipeline: unknown;
   };
 }
 
