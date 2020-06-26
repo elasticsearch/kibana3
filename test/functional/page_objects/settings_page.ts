@@ -647,6 +647,30 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
     }
 
+    async clickImportButton() {
+      await testSubjects.click('importObjects');
+    }
+
+    async clickExportButton() {
+      await testSubjects.click('exportAllObjects');
+    }
+
+    async closeDialogButton() {
+      await testSubjects.click('euiFlyoutCloseButton');
+    }
+
+    // async clickIndexPatternLogstash() {
+    //   await testSubjects.click('checkboxSelectRow-logstash-*');
+    // }
+
+    async clickRelationships() {
+      await testSubjects.click('savedObjectRelationship');
+    }
+
+    async clickSavedSearchBar() {
+      await testSubjects.click('savedObjectSearchBar');
+    }
+
     async checkNoneImported() {
       await testSubjects.existOrFail('importSavedObjectsSuccessNoneImported', { timeout: 20000 });
     }
