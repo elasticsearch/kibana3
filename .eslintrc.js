@@ -546,6 +546,14 @@ module.exports = {
     },
 
     /**
+     * object-prototype package specific rules
+     */
+    {
+      files: ['packages/object-prototype/**/*.js'],
+      rules: allMochaRulesOff,
+    },
+
+    /**
      * APM overrides
      */
     {
