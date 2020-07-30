@@ -2144,6 +2144,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.0.tgz#8da714827fc278f17546601fdfe55f5c920e2bc5"
   integrity sha512-NVTuy9Wzblp6nOH86CXjWXTajHgJGn5Tk2l59/Z5cWFU14KlE+8/zqPTgZdxYABzBJFE3L7S07kJDMN8sDvTmA==
 
+"@elastic/package-registry@https://github.com/elastic/package-registry.git#master":
+  version "0.0.0"
+  resolved "https://github.com/elastic/package-registry.git#02ca71731cdc092db213cd4c9069db43b74ac01b"
+
 "@elastic/request-crypto@1.1.4":
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.1.4.tgz#2189d5fea65f7afe1de9f5fa3d0dd420e93e3124"
