@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { findIndex } from 'lodash';
 import { IFieldType, shortenDottedString } from '../../../common';
 import { IndexPatternField } from './index_pattern_field';
 import { OnNotification, FieldSpec } from '../types';
@@ -25,6 +24,7 @@ import { IndexPattern } from '../index_patterns';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 
+/*
 export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   add(field: FieldSpec): void;
   getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
@@ -33,17 +33,12 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
+
 }
+*/
 
-export type CreateIndexPatternFieldList = (
-  indexPattern: IndexPattern,
-  specs?: FieldSpec[],
-  shortDotsEnable?: boolean,
-  onNotification?: OnNotification
-) => IIndexPatternFieldList;
-
-export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
-  private byName: FieldMap = new Map();
+export class FieldList {
+  private byName: FieldMap = new Map<IndexPatternField['name'], IndexPatternField>();
   private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
   private indexPattern: IndexPattern;
   private shortDotsEnable: boolean;
@@ -64,7 +59,6 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     shortDotsEnable = false,
     onNotification = () => {}
   ) {
-    super();
     this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;
     this.onNotification = onNotification;
@@ -72,56 +66,50 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     specs.map((field) => this.add(field));
   }
 
-  public readonly getByName = (name: IndexPatternField['name']) => this.byName.get(name);
-  public readonly getByType = (type: IndexPatternField['type']) => [
+  getAll = () => [...this.byName.values()];
+  getByName = (name: IndexPatternField['name']) => this.byName.get(name);
+  getByType = (type: IndexPatternField['type']) => [
     ...(this.groups.get(type) || new Map()).values(),
   ];
-  public readonly add = (field: FieldSpec) => {
+  add = (field: FieldSpec) => {
     const newField = new IndexPatternField(
       this.indexPattern,
       field,
       this.calcDisplayName(field.name),
       this.onNotification
     );
-    this.push(newField);
     this.setByName(newField);
     this.setByGroup(newField);
   };
 
-  public readonly remove = (field: IFieldType) => {
+  remove = (field: IFieldType) => {
     this.removeByGroup(field);
     this.byName.delete(field.name);
-
-    const fieldIndex = findIndex(this, { name: field.name });
-    this.splice(fieldIndex, 1);
   };
 
-  public readonly update = (field: FieldSpec) => {
+  update = (field: FieldSpec) => {
     const newField = new IndexPatternField(
       this.indexPattern,
       field,
       this.calcDisplayName(field.name),
       this.onNotification
     );
-    const index = this.findIndex((f) => f.name === newField.name);
-    this.splice(index, 1, newField);
     this.setByName(newField);
     this.removeByGroup(newField);
     this.setByGroup(newField);
   };
 
-  public readonly removeAll = () => {
-    this.length = 0;
+  removeAll = () => {
     this.byName.clear();
     this.groups.clear();
   };
 
-  public readonly replaceAll = (specs: FieldSpec[]) => {
+  replaceAll = (specs: FieldSpec[]) => {
     this.removeAll();
     specs.forEach(this.add);
   };
 
-  public readonly toSpec = () => {
-    return [...this.map((field) => field.toSpec())];
+  toSpec = () => {
+    return [...this.byName.values()].map((field) => field.toSpec());
   };
 }

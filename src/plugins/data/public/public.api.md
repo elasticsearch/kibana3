@@ -583,6 +583,21 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
     constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void);
     // (undocumented)
+<<<<<<< HEAD
+    add: (field: FieldSpec) => void;
+    // (undocumented)
+    getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
+    // (undocumented)
+    getByType: (type: IndexPatternField['type']) => any[];
+    // (undocumented)
+    remove: (field: IFieldType) => void;
+    // (undocumented)
+    removeAll: () => void;
+    // (undocumented)
+    replaceAll: (specs: FieldSpec[]) => void;
+    // (undocumented)
+    toSpec: () => {
+=======
     readonly add: (field: FieldSpec) => void;
     // (undocumented)
     readonly getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
@@ -596,6 +611,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     readonly replaceAll: (specs: FieldSpec[]) => void;
     // (undocumented)
     readonly toSpec: () => {
+>>>>>>> master
         count: number;
         script: string | undefined;
         lang: string | undefined;
@@ -611,7 +627,11 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
         format: any;
     }[];
     // (undocumented)
+<<<<<<< HEAD
+    update: (field: FieldSpec) => void;
+=======
     readonly update: (field: FieldSpec) => void;
+>>>>>>> master
 }
 
 // @public (undocumented)
