@@ -19,6 +19,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 import {
   EuiBasicTable,
@@ -45,6 +46,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -126,6 +128,7 @@ export interface FieldEditorState {
   errors?: string[];
   format: any;
   spec: IndexPatternField['spec'];
+  displayName: string;
 }
 
 export interface FieldEdiorProps {
@@ -165,6 +168,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
       spec: { ...spec },
+      displayName: '',
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -208,6 +212,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         data.fieldFormats
       ),
       fieldFormatId: get(indexPattern, ['fieldFormatMap', spec.name, 'type', 'id']),
+      displayName: get(indexPattern, ['attributes', 'fields', spec.name, 'displayName'], ''),
       fieldFormatParams: format.params(),
     });
   }
@@ -407,6 +412,27 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           data-test-subj="editorFieldType"
           onChange={(e) => {
             this.onTypeChange(e.target.value as KBN_FIELD_TYPES);
+          }}
+        />
+      </EuiFormRow>
+    );
+  }
+
+  renderDisplayName() {
+    const { displayName, spec } = this.state;
+
+    return (
+      <EuiFormRow
+        label={i18n.translate('indexPatternManagement.displayNameLabel', {
+          defaultMessage: 'Display Name',
+        })}
+      >
+        <EuiFieldText
+          value={displayName || ''}
+          placeholder={spec.name}
+          data-test-subj="editorFieldDisplayName"
+          onChange={(e) => {
+            this.setState({ displayName: e.target.value });
           }}
         />
       </EuiFormRow>
@@ -779,7 +805,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId } = this.state;
+    const { fieldFormatId, displayName } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -820,6 +846,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     } else {
       indexPattern.fieldFormatMap[field.name] = field.format;
     }
+    const attrFields = indexPattern.attributes?.fields;
+    const prevDisplayName =
+      attrFields && attrFields[field.name] ? attrFields[field.name].displayName : '';
+    if (prevDisplayName !== displayName) {
+      field.displayName = displayName;
+      set(indexPattern, ['attributes', 'fields', field.name, 'displayName'], displayName);
+      indexPattern.fields.update(field);
+    }
 
     return indexPattern
       .save()
@@ -831,7 +865,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         this.context.services.notifications.toasts.addSuccess(message);
         redirectAway();
       })
-      .catch((error) => {
+      .catch(() => {
         if (oldField) {
           indexPattern.fields.update(oldField);
         } else {
@@ -881,6 +915,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
+          {this.renderDisplayName()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}

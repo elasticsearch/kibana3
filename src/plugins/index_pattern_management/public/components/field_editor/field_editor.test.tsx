@@ -18,6 +18,7 @@
  */
 
 import { IndexPattern, IndexPatternField, FieldFormatInstanceType } from 'src/plugins/data/public';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -32,6 +33,7 @@ jest.mock('@elastic/eui', () => ({
   EuiButtonEmpty: 'eui-button-empty',
   EuiCallOut: 'eui-call-out',
   EuiCode: 'eui-code',
+  EuiCodeEditor: 'eui-code-editor',
   EuiConfirmModal: 'eui-confirm-modal',
   EuiFieldNumber: 'eui-field-number',
   EuiFieldText: 'eui-field-text',
@@ -159,6 +161,56 @@ describe('FieldEditor', () => {
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
+  });
+
+  it('should display and update a displayName correctly', async () => {
+    const testField = {
+      name: 'test',
+      format: new Format(),
+      lang: undefined,
+      type: 'string',
+    };
+    fieldList.push(testField as IndexPatternField);
+    indexPattern.fields.getByName = (name) => {
+      const flds = {
+        [testField.name]: testField,
+      };
+      return flds[name] as IndexPatternField;
+    };
+    indexPattern.fields = { ...indexPattern.fields, ...{ update: jest.fn(), add: jest.fn() } };
+    indexPattern.fieldFormatMap = { test: field };
+    indexPattern.attributes = { fields: { test: { displayName: 'Test' } } };
+
+    indexPattern.save = jest.fn(() => Promise.resolve());
+
+    const component = createComponentWithContext<FieldEdiorProps>(
+      FieldEditor,
+      {
+        indexPattern,
+        spec: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
+    );
+
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.update();
+    const input = findTestSubject(component, 'editorFieldDisplayName');
+    expect(input.props().value).toBe('Test');
+    input.simulate('change', { target: { value: 'new Test' } });
+    const saveBtn = findTestSubject(component, 'fieldSaveButton');
+
+    await saveBtn.simulate('click');
+    await new Promise((resolve) => process.nextTick(resolve));
+    expect(indexPattern.attributes).toMatchInlineSnapshot(`
+      Object {
+        "fields": Object {
+          "test": Object {
+            "displayName": "new Test",
+          },
+        },
+      }
+    `);
   });
 
   it('should show deprecated lang warning', async () => {

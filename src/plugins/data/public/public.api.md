@@ -950,6 +950,8 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     addScriptedField(name: string, script: string, fieldType: string | undefined, lang: string): Promise<void>;
     // (undocumented)
+    attributes: any;
+    // (undocumented)
     create(allowOverride?: boolean): Promise<string | false>;
     // (undocumented)
     _fetchFields(): Promise<void>;
@@ -1059,6 +1061,14 @@ export type IndexPatternAggRestrictions = Record<string, {
 //
 // @public @deprecated
 export interface IndexPatternAttributes {
+    // (undocumented)
+    attributes?: {
+        fields: {
+            [key: string]: {
+                displayName: string;
+            };
+        };
+    };
     // (undocumented)
     fieldFormatMap?: string;
     // (undocumented)

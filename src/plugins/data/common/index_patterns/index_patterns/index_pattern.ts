@@ -22,24 +22,28 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/common';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
+import { ES_FIELD_TYPES, IIndexPattern, KBN_FIELD_TYPES } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { IndexPatternField, IIndexPatternFieldList, FieldList } from '../fields';
+import { FieldList, IIndexPatternFieldList, IndexPatternField } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import {
-  OnNotification,
-  OnError,
-  UiSettingsCommon,
+  FieldSpec,
   IIndexPatternsApiClient,
   IndexPatternAttributes,
+  IndexPatternSpec,
+  OnError,
+  OnNotification,
+  SourceFilter,
+  TypeMeta,
+  UiSettingsCommon,
+  IndexPatternAttrs,
 } from '../types';
-import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
+import { FieldFormat, FieldFormatsStartCommon } from '../../field_formats';
 import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
-import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -69,6 +73,7 @@ export class IndexPattern implements IIndexPattern {
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
+  public attributes?: IndexPatternAttrs;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -90,6 +95,7 @@ export class IndexPattern implements IIndexPattern {
   private uiSettingsValues: IUiSettingsValues;
 
   private mapping: MappingObject = expandShorthand({
+    attributes: ES_FIELD_TYPES.OBJECT,
     title: ES_FIELD_TYPES.TEXT,
     timeFieldName: ES_FIELD_TYPES.KEYWORD,
     intervalName: ES_FIELD_TYPES.KEYWORD,
@@ -138,7 +144,7 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
     this.metaFields = uiSettingsValues.metaFields;
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
+    this.fields = new FieldList(this, [], this.onUnknownType);
 
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
@@ -193,9 +199,28 @@ export class IndexPattern implements IIndexPattern {
       await this.refreshFields();
     } else {
       if (specs) {
-        this.fields.replaceAll(specs);
+        this.fields.replaceAll(this.getFieldSpecs(specs));
       }
     }
+  }
+
+  /**
+   * Helper function to extend  field specs with e.g. displayName
+   */
+  private getFieldSpecs(specs: FieldSpec[] | undefined) {
+    if (!Array.isArray(specs)) {
+      return [];
+    }
+    return specs.map((spec) => {
+      return { ...spec, customLabel: this.getFieldSpecCustomLabel(spec.name) };
+    });
+  }
+  private getFieldSpecCustomLabel(name: string) {
+    const displayNameMap = this.attributes?.fields;
+    if (!displayNameMap || !displayNameMap[name]) {
+      return;
+    }
+    return displayNameMap[name].displayName;
   }
 
   public initFromSpec(spec: IndexPatternSpec) {
@@ -215,7 +240,7 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    this.fields.replaceAll(spec.fields || []);
+    this.fields.replaceAll(this.getFieldSpecs(spec.fields));
     this.typeMeta = spec.typeMeta;
 
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
@@ -313,6 +338,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormatMap: savedObject.attributes.fieldFormatMap,
       typeMeta: savedObject.attributes.typeMeta,
       type: savedObject.attributes.type,
+      attributes: savedObject.attributes.attributes,
     };
     // Do this before we attempt to update from ES since that call can potentially perform a save
     this.originalBody = this.prepBody();
@@ -361,6 +387,7 @@ export class IndexPattern implements IIndexPattern {
       searchable: true,
       count: 0,
       readFromDocValues: false,
+      shortDotsEnable: this.shortDotsEnable,
     });
 
     await this.save();
@@ -452,6 +479,8 @@ export class IndexPattern implements IIndexPattern {
         ? fieldMapping._serialize(this[fieldName])
         : this[fieldName];
     });
+
+    // todo build attributes.fields
 
     return body;
   }
@@ -578,7 +607,7 @@ export class IndexPattern implements IIndexPattern {
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields().map((field) => field.spec);
-    this.fields.replaceAll([...fields, ...scripted]);
+    this.fields.replaceAll(this.getFieldSpecs([...fields, ...scripted]));
   }
 
   refreshFields() {
