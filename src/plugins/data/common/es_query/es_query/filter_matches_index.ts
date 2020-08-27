@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IFieldType, IndexPatternSpec } from '../../index_patterns';
 import { Filter } from '../filters';
 
 /*
@@ -25,9 +25,9 @@ import { Filter } from '../filters';
  * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
  * change.
  */
-export function filterMatchesIndex(filter: Filter, indexPattern?: IIndexPattern | null) {
+export function filterMatchesIndex(filter: Filter, indexPattern?: IndexPatternSpec | null) {
   if (!filter.meta?.key || !indexPattern) {
     return true;
   }
-  return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
+  return indexPattern.fields?.some((field: IFieldType) => field.name === filter.meta.key);
 }

@@ -156,11 +156,12 @@ export interface FieldSpec {
   format?: SerializedFieldFormat;
 
   name: string;
+  displayName?: string;
   type: string;
   esTypes?: string[];
   scripted?: boolean;
-  searchable: boolean;
-  aggregatable: boolean;
+  searchable?: boolean;
+  aggregatable?: boolean;
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
@@ -170,7 +171,7 @@ export interface IndexPatternSpec {
   id?: string;
   version?: string;
 
-  title: string;
+  title?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
   fields?: FieldSpec[];

@@ -312,7 +312,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   public toSpec(): IndexPatternSpec {
-    return {
+    const spec = {
       id: this.id,
       version: this.version,
 
@@ -322,6 +322,12 @@ export class IndexPattern implements IIndexPattern {
       fields: this.fields.toSpec(),
       typeMeta: this.typeMeta,
     };
+
+    spec.fields.forEach((field) => {
+      field.format = this.getFormatterForField(field).toJSON();
+    });
+
+    return spec;
   }
 
   // Get the source filtering configuration for that index.

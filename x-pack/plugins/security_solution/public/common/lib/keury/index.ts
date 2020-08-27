@@ -25,7 +25,10 @@ export const convertKueryToElasticSearchQuery = (
   try {
     return kueryExpression
       ? JSON.stringify(
-          esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
+          esKuery.toElasticsearchQuery(
+            esKuery.fromKueryExpression(kueryExpression),
+            indexPattern?.toSpec()
+          )
         )
       : '';
   } catch (err) {
@@ -39,7 +42,10 @@ export const convertKueryToDslFilter = (
 ): JsonObject => {
   try {
     return kueryExpression
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
+      ? esKuery.toElasticsearchQuery(
+          esKuery.fromKueryExpression(kueryExpression),
+          indexPattern.toSpec()
+        )
       : {};
   } catch (err) {
     return {};
@@ -96,7 +102,7 @@ export const convertToBuildEsQuery = ({
   try {
     return JSON.stringify(
       esQuery.buildEsQuery(
-        indexPattern,
+        indexPattern.toSpec(),
         queries,
         filters.filter((f) => f.meta.disabled === false),
         {

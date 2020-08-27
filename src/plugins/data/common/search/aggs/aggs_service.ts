@@ -83,7 +83,7 @@ export class AggsCommonService {
     return {
       calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
       createAggConfigs: (indexPattern, configStates = [], schemas) => {
-        return new AggConfigs(indexPattern, configStates, {
+        return new AggConfigs(indexPattern.toSpec(), configStates, {
           typesRegistry: aggTypesStart,
         });
       },

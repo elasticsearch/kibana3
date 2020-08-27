@@ -83,7 +83,7 @@ function buildSafeEsQuery(
   queryConfig: EsQueryConfig
 ) {
   try {
-    return esQuery.buildEsQuery(indexPattern, query, filters, queryConfig);
+    return esQuery.buildEsQuery(indexPattern.toSpec(), query, filters, queryConfig);
   } catch (e) {
     return {
       bool: {

@@ -364,11 +364,11 @@ export const esFilters: {
     FILTERS: typeof FILTERS;
     FilterStateStore: typeof FilterStateStore;
     buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
-    buildPhrasesFilter: (field: import("../common").IFieldType, params: any[], indexPattern: import("../common").IIndexPattern) => import("../common").PhrasesFilter;
-    buildExistsFilter: (field: import("../common").IFieldType, indexPattern: import("../common").IIndexPattern) => import("../common").ExistsFilter;
-    buildPhraseFilter: (field: import("../common").IFieldType, value: any, indexPattern: import("../common").IIndexPattern) => import("../common").PhraseFilter;
+    buildPhrasesFilter: (field: import("../common").IFieldType, params: any[], indexPattern: import("../common").IndexPatternSpec) => import("../common").PhrasesFilter;
+    buildExistsFilter: (field: import("../common").IFieldType, indexPattern: import("../common").IndexPatternSpec) => import("../common").ExistsFilter;
+    buildPhraseFilter: (field: import("../common").IFieldType, value: any, indexPattern: import("../common").IndexPatternSpec) => import("../common").PhraseFilter;
     buildQueryFilter: (query: any, index: string, alias: string) => import("../common").QueryStringFilter;
-    buildRangeFilter: (field: import("../common").IFieldType, params: import("../common").RangeFilterParams, indexPattern: import("../common").IIndexPattern, formattedValue?: string | undefined) => import("../common").RangeFilter;
+    buildRangeFilter: (field: import("../common").IFieldType, params: import("../common").RangeFilterParams, indexPattern: import("../common").IndexPatternSpec, formattedValue?: string | undefined) => import("../common").RangeFilter;
     isPhraseFilter: (filter: any) => filter is import("../common").PhraseFilter;
     isExistsFilter: (filter: any) => filter is import("../common").ExistsFilter;
     isPhrasesFilter: (filter: any) => filter is import("../common").PhrasesFilter;
@@ -413,7 +413,7 @@ export const esFilters: {
 export const esKuery: {
     nodeTypes: import("../common/es_query/kuery/node_types").NodeTypes;
     fromKueryExpression: (expression: any, parseOptions?: Partial<import("../common").KueryParseOptions>) => import("../common").KueryNode;
-    toElasticsearchQuery: (node: import("../common").KueryNode, indexPattern?: import("../common").IIndexPattern | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("../../kibana_utils/common").JsonObject;
+    toElasticsearchQuery: (node: import("../common").KueryNode, indexPattern?: import("../common").IndexPatternSpec | undefined, config?: Record<string, any> | undefined, context?: Record<string, any> | undefined) => import("../../kibana_utils/common").JsonObject;
 };
 
 // Warning: (ae-missing-release-tag) "esQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -422,7 +422,7 @@ export const esKuery: {
 export const esQuery: {
     buildEsQuery: typeof buildEsQuery;
     getEsQueryConfig: typeof getEsQueryConfig;
-    buildQueryFromFilters: (filters: import("../common").Filter[] | undefined, indexPattern: import("../common").IIndexPattern | undefined, ignoreFilterIfFieldNotInIndex?: boolean) => {
+    buildQueryFromFilters: (filters: import("../common").Filter[] | undefined, indexPattern: import("../common").IndexPatternSpec | undefined, ignoreFilterIfFieldNotInIndex?: boolean) => {
         must: never[];
         filter: import("../common").Filter[];
         should: never[];
@@ -603,7 +603,6 @@ export type FieldFormatsGetConfigFn = GetConfigFn;
 //
 // @public (undocumented)
 export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
-    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
     constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void);
     // (undocumented)
     readonly add: (field: FieldSpec) => void;
@@ -647,6 +646,44 @@ export interface FieldMappingSpec {
     _serialize?: (mapping: any) => string | undefined;
     // (undocumented)
     type: ES_FIELD_TYPES;
+}
+
+// Warning: (ae-missing-release-tag) "FieldSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface FieldSpec {
+    // (undocumented)
+    aggregatable?: boolean;
+    // (undocumented)
+    conflictDescriptions?: Record<string, string[]>;
+    // (undocumented)
+    count?: number;
+    // (undocumented)
+    displayName?: string;
+    // (undocumented)
+    esTypes?: string[];
+    // Warning: (ae-forgotten-export) The symbol "SerializedFieldFormat" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    format?: SerializedFieldFormat;
+    // (undocumented)
+    indexed?: boolean;
+    // (undocumented)
+    lang?: string;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    readFromDocValues?: boolean;
+    // (undocumented)
+    script?: string;
+    // (undocumented)
+    scripted?: boolean;
+    // (undocumented)
+    searchable?: boolean;
+    // (undocumented)
+    subType?: IFieldSubType;
+    // (undocumented)
+    type: string;
 }
 
 // Warning: (ae-missing-release-tag) "Filter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -705,6 +742,18 @@ export class FilterManager {
     static setFiltersStore(filters: Filter[], store: FilterStateStore, shouldOverrideStore?: boolean): void;
     setGlobalFilters(newGlobalFilters: Filter[]): void;
     }
+
+// Warning: (ae-missing-release-tag) "getAggregationRestrictions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function getAggregationRestrictions(indexPattern: IndexPatternSpec): Record<string, Record<string, {
+    agg?: string | undefined;
+    interval?: number | undefined;
+    fixed_interval?: string | undefined;
+    calendar_interval?: string | undefined;
+    delay?: string | undefined;
+    time_zone?: string | undefined;
+}>> | undefined;
 
 // Warning: (ae-forgotten-export) The symbol "QueryLanguage" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "getDefaultQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1003,8 +1052,6 @@ export class IndexPattern implements IIndexPattern {
     id?: string;
     // (undocumented)
     init(forceFieldRefresh?: boolean): Promise<this>;
-    // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     initFromSpec(spec: IndexPatternSpec): this;
     // (undocumented)
@@ -1206,6 +1253,28 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
     state: IndexPatternSelectState;
     // (undocumented)
     UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectProps): void;
+}
+
+// Warning: (ae-missing-release-tag) "IndexPatternSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface IndexPatternSpec {
+    // (undocumented)
+    fields?: FieldSpec[];
+    // (undocumented)
+    id?: string;
+    // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    sourceFilters?: SourceFilter[];
+    // (undocumented)
+    timeFieldName?: string;
+    // (undocumented)
+    title?: string;
+    // (undocumented)
+    typeMeta?: IndexPatternTypeMeta;
+    // (undocumented)
+    version?: string;
 }
 
 // Warning: (ae-missing-release-tag) "TypeMeta" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
