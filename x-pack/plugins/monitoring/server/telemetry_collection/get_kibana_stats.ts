@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { isEmpty } from 'lodash';
+import { isEmpty, get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
@@ -75,8 +75,16 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
 
   // get usage stats per cluster / .kibana index
   return rawStatsHits.reduce((accum, currInstance) => {
-    const clusterUuid = currInstance._source.cluster_uuid;
-    const currUsage = currInstance._source.kibana_stats?.usage || {};
+    const clusterUuid = get(
+      currInstance,
+      '_source.elasticsearch.cluster.id',
+      get(currInstance, '_source.cluster_uuid')
+    );
+    const currUsage = get(
+      currInstance,
+      '_source.kibana.stats.usage',
+      get(currInstance, '_source.kibana_stats.usage', {})
+    );
     const clusterIndexCombination = clusterUuid + currUsage.index;
 
     // return early if usage data is empty or if this cluster/index has already been processed
@@ -179,7 +187,8 @@ export async function getKibanaStats(
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
-  maxBucketSize: number
+  maxBucketSize: number,
+  metricbeatIndex: string
 ) {
   const { start: safeStart, end: safeEnd } = ensureTimeSpan(start, end);
   const rawStats = await fetchHighLevelStats<KibanaUsageStats>(
@@ -188,7 +197,8 @@ export async function getKibanaStats(
     safeStart,
     safeEnd,
     KIBANA_SYSTEM_ID,
-    maxBucketSize
+    maxBucketSize,
+    metricbeatIndex
   );
   const highLevelStats = handleHighLevelStatsResponse(rawStats, KIBANA_SYSTEM_ID);
   const usageStats = getUsageStats(rawStats);

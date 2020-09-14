@@ -18,9 +18,15 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 export async function getElasticsearchStats(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  maxBucketSize: number
+  maxBucketSize: number,
+  metricbeatIndex: string
 ) {
-  const response = await fetchElasticsearchStats(callCluster, clusterUuids, maxBucketSize);
+  const response = await fetchElasticsearchStats(
+    callCluster,
+    clusterUuids,
+    maxBucketSize,
+    metricbeatIndex
+  );
   return handleElasticsearchStats(response);
 }
 
@@ -36,18 +42,23 @@ export async function getElasticsearchStats(
 export function fetchElasticsearchStats(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  maxBucketSize: number
+  maxBucketSize: number,
+  metricbeatIndex: string
 ) {
   const params = {
-    index: INDEX_PATTERN_ELASTICSEARCH,
+    index: `${INDEX_PATTERN_ELASTICSEARCH},${metricbeatIndex}`,
     size: maxBucketSize,
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.timestamp',
+      'hits.hits._source.@timestamp',
       'hits.hits._source.cluster_name',
       'hits.hits._source.version',
+      'hits.hits._source.version',
       'hits.hits._source.cluster_stats',
+      'hits.hits._source.elasticsearch.cluster',
       'hits.hits._source.stack_stats',
     ],
     body: {

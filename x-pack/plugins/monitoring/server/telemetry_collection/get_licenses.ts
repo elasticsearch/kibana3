@@ -5,6 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { get } from 'lodash';
 import {
   ESLicense,
   LicenseGetter,
@@ -19,10 +20,10 @@ import { CustomContext } from './get_all_stats';
 export const getLicenses: LicenseGetter<CustomContext> = async (
   clustersDetails,
   { callCluster },
-  { maxBucketSize }
+  { maxBucketSize, metricbeatIndex }
 ) => {
   const clusterUuids = clustersDetails.map(({ clusterUuid }) => clusterUuid);
-  const response = await fetchLicenses(callCluster, clusterUuids, maxBucketSize);
+  const response = await fetchLicenses(callCluster, clusterUuids, maxBucketSize, metricbeatIndex);
   return handleLicenses(response);
 };
 
@@ -38,13 +39,18 @@ export const getLicenses: LicenseGetter<CustomContext> = async (
 export function fetchLicenses(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  maxBucketSize: number
+  maxBucketSize: number,
+  metricbeatIndex: string
 ) {
   const params = {
-    index: INDEX_PATTERN_ELASTICSEARCH,
+    index: `${INDEX_PATTERN_ELASTICSEARCH},${metricbeatIndex}`,
     size: maxBucketSize,
     ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
+    filterPath: [
+      'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
+      'hits.hits._source.license',
+    ],
     body: {
       query: {
         bool: {
@@ -78,11 +84,11 @@ export interface ESClusterStatsWithLicense {
 export function handleLicenses(response: SearchResponse<ESClusterStatsWithLicense>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.reduce(
-    (acc, { _source }) => ({
+  return clusters.reduce((acc, { _source }) => {
+    const clusterUuid = get(_source, 'elasticsearch.cluster.id', get(_source, 'cluster_uuid'));
+    return {
       ...acc,
-      [_source.cluster_uuid]: _source.license,
-    }),
-    {}
-  );
+      [clusterUuid]: _source.license,
+    };
+  }, {});
 }
