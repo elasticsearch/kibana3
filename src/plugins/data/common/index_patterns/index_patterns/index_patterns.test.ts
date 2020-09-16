@@ -31,7 +31,6 @@ const createFieldsFetcher = jest.fn().mockImplementation(() => ({
 }));
 
 const fieldFormats = fieldFormatsMock;
-
 let object: any = {};
 
 function setDocsourcePayload(id: string | null, providedPayload: any) {
@@ -43,16 +42,18 @@ describe('IndexPatterns', () => {
   let savedObjectsClient: SavedObjectsClientCommon;
 
   beforeEach(() => {
+    const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
-      () =>
-        Promise.resolve([{ id: 'id', attributes: { title: 'title' } }]) as Promise<
-          Array<SavedObject<any>>
-        >
+      () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
     );
     savedObjectsClient.delete = jest.fn(() => Promise.resolve({}) as Promise<any>);
-    savedObjectsClient.get = jest.fn().mockImplementation(() => object);
     savedObjectsClient.create = jest.fn();
+    savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => ({
+      id: object.id,
+      version: object.version,
+      attributes: object.attributes,
+    }));
     savedObjectsClient.update = jest
       .fn()
       .mockImplementation(async (type, id, body, { version }) => {
@@ -143,12 +144,13 @@ describe('IndexPatterns', () => {
     });
 
     // Create a normal index patterns
-    const pattern = await indexPatterns.make('foo');
+    const pattern = await indexPatterns.get('foo');
 
     expect(pattern.version).toBe('fooa');
+    indexPatterns.clearCache();
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = await indexPatterns.make('foo');
+    const samePattern = await indexPatterns.get('foo');
 
     expect(samePattern.version).toBe('fooaa');
 

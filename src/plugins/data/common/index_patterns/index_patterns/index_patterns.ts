@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientCommon } from '../..';
+import { SavedObjectsClientCommon, DuplicateIndexPatternError } from '../..';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -33,9 +33,14 @@ import {
   IIndexPatternsApiClient,
   GetFieldsOptions,
   IndexPatternSpec,
+  IndexPatternAttributes,
+  FieldSpec,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
+import { SavedObjectNotFound } from '../../../../kibana_utils/common';
+import { IndexPatternMissingIndices } from '../lib';
+import { findByTitle } from '../utils';
 
 const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -132,14 +137,6 @@ export class IndexPatternsService {
     });
   };
 
-  getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForTimePattern(options);
-  };
-
-  getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForWildcard(options);
-  };
-
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
@@ -148,6 +145,8 @@ export class IndexPatternsService {
       indexPatternCache.clearAll();
     }
   };
+
+  // rename
   getCache = async () => {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
@@ -164,44 +163,233 @@ export class IndexPatternsService {
     return null;
   };
 
+  setDefault = async (id: string, force = false) => {
+    if (force || !this.config.get('defaultIndex')) {
+      await this.config.set('defaultIndex', id);
+    }
+  };
+
+  private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
+    if (!specs) {
+      return true;
+    }
+
+    return specs.every((spec) => {
+      // See https://github.com/elastic/kibana/pull/8421
+      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
+
+      // See https://github.com/elastic/kibana/pull/11969
+      const hasDocValuesFlag = 'readFromDocValues' in spec;
+
+      return !hasFieldCaps || !hasDocValuesFlag;
+    });
+  }
+
+  getFieldsForWildcard = async (options: GetFieldsOptions = {}) => {
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    return this.apiClient.getFieldsForWildcard({
+      pattern: options.pattern,
+      metaFields,
+      type: options.type,
+      params: options.params || {},
+    });
+  };
+
+  getFieldsForIndexPattern = async (
+    indexPattern: IndexPattern | IndexPatternSpec,
+    options: GetFieldsOptions = {}
+  ) =>
+    this.getFieldsForWildcard({
+      pattern: indexPattern.title as string,
+      ...options,
+      type: indexPattern.type,
+      params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+    });
+
+  // grab fields, grab scripted fields, mash together
+  refreshFields = async (indexPattern: IndexPattern) => {
+    const fields = await this.getFieldsForIndexPattern(indexPattern);
+    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+    indexPattern.fields.replaceAll([...fields, ...scripted]);
+  };
+
+  private refreshFieldSpecArray = async (
+    fields: FieldSpec[],
+    id: string,
+    title: string,
+    options: GetFieldsOptions
+  ) => {
+    const scriptdFields = fields.filter((field) => field.scripted);
+    try {
+      const newFields = await this.getFieldsForWildcard(options);
+      return [...newFields, ...scriptdFields];
+    } catch (err) {
+      if (err instanceof IndexPatternMissingIndices) {
+        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
+        return [];
+      }
+
+      this.onError(err, {
+        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          values: { id, title },
+        }),
+      });
+    }
+    return fields;
+  };
+
   get = async (id: string): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
     if (cache) {
       return cache;
     }
 
-    const indexPattern = await this.make(id);
+    const {
+      version,
+      attributes: {
+        title,
+        timeFieldName,
+        intervalName,
+        fields,
+        sourceFilters,
+        fieldFormatMap,
+        typeMeta,
+        type,
+      },
+    } = await this.savedObjectsClient.get<IndexPatternAttributes>(savedObjectType, id);
 
-    return indexPatternCache.set(id, indexPattern);
+    if (!version) {
+      throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
+    }
+
+    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
+    let parsedFields = fields ? JSON.parse(fields) : [];
+    const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
+
+    const isFieldRefreshRequired = this.isFieldRefreshRequired(parsedFields);
+    let isSaveRequired = isFieldRefreshRequired;
+    try {
+      parsedFields = isFieldRefreshRequired
+        ? await this.refreshFieldSpecArray(parsedFields, id, title, {
+            pattern: title,
+            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+            type,
+            params: parsedTypeMeta && parsedTypeMeta.params,
+          })
+        : parsedFields;
+    } catch (err) {
+      isSaveRequired = false;
+      if (err instanceof IndexPatternMissingIndices) {
+        this.onNotification({
+          title: (err as any).message,
+          color: 'danger',
+          iconType: 'alert',
+        });
+      } else {
+        this.onError(err, {
+          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+            values: { id, title },
+          }),
+        });
+      }
+    }
+
+    Object.entries(parsedFieldFormatMap).forEach(([fieldName, value]) => {
+      const field = parsedFields.find((fld: FieldSpec) => fld.name === fieldName);
+      if (field) {
+        field.format = value;
+      }
+    });
+
+    const spec: IndexPatternSpec = {
+      id,
+      version,
+      title,
+      timeFieldName,
+      intervalName,
+      fields: parsedFields,
+      sourceFilters: sourceFilters ? JSON.parse(sourceFilters) : undefined,
+      typeMeta: parsedTypeMeta,
+      type,
+    };
+
+    const indexPattern = await this.newIndexPattern(spec);
+    indexPatternCache.set(id, indexPattern);
+    if (isSaveRequired) {
+      try {
+        this.save(indexPattern);
+      } catch (err) {
+        this.onError(err, {
+          title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
+            defaultMessage:
+              'Error saving after fetching fields for index pattern {title} (ID: {id})',
+            values: {
+              id: indexPattern.id,
+              title: indexPattern.title,
+            },
+          }),
+        });
+      }
+    }
+    // todo better way to do this
+    indexPattern.originalBody = indexPattern.prepBody();
+    return indexPattern;
   };
 
-  async specToIndexPattern(spec: IndexPatternSpec) {
+  async newIndexPattern(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
-    const indexPattern = new IndexPattern(spec.id, {
+    const indexPattern = new IndexPattern({
+      spec,
       savedObjectsClient: this.savedObjectsClient,
-      apiClient: this.apiClient,
-      patternCache: indexPatternCache,
       fieldFormats: this.fieldFormats,
-      indexPatternsService: this,
-      onNotification: this.onNotification,
-      onError: this.onError,
       shortDotsEnable,
       metaFields,
     });
 
-    indexPattern.initFromSpec(spec);
+    if (!skipFetchFields) {
+      await this.refreshFields(indexPattern);
+    }
+
+    return indexPattern;
+  }
+
+  async newIndexPatternAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
+    const indexPattern = await this.newIndexPattern(spec, skipFetchFields);
+    await this.create(indexPattern, override);
+    await this.setDefault(indexPattern.id as string);
+    return indexPattern;
+  }
+
+  async create(indexPattern: IndexPattern, override = false) {
+    const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
+    if (dupe) {
+      if (override) {
+        await this.delete(dupe.id);
+      } else {
+        throw new DuplicateIndexPatternError(`Duplicate index pattern: ${indexPattern.title}`);
+      }
+    }
+
+    const body = indexPattern.prepBody();
+    const response = await this.savedObjectsClient.create(savedObjectType, body, {
+      id: indexPattern.id,
+    });
+    indexPattern.id = response.id;
+    indexPatternCache.set(indexPattern.id, indexPattern);
     return indexPattern;
   }
 
   async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
     if (!indexPattern.id) return;
-    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
+    // get the list of attributes
     const body = indexPattern.prepBody();
 
+    // get changed keys
     const originalChangedKeys: string[] = [];
     Object.entries(body).forEach(([key, value]) => {
       if (value !== indexPattern.originalBody[key]) {
@@ -215,90 +403,58 @@ export class IndexPatternsService {
         indexPattern.id = resp.id;
         indexPattern.version = resp.version;
       })
-      .catch((err) => {
+      .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
-          const samePattern = new IndexPattern(indexPattern.id, {
-            savedObjectsClient: this.savedObjectsClient,
-            apiClient: this.apiClient,
-            patternCache: indexPatternCache,
-            fieldFormats: this.fieldFormats,
-            indexPatternsService: this,
-            onNotification: this.onNotification,
-            onError: this.onError,
-            shortDotsEnable,
-            metaFields,
+          const samePattern = await this.get(indexPattern.id as string);
+          // What keys changed from now and what the server returned
+          const updatedBody = samePattern.prepBody();
+
+          // Build a list of changed keys from the server response
+          // and ensure we ignore the key if the server response
+          // is the same as the original response (since that is expected
+          // if we made a change in that key)
+
+          const serverChangedKeys: string[] = [];
+          Object.entries(updatedBody).forEach(([key, value]) => {
+            if (value !== (body as any)[key] && value !== indexPattern.originalBody[key]) {
+              serverChangedKeys.push(key);
+            }
           });
 
-          return samePattern.init().then(() => {
-            // What keys changed from now and what the server returned
-            const updatedBody = samePattern.prepBody();
-
-            // Build a list of changed keys from the server response
-            // and ensure we ignore the key if the server response
-            // is the same as the original response (since that is expected
-            // if we made a change in that key)
-
-            const serverChangedKeys: string[] = [];
-            Object.entries(updatedBody).forEach(([key, value]) => {
-              if (value !== (body as any)[key] && value !== indexPattern.originalBody[key]) {
-                serverChangedKeys.push(key);
-              }
-            });
-
-            let unresolvedCollision = false;
-            for (const originalKey of originalChangedKeys) {
-              for (const serverKey of serverChangedKeys) {
-                if (originalKey === serverKey) {
-                  unresolvedCollision = true;
-                  break;
-                }
+          let unresolvedCollision = false;
+          for (const originalKey of originalChangedKeys) {
+            for (const serverKey of serverChangedKeys) {
+              if (originalKey === serverKey) {
+                unresolvedCollision = true;
+                break;
               }
             }
+          }
 
-            if (unresolvedCollision) {
-              const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
-                defaultMessage:
-                  'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-              });
-
-              this.onNotification({ title, color: 'danger' });
-              throw err;
-            }
-
-            // Set the updated response on this object
-            serverChangedKeys.forEach((key) => {
-              (indexPattern as any)[key] = (samePattern as any)[key];
+          if (unresolvedCollision) {
+            const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
+              defaultMessage:
+                'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
             });
-            indexPattern.version = samePattern.version;
 
-            // Clear cache
-            indexPatternCache.clear(indexPattern.id!);
+            this.onNotification({ title, color: 'danger' });
+            throw err;
+          }
 
-            // Try the save again
-            return this.save(indexPattern, saveAttempts);
+          // Set the updated response on this object
+          serverChangedKeys.forEach((key) => {
+            (indexPattern as any)[key] = (samePattern as any)[key];
           });
+          indexPattern.version = samePattern.version;
+
+          // Clear cache
+          indexPatternCache.clear(indexPattern.id!);
+
+          // Try the save again
+          return this.save(indexPattern, saveAttempts);
         }
         throw err;
       });
-  }
-
-  async make(id?: string): Promise<IndexPattern> {
-    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-
-    const indexPattern = new IndexPattern(id, {
-      savedObjectsClient: this.savedObjectsClient,
-      apiClient: this.apiClient,
-      patternCache: indexPatternCache,
-      fieldFormats: this.fieldFormats,
-      indexPatternsService: this,
-      onNotification: this.onNotification,
-      onError: this.onError,
-      shortDotsEnable,
-      metaFields,
-    });
-
-    return indexPattern.init();
   }
 
   /**

@@ -262,8 +262,11 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
+  IndexPatternSpec,
   fieldList,
 } from '../common';
+
+export * from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
