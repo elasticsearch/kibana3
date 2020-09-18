@@ -77,6 +77,10 @@ describe('createFiltersFromValueClick', () => {
           getByName: () => mockField,
           filter: () => [mockField],
         },
+        toSpec: () => ({
+          id: 'logstash-*',
+          fields: [mockField],
+        }),
         getFormatterForField: () =>
           new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),

@@ -7,7 +7,7 @@
 import {
   Filter,
   Query,
-  IIndexPattern,
+  IndexPatternSpec,
   isFilterDisabled,
   buildEsQuery,
   EsQueryConfig,
@@ -27,7 +27,7 @@ export const getQueryFilter = (
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
 ) => {
-  const indexPattern: IIndexPattern = {
+  const indexPattern = {
     fields: [],
     title: index.join(),
   };
@@ -69,7 +69,7 @@ export const getQueryFilter = (
 
 export const buildExceptionFilter = (
   exceptionQueries: Query[],
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternSpec,
   config: EsQueryConfig,
   excludeExceptions: boolean,
   chunkSize: number

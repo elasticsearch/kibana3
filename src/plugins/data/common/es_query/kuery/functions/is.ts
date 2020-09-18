@@ -22,7 +22,7 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IIndexPattern, KueryNode, IFieldType } from '../../..';
+import { IndexPatternSpec, KueryNode, IFieldType } from '../../..';
 
 import * as ast from '../ast';
 
@@ -50,7 +50,7 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPatternSpec,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {
@@ -94,13 +94,15 @@ export function toElasticsearchQuery(
       name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
       scripted: false,
       type: '',
+      searchable: false,
+      aggregatable: false,
     });
   }
 
   const isExistsQuery = valueArg.type === 'wildcard' && (value as any) === '*';
   const isAllFieldsQuery =
     (fullFieldNameArg.type === 'wildcard' && ((fieldName as unknown) as string) === '*') ||
-    (fields && indexPattern && fields.length === indexPattern.fields.length);
+    (fields && indexPattern && fields.length === indexPattern.fields?.length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {

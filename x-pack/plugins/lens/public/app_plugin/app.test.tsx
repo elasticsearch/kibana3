@@ -23,7 +23,6 @@ import {
   esFilters,
   FilterManager,
   IFieldType,
-  IIndexPattern,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
@@ -257,7 +256,7 @@ describe('Lens App', () => {
   it('passes global filters to frame', async () => {
     const args = makeDefaultArgs();
     args.editorFrame = frame;
-    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const indexPattern = { id: 'index1' };
     const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
     const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
     args.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
@@ -719,7 +718,7 @@ describe('Lens App', () => {
       });
 
       it('saves app filters and does not save pinned filters', async () => {
-        const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+        const indexPattern = { id: 'index1' };
         const field = ({ name: 'myfield' } as unknown) as IFieldType;
         const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
 
@@ -942,7 +941,7 @@ describe('Lens App', () => {
       args.editorFrame = frame;
 
       instance = mount(<App {...args} />);
-      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const indexPattern = { id: 'index1' };
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
       act(() =>
@@ -1078,7 +1077,7 @@ describe('Lens App', () => {
         })
       );
 
-      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const indexPattern = { id: 'index1' };
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
       const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
 

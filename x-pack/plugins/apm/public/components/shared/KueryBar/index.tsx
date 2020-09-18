@@ -11,7 +11,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   esKuery,
-  IIndexPattern,
+  IndexPatternSpec,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
@@ -32,7 +32,7 @@ interface State {
   isLoadingSuggestions: boolean;
 }
 
-function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
+function convertKueryToEsQuery(kuery: string, indexPattern: IndexPatternSpec) {
   const ast = esKuery.fromKueryExpression(kuery);
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
@@ -132,7 +132,7 @@ export function KueryBar() {
     }
 
     try {
-      const res = convertKueryToEsQuery(inputValue, indexPattern);
+      const res = convertKueryToEsQuery(inputValue, indexPattern.toSpec());
       if (!res) {
         return;
       }

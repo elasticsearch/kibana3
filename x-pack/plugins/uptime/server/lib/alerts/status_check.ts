@@ -74,7 +74,7 @@ export const generateFilterDSL = async (
 
   return esKuery.toElasticsearchQuery(
     esKuery.fromKueryExpression(combinedString ?? ''),
-    await getIndexPattern()
+    (await getIndexPattern())?.toSpec()
   );
 };
 

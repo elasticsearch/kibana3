@@ -18,11 +18,11 @@
  */
 
 import { getFields } from './get_fields';
-import { IIndexPattern, IFieldType, KueryNode } from '../../../..';
+import { IndexPatternSpec, IFieldType, KueryNode } from '../../../..';
 
 export function getFullFieldNameNode(
   rootNameNode: any,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPatternSpec,
   nestedPath?: string
 ): KueryNode {
   const fullFieldNameNode = {
