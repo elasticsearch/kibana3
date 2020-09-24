@@ -27,6 +27,8 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
+import SpeedMeasurePlugin from 'speed-measure-webpack-plugin';
+
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
@@ -275,5 +277,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     },
   };
 
-  return webpackMerge(commonConfig, worker.dist ? distributableConfig : nonDistributableConfig);
+  const smp = new SpeedMeasurePlugin({
+    // outputTarget: 'build-perf-stat.txt',
+    outputFormat: 'human',
+  });
+  const finalConfig = webpackMerge(
+    commonConfig,
+    worker.dist ? distributableConfig : nonDistributableConfig
+  );
+  return smp.wrap(finalConfig);
 }
