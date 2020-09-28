@@ -12,8 +12,8 @@ kibanaPipeline(timeoutMinutes: 240) {
     ]) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
         catchError {
-          kibanaCoverage.runTests()
-          kibanaTeamAssign.load('team_assignment', "### Upload Team Assignment JSON")
+//          kibanaCoverage.runTests()
+//          kibanaTeamAssign.load('team_assignment', "### Upload Team Assignment JSON")
           handleIngestion(TIME_STAMP)
         }
         handleFail()
@@ -24,14 +24,17 @@ kibanaPipeline(timeoutMinutes: 240) {
 }
 
 def handleIngestion(timestamp) {
-  def previousSha = handlePreviousSha()
-  kibanaPipeline.downloadCoverageArtifacts()
+//  def previousSha = handlePreviousSha()
+  def statDatFilePath = 'src/dev/code_coverage/www/stat_data.js'
+
+//  kibanaPipeline.downloadCoverageArtifacts()
   kibanaCoverage.prokLinks("### Process HTML Links")
-  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
-  kibanaCoverage.generateReports("### Merge coverage reports")
-  kibanaCoverage.uploadCombinedReports()
-  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, '### Ingest && Upload')
-  kibanaCoverage.uploadCoverageStaticSite(timestamp)
+  kibanaCoverage.vizData("### Process Visualization Data", statDatFilePath)
+//  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
+//  kibanaCoverage.generateReports("### Merge coverage reports")
+//  kibanaCoverage.uploadCombinedReports()
+//  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, '### Ingest && Upload')
+  kibanaCoverage.uploadCoverageStaticSite(timestamp, statDatFilePath)
 }
 
 def handlePreviousSha() {

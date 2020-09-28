@@ -1,3 +1,16 @@
+
+def vizData(title, statDatFilePath) {
+
+  kibanaPipeline.bash("""
+
+    . src/dev/code_coverage/shell_scripts/bootstrap_stats.sh ${statDatFilePath}
+
+    echo "### Generated Viz Data: ..."
+    cat '${statDatFilePath}'
+
+  """, title)
+}
+
 def downloadPrevious(title) {
   def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
 
@@ -41,16 +54,17 @@ def uploadPrevious(title) {
   }
 }
 
-def uploadCoverageStaticSite(timestamp) {
+def uploadCoverageStaticSite(timestamp, statDatFilePath) {
   def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/"
   def uploadPrefixWithTimeStamp = "${uploadPrefix}${timestamp}/"
 
-  uploadBaseWebsiteFiles(uploadPrefix)
+  uploadBaseWebsiteFiles(uploadPrefix, statDatFilePath)
   uploadCoverageHtmls(uploadPrefixWithTimeStamp)
 }
 
-def uploadBaseWebsiteFiles(prefix) {
+def uploadBaseWebsiteFiles(prefix, statDatFilePath) {
   [
+    statDatFilePath, // gs://elastic-bekitzur-kibana-coverage-live/stat_data.js
     'src/dev/code_coverage/www/index.html',
     'src/dev/code_coverage/www/404.html'
   ].each { uploadWithVault(prefix, it) }
@@ -98,6 +112,8 @@ cat << EOF > src/dev/code_coverage/www/index_partial_2.html
     </div>
   </footer>
 </div>
+<script src="./stat_data.js"></script>
+<script src="./index.js"></script>
 </body>
 </html>
 EOF
