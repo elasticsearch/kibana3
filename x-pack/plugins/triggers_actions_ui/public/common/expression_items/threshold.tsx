@@ -44,6 +44,7 @@ interface ThresholdExpressionProps {
     | 'rightUp'
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
+  valueSuffix?: string;
 }
 
 export const ThresholdExpression = ({
@@ -55,6 +56,7 @@ export const ThresholdExpression = ({
   display = 'inline',
   threshold = [],
   popupPosition,
+  valueSuffix,
 }: ThresholdExpressionProps) => {
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
@@ -66,15 +68,19 @@ export const ThresholdExpression = ({
     }
   );
 
+  const thresholdValue = (threshold || [])
+    .slice(0, comparators[thresholdComparator].requiredValues)
+    .join(` ${andThresholdText} `);
+  const thresholdValueText =
+    valueSuffix && threshold ? `${thresholdValue} ${valueSuffix}` : thresholdValue;
+
   return (
     <EuiPopover
       button={
         <EuiExpression
           data-test-subj="thresholdPopover"
           description={comparators[thresholdComparator].text}
-          value={(threshold || [])
-            .slice(0, comparators[thresholdComparator].requiredValues)
-            .join(` ${andThresholdText} `)}
+          value={thresholdValueText}
           isActive={Boolean(
             alertThresholdPopoverOpen ||
               (errors.threshold0 && errors.threshold0.length) ||

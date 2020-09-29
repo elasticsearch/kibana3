@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
 import { useMount } from 'react-use';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ConditionCharts, useConditionSelector } from '../../../../alerting/common';
 import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -20,6 +21,7 @@ import { AlertsContextValue } from '../../../../../../triggers_actions_ui/public
 import { LogDocumentCountAlertParams, Comparator } from '../../../../../common/alerting/logs/types';
 import { DocumentCount } from './document_count';
 import { Criteria } from './criteria';
+import { CriterionPreview } from './criterion_preview_chart';
 import { useSourceId } from '../../../../containers/source_id';
 import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
 import { GroupByExpression } from '../../shared/group_by_expression/group_by_expression';
@@ -131,6 +133,8 @@ export const Editor: React.FC<Props> = (props) => {
     }
   });
 
+  const [conditionPreviewId, setConditionPreviewId] = useConditionSelector(alertParams.criteria);
+
   const supportedFields = useMemo(() => {
     if (sourceStatus?.logIndexFields) {
       return sourceStatus.logIndexFields.filter((field) => {
@@ -229,6 +233,7 @@ export const Editor: React.FC<Props> = (props) => {
         updateCriterion={updateCriterion}
         removeCriterion={removeCriterion}
         errors={errors.criteria as IErrorObject}
+        documentCount={alertParams.count?.value}
         alertParams={alertParams}
         context={alertsContext}
         sourceId={sourceId}
@@ -240,6 +245,7 @@ export const Editor: React.FC<Props> = (props) => {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         errors={errors as { [key: string]: string[] }}
+        display="fullWidth"
       />
 
       <GroupByExpression
@@ -262,6 +268,20 @@ export const Editor: React.FC<Props> = (props) => {
           />
         </EuiButtonEmpty>
       </div>
+
+      <ConditionCharts
+        selectedConditionId={conditionPreviewId}
+        setSelectedConditionId={setConditionPreviewId}
+        conditions={alertParams.criteria}
+        expressionChart={(criterionIdx) => (
+          <CriterionPreview
+            alertParams={alertParams}
+            context={alertsContext}
+            chartCriterion={alertParams.criteria![criterionIdx]}
+            sourceId={sourceId}
+          />
+        )}
+      />
     </>
   );
 };

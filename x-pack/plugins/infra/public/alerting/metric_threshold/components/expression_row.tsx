@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
+import { ExpressionRowLabel } from '../../common';
 import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
 import {
   WhenExpression,
@@ -45,23 +46,25 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setAlertParams(id: number, params: MetricExpression): void;
+  label?: string | null;
 }
-
-const StyledExpressionRow = euiStyled(EuiFlexGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -4px;
-`;
 
 const StyledExpression = euiStyled.div`
   padding: 0 4px;
+  & .euiExpression {
+    transition-duration: 0s;
+  }
+`;
+
+const StyledExpressionRow = euiStyled(EuiFlexGroup)`
+  display: inline;
+  flex-wrap: wrap;
+  margin: 0 -4px;
+  padding: 0;
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const [isExpanded, setRowState] = useState(true);
-  const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
   const {
-    children,
     setAlertParams,
     expression,
     errors,
@@ -69,6 +72,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     remove,
     fields,
     canDelete,
+    label,
   } = props;
   const {
     aggType = AGGREGATION_TYPES.MAX,
@@ -124,22 +128,19 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggleRowState}
-            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
-              defaultMessage: 'Expand row.',
-            })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
+        {label && (
+          <ExpressionRowLabel>
+            <label htmlFor={`expression-${label}`}>{label}</label>
+          </ExpressionRowLabel>
+        )}
+        <EuiFlexItem grow id={`expression-${label}`}>
           <StyledExpressionRow>
             <StyledExpression>
               <WhenExpression
                 customAggTypesOptions={aggregationType}
                 aggType={aggType}
                 onChangeSelectedAggType={updateAggType}
+                display="fullWidth"
               />
             </StyledExpression>
             {aggType !== 'count' && (
@@ -154,6 +155,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   aggType={aggType}
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
+                  display="fullWidth"
                 />
               </StyledExpression>
             )}
@@ -165,17 +167,10 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 onChangeSelectedThresholdComparator={updateComparator}
                 onChangeSelectedThreshold={updateThreshold}
                 errors={errors}
+                display="fullWidth"
+                valueSuffix={isMetricPct ? '%' : undefined}
               />
             </StyledExpression>
-            {isMetricPct && (
-              <div
-                style={{
-                  alignSelf: 'center',
-                }}
-              >
-                <EuiText size={'s'}>%</EuiText>
-              </div>
-            )}
           </StyledExpressionRow>
         </EuiFlexItem>
         {canDelete && (
@@ -191,8 +186,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {isExpanded ? <div style={{ padding: '0 0 0 28px' }}>{children}</div> : null}
-      <EuiSpacer size={'s'} />
     </>
   );
 };

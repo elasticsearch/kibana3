@@ -23,15 +23,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { idxToAlphabeticalLabel } from '../../../../common/utils/index_to_alphabetical_label';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertPreview } from '../../common';
+import { AlertPreview, ExpressionRowLabel } from '../../common';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
-import { euiStyled } from '../../../../../observability/public';
 import {
   ThresholdExpression,
   ForLastExpression,
@@ -282,16 +282,13 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </h4>
       </EuiText>
-      <StyledExpression>
-        <StyledExpressionRow>
-          <NodeTypeExpression
-            options={nodeTypes}
-            value={alertParams.nodeType || 'host'}
-            onChange={updateNodeType}
-          />
-        </StyledExpressionRow>
-      </StyledExpression>
-      <EuiSpacer size={'xs'} />
+
+      <NodeTypeExpression
+        options={nodeTypes}
+        value={alertParams.nodeType || 'host'}
+        onChange={updateNodeType}
+      />
+
       {alertParams.criteria &&
         alertParams.criteria.map((e, idx) => {
           return (
@@ -306,9 +303,11 @@ export const Expressions: React.FC<Props> = (props) => {
               errors={errors[idx] || emptyError}
               expression={e || {}}
               alertsContextMetadata={alertsContext.metadata}
+              label={alertParams.criteria.length > 1 ? idxToAlphabeticalLabel(idx) : null}
             />
           );
         })}
+      {alertParams.criteria?.length > 1 && <EuiSpacer size="xs" />}
 
       <ForLastExpression
         timeWindowSize={timeSize}
@@ -316,6 +315,7 @@ export const Expressions: React.FC<Props> = (props) => {
         errors={emptyError}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
+        display="fullWidth"
       />
 
       <div>
@@ -415,17 +415,8 @@ interface ExpressionRowProps {
   remove(id: number): void;
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
   alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
+  label?: string | null;
 }
-
-const StyledExpressionRow = euiStyled(EuiFlexGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -4px;
-`;
-
-const StyledExpression = euiStyled.div`
-  padding: 0 4px;
-`;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const {
@@ -436,6 +427,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     remove,
     canDelete,
     alertsContextMetadata,
+    label,
   } = props;
   const { metric, comparator = Comparator.GT, threshold = [], customMetric } = expression;
   const [customMetrics, updateCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
@@ -530,43 +522,36 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
+        {label && (
+          <ExpressionRowLabel>
+            <label htmlFor={`expression-${label}`}>{label}</label>
+          </ExpressionRowLabel>
+        )}
         <EuiFlexItem grow>
-          <StyledExpressionRow>
-            <StyledExpression>
-              <MetricExpression
-                metric={{
-                  value: selectedMetricValue,
-                  text: ofFields.find((v) => v?.value === selectedMetricValue)?.text || '',
-                }}
-                metrics={
-                  ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
-                    value: SnapshotMetricType;
-                    text: string;
-                  }>
-                }
-                onChange={updateMetric}
-                errors={errors}
-              />
-            </StyledExpression>
-            <StyledExpression>
-              <ThresholdExpression
-                thresholdComparator={comparator || Comparator.GT}
-                threshold={threshold}
-                onChangeSelectedThresholdComparator={updateComparator}
-                onChangeSelectedThreshold={updateThreshold}
-                errors={errors}
-              />
-            </StyledExpression>
-            {metric && (
-              <div
-                style={{
-                  alignSelf: 'center',
-                }}
-              >
-                <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
-              </div>
-            )}
-          </StyledExpressionRow>
+          <MetricExpression
+            metric={{
+              value: selectedMetricValue,
+              text: ofFields.find((v) => v?.value === selectedMetricValue)?.text || '',
+            }}
+            metrics={
+              ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
+                value: SnapshotMetricType;
+                text: string;
+              }>
+            }
+            onChange={updateMetric}
+            errors={errors}
+          />
+
+          <ThresholdExpression
+            thresholdComparator={comparator || Comparator.GT}
+            threshold={threshold}
+            onChangeSelectedThresholdComparator={updateComparator}
+            onChangeSelectedThreshold={updateThreshold}
+            errors={errors}
+            display="fullWidth"
+            valueSuffix={metric && metricUnit[metric]?.label}
+          />
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
@@ -581,7 +566,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size={'s'} />
     </>
   );
 };
