@@ -66,6 +66,11 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
+
+        await PageObjects.dashboard.saveDashboard('filtering test');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
         await filterBar.addFilter('bytes', 'is', '12345678');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -125,7 +130,24 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('using a pinned filter that excludes all data', () => {
+    // This is for a specific bug that wasn't caught by our existing tests.
+    describe('same filter can be re-applied after opening the dashboard back up', async () => {
+      before(async () => {
+        await PageObjects.dashboard.loadSavedDashboard('filtering test');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await filterBar.addFilter('bytes', 'is', '12345678');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      it('filters on pie charts', async () => {
+        await pieChart.expectPieSliceCount(0);
+      });
+    });
+
+    describe('using a pinned filter that excludes all data', async () => {
       before(async () => {
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
