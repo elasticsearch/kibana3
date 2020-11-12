@@ -36,6 +36,7 @@ interface IndexPatternDeps {
 }
 
 interface SavedObjectBody {
+  attributes?: string;
   title?: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -70,6 +71,8 @@ export class IndexPattern implements IIndexPattern {
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
+  // make private once manual field refresh is removed
+  public fieldAttributes: { [key: string]: { customName: string } };
 
   constructor({
     spec = {},
@@ -101,10 +104,10 @@ export class IndexPattern implements IIndexPattern {
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
-
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
+    this.fieldAttributes = spec.fieldAttributes || {};
   }
 
   setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
@@ -125,6 +128,20 @@ export class IndexPattern implements IIndexPattern {
    */
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
+  };
+
+  resetFieldAttributes = () => {
+    const newFieldAttrs = { ...this.fieldAttributes };
+
+    this.fields.forEach((field) => {
+      if (field.customName) {
+        newFieldAttrs[field.name] = { customName: field.customName };
+      } else {
+        delete newFieldAttrs[field.name];
+      }
+    });
+
+    this.fieldAttributes = newFieldAttrs;
   };
 
   getComputedFields() {
@@ -180,6 +197,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
+      fieldAttributes: this.fieldAttributes,
     };
   }
 
@@ -273,6 +291,7 @@ export class IndexPattern implements IIndexPattern {
       : JSON.stringify(this.fieldFormatMap);
 
     return {
+      attributes: JSON.stringify(this.getSavedObjectAttrsField()),
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
@@ -311,5 +330,13 @@ export class IndexPattern implements IIndexPattern {
     if (formatSpec?.id) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
+  }
+
+  /**
+   * Creates saved object attributes field.
+   */
+  private getSavedObjectAttrsField() {
+    this.resetFieldAttributes();
+    return { fields: this.fieldAttributes };
   }
 }
