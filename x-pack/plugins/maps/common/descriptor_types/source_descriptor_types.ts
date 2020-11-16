@@ -132,3 +132,15 @@ export type GeojsonFileSourceDescriptor = {
   name: string;
   type: string;
 };
+
+export type TileJsonVectorSourceSettings = {
+  url: string;
+  layerName: string;
+  minSourceZoom: number;
+  maxSourceZoom: number;
+};
+
+export type TileJsonVectorSourceDescriptor = AbstractSourceDescriptor &
+  TileJsonVectorSourceSettings & {
+    tooltipProperties?: string[];
+  };
