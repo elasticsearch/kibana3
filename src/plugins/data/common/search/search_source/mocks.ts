@@ -37,6 +37,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   createChild: jest.fn().mockReturnThis(),
   setParent: jest.fn(),
   getParent: jest.fn().mockReturnThis(),
+  setFilterPath: jest.fn(),
   fetch: jest.fn().mockResolvedValue({}),
   onRequestStart: jest.fn(),
   getSearchRequestBody: jest.fn(),
