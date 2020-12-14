@@ -15,7 +15,8 @@ import {
   InstallSource,
   PackageAssetReference,
 } from '../../../../common';
-import { getArchiveEntry } from './index';
+import { ArchiveEntry, getArchiveEntry, setArchiveEntry } from './index';
+import { parseAndVerifyEntries } from './validation';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
 const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
@@ -137,4 +138,41 @@ export async function getAsset(opts: {
   }
 
   return storedAsset;
+}
+
+export async function getAssetsFromReferences(opts: {
+  savedObjectsClient: SavedObjectsClientContract;
+  references: PackageAssetReference[];
+}): Promise<PackageAsset[]> {
+  const { savedObjectsClient, references } = opts;
+  const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(references);
+  return bulkRes.saved_objects.map((so) => so.attributes);
+}
+
+export function packageAssetToArchiveEntry(asset: PackageAsset): ArchiveEntry {
+  const { asset_path: path, data_utf8: utf8, data_base64: base64 } = asset;
+  const buffer = utf8 ? Buffer.from(utf8, 'utf8') : Buffer.from(base64, 'base64');
+
+  return {
+    path,
+    buffer,
+  };
+}
+
+export async function getEsPackage(opts: {
+  references: PackageAssetReference[];
+  savedObjectsClient: SavedObjectsClientContract;
+}) {
+  const { references, savedObjectsClient } = opts;
+  const assets = await getAssetsFromReferences({ references, savedObjectsClient });
+  const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
+  const packageResponse = parseAndVerifyEntries(entries);
+
+  entries.forEach(({ path, buffer }) => {
+    if (path && buffer) {
+      setArchiveEntry(path, buffer);
+    }
+  });
+
+  return packageResponse;
 }

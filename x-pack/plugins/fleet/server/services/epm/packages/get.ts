@@ -7,16 +7,12 @@
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited, installationStatuses } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
-  ArchivePackage,
-  InstallSource,
-  RegistryPackage,
-  EpmPackageAdditions,
-} from '../../../../common/types';
+import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../../common/types';
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
-import { getArchivePackage } from '../archive';
+import { getEsPackage } from '../archive/storage';
+import { getArchivePackage, setPackageInfo, setArchiveFilelist } from '../archive';
 
 export { getFile, SearchParams } from '../registry';
 
@@ -103,13 +99,10 @@ export async function getPackageInfo(options: {
   const getPackageRes = await getPackageFromSource({
     pkgName,
     pkgVersion,
-    pkgInstallSource:
-      savedObject?.attributes.version === pkgVersion
-        ? savedObject?.attributes.install_source
-        : 'registry',
+    savedObjectsClient,
+    installation: savedObject?.attributes,
   });
-  const paths = getPackageRes.paths;
-  const packageInfo = getPackageRes.packageInfo;
+  const { paths, packageInfo } = getPackageRes;
 
   // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
@@ -123,31 +116,61 @@ export async function getPackageInfo(options: {
   return createInstallableFrom(updated, savedObject);
 }
 
+interface PackageResponse {
+  paths: string[];
+  packageInfo: ArchivePackage | RegistryPackage;
+}
+type GetPackageResponse = PackageResponse | undefined;
+
 // gets package from install_source if it exists otherwise gets from registry
 export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
-  pkgInstallSource?: InstallSource;
-}): Promise<{
-  paths: string[] | undefined;
-  packageInfo: RegistryPackage | ArchivePackage;
-}> {
-  const { pkgName, pkgVersion, pkgInstallSource } = options;
-  // TODO: Check package storage before checking registry
-  let res;
-  if (pkgInstallSource === 'upload') {
+  installation?: Installation;
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<PackageResponse> {
+  const { pkgName, pkgVersion, installation, savedObjectsClient } = options;
+  let res: GetPackageResponse;
+  // if the package is installed
+
+  if (installation && installation.version === pkgVersion) {
+    const { install_source: pkgInstallSource } = installation;
+    // check cache
     res = getArchivePackage({
       name: pkgName,
       version: pkgVersion,
     });
+    // check storage
+    if (!res) {
+      res = await getEsPackage({
+        references: installation.package_assets,
+        savedObjectsClient,
+      });
+    }
+    // for packages not in cache or package storage and installed from registry, check registry
+    if (!res && pkgInstallSource === 'registry') {
+      try {
+        res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+        // TODO: add to cache and storage here?
+      } catch (error) {
+        // treating this is a 404 as no status code returned
+        // in the unlikely event its missing from cache, storage, and never installed from registry
+      }
+    }
   } else {
+    // else package is not installed or installed and missing from cache and storage and installed from registry
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
   }
-  if (!res.packageInfo || !res.paths)
-    throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+
+  if (!res) throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+
+  const { paths, packageInfo } = res;
+  setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
+  setPackageInfo({ name: pkgName, version: pkgVersion, packageInfo });
+
   return {
-    paths: res.paths,
-    packageInfo: res.packageInfo,
+    paths,
+    packageInfo,
   };
 }
 
