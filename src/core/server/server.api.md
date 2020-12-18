@@ -141,6 +141,7 @@ import { Request } from '@hapi/hapi';
 import { RequestHandlerContext as RequestHandlerContext_2 } from 'src/core/server';
 import { ResponseObject } from '@hapi/hapi';
 import { ResponseToolkit } from '@hapi/hapi';
+import { SavedObjectAccessControl as SavedObjectAccessControl_2 } from 'src/core/types';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
@@ -2173,6 +2174,8 @@ export type SafeRouteMethod = 'get' | 'options';
 //
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
+    // (undocumented)
+    accessControl?: SavedObjectAccessControl;
     attributes: T;
     coreMigrationVersion?: string;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectError" needs to be exported by the entry point index.d.ts
@@ -2187,6 +2190,11 @@ export interface SavedObject<T = unknown> {
     type: string;
     updated_at?: string;
     version?: string;
+}
+
+// @public
+export interface SavedObjectAccessControl {
+    owner: string;
 }
 
 // @public
@@ -2238,10 +2246,12 @@ export interface SavedObjectReference {
 
 // @public
 export interface SavedObjectReferenceWithContext {
+    accessControl?: SavedObjectAccessControl;
     id: string;
     inboundReferences: Array<{
         type: string;
         id: string;
+        accessControl?: SavedObjectAccessControl;
         name: string;
     }>;
     isMissing?: boolean;
@@ -2263,6 +2273,7 @@ export interface SavedObjectsBaseOptions {
 
 // @public (undocumented)
 export interface SavedObjectsBulkCreateObject<T = unknown> {
+    accessControl?: SavedObjectAccessControl_2;
     // (undocumented)
     attributes: T;
     coreMigrationVersion?: string;
@@ -2278,6 +2289,9 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     version?: string;
 }
+
+// @public (undocumented)
+export type SavedObjectsBulkCreateOptions = Omit<SavedObjectsCreateOptions, 'accessControl'>;
 
 // @public (undocumented)
 export interface SavedObjectsBulkGetObject {
@@ -2328,6 +2342,11 @@ export interface SavedObjectsCheckConflictsObject {
 }
 
 // @public (undocumented)
+export interface SavedObjectsCheckConflictsOptions extends SavedObjectsBaseOptions {
+    accessControl?: SavedObjectAccessControl_2;
+}
+
+// @public (undocumented)
 export interface SavedObjectsCheckConflictsResponse {
     // (undocumented)
     errors: Array<{
@@ -2344,7 +2363,7 @@ export class SavedObjectsClient {
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
-    checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
+    checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsCheckConflictsOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     collectMultiNamespaceReferences(objects: SavedObjectsCollectMultiNamespaceReferencesObject[], options?: SavedObjectsCollectMultiNamespaceReferencesOptions): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
@@ -2426,6 +2445,7 @@ export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
 
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
+    accessControl?: SavedObjectAccessControl_2;
     coreMigrationVersion?: string;
     id?: string;
     initialNamespaces?: string[];
@@ -2466,6 +2486,8 @@ export class SavedObjectsErrorHelpers {
     static createConflictError(type: string, id: string, reason?: string): DecoratedError;
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
+    // (undocumented)
+    static createIncompatibleAccessControlError(type: string, id: string): DecoratedError;
     // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)
@@ -2936,10 +2958,10 @@ export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBase
 
 // @public (undocumented)
 export class SavedObjectsRepository {
-    bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
+    bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsBulkCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
-    checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
+    checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsCheckConflictsOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     collectMultiNamespaceReferences(objects: SavedObjectsCollectMultiNamespaceReferencesObject[], options?: SavedObjectsCollectMultiNamespaceReferencesOptions): Promise<import("./collect_multi_namespace_references").SavedObjectsCollectMultiNamespaceReferencesResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
@@ -3023,6 +3045,9 @@ export interface SavedObjectStatusMeta {
 
 // @public (undocumented)
 export interface SavedObjectsType<Attributes = any> {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsAccessClassification" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectsAccessClassification"
+    accessClassification?: SavedObjectsAccessClassification;
     convertToAliasScript?: string;
     convertToMultiNamespaceTypeVersion?: string;
     hidden: boolean;
@@ -3122,6 +3147,7 @@ export class SavedObjectTypeRegistry {
     isImportableAndExportable(type: string): boolean;
     isMultiNamespace(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
+    isPrivate(type: string): boolean;
     isShareable(type: string): boolean;
     isSingleNamespace(type: string): boolean;
     registerType(type: SavedObjectsType): void;
