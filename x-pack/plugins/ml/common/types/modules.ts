@@ -73,6 +73,21 @@ export interface JobResponse extends ResultItem {
   error?: ErrorType;
 }
 
+export interface DataRecognizerConfigRequest {
+  moduleId: string;
+  prefix?: string;
+  groups?: string[];
+  indexPatternName?: string;
+  query?: any;
+  useDedicatedIndex?: boolean;
+  startDatafeed?: boolean;
+  start?: number;
+  end?: number;
+  jobOverrides?: Array<Partial<Job>>;
+  estimateModelMemory?: boolean;
+  applyToAllSpaces?: boolean;
+}
+
 export interface DataRecognizerConfigResponse {
   datafeeds: DatafeedResponse[];
   jobs: JobResponse[];
