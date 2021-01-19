@@ -65,8 +65,9 @@ export const IGNORE_FILE_GLOBS = [
   // filename must match upstream filenames from lodash
   'packages/elastic-safer-lodash-set/**/*',
 
-  // TODO fix file names in APM to remove these
+  // TODO fix file names in APM, UX to remove these
   'x-pack/plugins/apm/public/**/*',
+  'x-pack/plugins/ux/public/**/*',
   'x-pack/plugins/apm/scripts/**/*',
   'x-pack/plugins/apm/e2e/**/*',
 

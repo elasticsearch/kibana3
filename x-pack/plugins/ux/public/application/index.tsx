@@ -19,10 +19,10 @@ import {
 import { APMRouteDefinition } from '../application/routes';
 import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
+import { RumHome, UX_LABEL } from '../components/app/Home/RumHome';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
-import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+// import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
@@ -46,7 +46,7 @@ export const rumRoutes: APMRouteDefinition[] = [
 function CsmApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  useBreadcrumbs(rumRoutes);
+  // useBreadcrumbs(rumRoutes);
 
   return (
     <ThemeProvider

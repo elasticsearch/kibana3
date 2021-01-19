@@ -1,5 +1,5 @@
 {
-  "id": "apm",
+  "id": "ux",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
@@ -19,18 +19,11 @@
     "alerts",
     "observability",
     "security",
-    "ml",
-    "home"
+    "maps"
   ],
-  "server": true,
+  "server": false,
   "ui": true,
-  "configPath": ["xpack", "apm"],
+  "configPath": ["xpack", "ux"],
   "extraPublicDirs": ["public/style/variables"],
-  "requiredBundles": [
-    "kibanaReact",
-    "kibanaUtils",
-    "observability",
-    "home",
-    "ml"
-  ]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "observability", "maps"]
 }

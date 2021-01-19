@@ -1,0 +1,101 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { omit } from 'lodash';
+import { useHistory } from 'react-router-dom';
+import { pickKeys } from '../../common/utils/pick_keys';
+import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
+import { removeUndefinedProps } from '../context/url_params_context/helpers';
+import { useCallApi } from './useCallApi';
+import { useFetcher } from './use_fetcher';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { LocalUIFilterName } from '../../common/ui_filter';
+import { localUIFilters } from '../../common/config';
+import { Projection } from '../../common/projections';
+
+const getInitialData = (filterNames: LocalUIFilterName[]): any => {
+  return filterNames.map((filterName) => ({
+    options: [],
+    ...localUIFilters[filterName],
+  }));
+};
+
+export function useLocalUIFilters({
+  projection,
+  filterNames,
+  params,
+  shouldFetch,
+}: {
+  projection: Projection;
+  filterNames: LocalUIFilterName[];
+  params?: Record<string, string | number | boolean | undefined>;
+  shouldFetch: boolean;
+}) {
+  const history = useHistory();
+  const { uiFilters, urlParams } = useUrlParams();
+  const callApi = useCallApi();
+
+  const values = pickKeys(uiFilters, ...filterNames);
+
+  const setFilterValue = (name: LocalUIFilterName, value: string[]) => {
+    const search = omit(toQuery(history.location.search), name);
+
+    history.push({
+      ...history.location,
+      search: fromQuery(
+        removeUndefinedProps({
+          ...search,
+          [name]: value.length ? value.join(',') : undefined,
+        })
+      ),
+    });
+  };
+
+  const clearValues = () => {
+    const search = omit(toQuery(history.location.search), filterNames);
+    history.push({
+      ...history.location,
+      search: fromQuery(search),
+    });
+  };
+
+  const { data = getInitialData(filterNames), status } = useFetcher(() => {
+    if (shouldFetch) {
+      return callApi<LocalUIFiltersAPIResponse>({
+        method: 'GET',
+        pathname: `/api/apm/ui_filters/local_filters/${projection}`,
+        query: {
+          uiFilters: JSON.stringify(uiFilters),
+          start: urlParams.start,
+          end: urlParams.end,
+          filterNames: JSON.stringify(filterNames),
+          ...params,
+        },
+      });
+    }
+  }, [
+    callApi,
+    projection,
+    uiFilters,
+    urlParams.start,
+    urlParams.end,
+    filterNames,
+    params,
+    shouldFetch,
+  ]);
+
+  const filters = data.map((filter) => ({
+    ...filter,
+    value: values[filter.name] || [],
+  }));
+
+  return {
+    filters,
+    status,
+    setFilterValue,
+    clearValues,
+  };
+}
