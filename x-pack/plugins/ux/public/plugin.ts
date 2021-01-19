@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { ConfigSchema } from '.';
-// import {
-//   FetchDataParams,
-//   ObservabilityPluginSetup,
-// } from '../../observability/public';
+import { ConfigSchema } from '.';
+import {
+  FetchDataParams,
+  HasDataParams,
+  ObservabilityPluginSetup,
+} from '../../observability/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -32,11 +33,9 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
-// import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-// import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import { MapsStartApi } from '../../maps/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -49,7 +48,7 @@ export interface ApmPluginSetupDeps {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  observability?: any;
+  observability?: ObservabilityPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -60,11 +59,12 @@ export interface ApmPluginStartDeps {
   licensing: void;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   embeddable: EmbeddableStart;
+  maps?: MapsStartApi;
 }
 
-export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
+export class UxPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
-    private readonly initializerContext: PluginInitializerContext<any>
+    private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
   }
@@ -72,49 +72,43 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
 
-    if (pluginSetupDeps.home) {
-      pluginSetupDeps.home.environment.update({ apmUi: true });
-      pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
-    }
-
     if (plugins.observability) {
-      const getApmDataHelper = async () => {
+      const getUxDataHelper = async () => {
         const {
-          fetchObservabilityOverviewPageData,
-          hasData,
+          fetchUxOverviewDate,
+          hasRumData,
           createCallApmApi,
-        } = await import('./services/rest/apm_observability_overview_fetchers');
+        } = await import('./components/app/Home/ux_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core.http);
 
-        return { fetchObservabilityOverviewPageData, hasData };
+        return { fetchUxOverviewDate, hasRumData };
       };
+
       plugins.observability.dashboard.register({
-        appName: 'apm',
-        hasData: async () => {
-          const dataHelper = await getApmDataHelper();
-          return await dataHelper.hasData();
+        appName: 'ux',
+        hasData: async (params?: HasDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          return await dataHelper.hasRumData(params!);
         },
-        fetchData: async (params: any) => {
-          const dataHelper = await getApmDataHelper();
-          return await dataHelper.fetchObservabilityOverviewPageData(params);
+        fetchData: async (params: FetchDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          return await dataHelper.fetchUxOverviewDate(params);
         },
       });
     }
 
     core.application.register({
-      id: 'apm',
-      title: 'APM',
-      order: 8300,
+      id: 'ux',
+      title: 'User Experience',
+      order: 8500,
       euiIconType: 'logoObservability',
-      appRoute: '/app/apm',
-      icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
 
       async mount(params: AppMountParameters<unknown>) {
-        // Load application bundle and Get start services
+        // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application'),
+          import('./application/index'),
           core.getStartServices(),
         ]);
 
@@ -128,8 +122,5 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    // toggleAppLinkInNav(core, this.initializerContext.config.get());
-    // registerApmAlerts(plugins.triggersActionsUi.alertTypeRegistry);
-  }
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
 }

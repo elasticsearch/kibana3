@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { RumOverview } from '../RumDashboard';
+import { RumOverview } from './';
 import { CsmSharedContextProvider } from './CsmSharedContext';
 import { MainFilters } from './Panels/MainFilters';
 import { DatePicker } from '../../shared/DatePicker';
