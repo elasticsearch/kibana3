@@ -17,12 +17,15 @@
  * under the License.
  */
 
-export { IndexPatternTableWithRouter } from './index_pattern_table';
-export {
-  EditIndexPattern,
-  EditIndexPatternContainer,
-  CreateEditField,
-  CreateEditFieldContainer,
-  CreateEditFieldContainerB,
-} from './edit_index_pattern';
-export { CreateIndexPatternWizardWithRouter } from './create_index_pattern_wizard';
+import type { DocLinksStart, IUiSettingsClient } from 'src/core/public';
+// eslint-disable-next-line
+import type { RuntimeFieldStart } from '../../../../x-pack/plugins/runtime_field_editor/public';
+
+export const loadEditor = (
+  dockLinks: DocLinksStart,
+  uiSettings: IUiSettingsClient,
+  runtimeFieldEditor?: RuntimeFieldStart['RuntimeFieldEditor']
+) => async () => {
+  const { indexPatternFieldEditorFlyoutContent } = await import('./components');
+  return indexPatternFieldEditorFlyoutContent(dockLinks, uiSettings, runtimeFieldEditor);
+};

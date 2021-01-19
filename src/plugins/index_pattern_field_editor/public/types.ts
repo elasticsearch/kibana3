@@ -17,12 +17,5 @@
  * under the License.
  */
 
-export { IndexPatternTableWithRouter } from './index_pattern_table';
-export {
-  EditIndexPattern,
-  EditIndexPatternContainer,
-  CreateEditField,
-  CreateEditFieldContainer,
-  CreateEditFieldContainerB,
-} from './edit_index_pattern';
-export { CreateIndexPatternWizardWithRouter } from './create_index_pattern_wizard';
+// eslint-disable-next-line
+export type { RuntimeFieldStart, RuntimeField } from '../../../../x-pack/plugins/runtime_field_editor/public';

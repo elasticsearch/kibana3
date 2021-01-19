@@ -20,12 +20,14 @@
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
+import type { RuntimeField as SharedRuntimeField } from 'src/plugins/runtime_fields/common';
 import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
+export type RuntimeField = Omit<SharedRuntimeField, 'name'>;
 export interface IIndexPattern {
   fields: IFieldType[];
   title: string;
@@ -49,6 +51,7 @@ export interface IndexPatternAttributes {
   sourceFilters?: string;
   fieldFormatMap?: string;
   fieldAttrs?: string;
+  runtimeFieldMap?: string;
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -180,8 +183,10 @@ export interface FieldSpec {
   subType?: IFieldSubType;
   indexed?: boolean;
   customLabel?: string;
+  runtimeField?: RuntimeField;
   // not persisted
   shortDotsEnable?: boolean;
+  isMapped?: boolean;
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
@@ -197,6 +202,8 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
+  // todo runtimeField includes name prop
+  runtimeFieldMap?: Record<string, RuntimeField>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }

@@ -8,10 +8,8 @@
     "declarationMap": true
   },
   "include": [
-    "common/**/*",
     "public/**/*",
-  ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
+    "common/**/*",
+    "../../../typings/**/*"
   ]
 }

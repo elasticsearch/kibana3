@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './table';
+export { CreateEditField as CreateEditFieldB } from './create_edit_field';
+export { CreateEditFieldContainer as CreateEditFieldContainerB } from './create_edit_field_container';

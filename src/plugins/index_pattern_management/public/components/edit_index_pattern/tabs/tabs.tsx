@@ -28,6 +28,7 @@ import {
   EuiFieldSearch,
   EuiSelect,
   EuiSelectOption,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
@@ -78,6 +79,9 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     uiSettings,
     indexPatternManagementStart,
     docLinks,
+    indexPatternFieldEditor,
+    overlays,
+    data,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -131,15 +135,28 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
             />
           </EuiFlexItem>
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                options={indexedFieldTypes}
-                value={indexedFieldTypeFilter}
-                onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
-                data-test-subj="indexedFieldTypeFilterDropdown"
-                aria-label={filterAriaLabel}
-              />
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  options={indexedFieldTypes}
+                  value={indexedFieldTypeFilter}
+                  onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
+                  data-test-subj="indexedFieldTypeFilterDropdown"
+                  aria-label={filterAriaLabel}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  onClick={async () => {
+                    const editor = await indexPatternFieldEditor.loadEditor();
+                    editor(overlays.openFlyout, indexPattern, data.indexPatterns, refreshFilters);
+                  }}
+                >
+                  Add field
+                </EuiButton>
+              </EuiFlexItem>
+            </>
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
             <EuiFlexItem grow={false}>
@@ -160,6 +177,11 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       indexedFieldTypes,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
+      indexPattern,
+      indexPatternFieldEditor,
+      overlays.openFlyout,
+      data.indexPatterns,
+      refreshFilters,
     ]
   );
 
@@ -183,6 +205,16 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                     history.push(getPath(field, indexPattern));
                   },
                   getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
+                }}
+                newEditField={async (ip, indexPatternField) => {
+                  const editor = await indexPatternFieldEditor.loadEditor();
+                  editor(
+                    overlays.openFlyout,
+                    ip,
+                    data.indexPatterns,
+                    refreshFilters,
+                    indexPatternField
+                  );
                 }}
               />
             </Fragment>
@@ -238,6 +270,9 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
+      indexPatternFieldEditor,
+      overlays.openFlyout,
+      data.indexPatterns,
     ]
   );
 
