@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { Writable } from 'stream';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
@@ -33,7 +33,7 @@ export function createIndexDocRecordsStream(
       );
     });
 
-    const resp = await client.bulk({ requestTimeout: 2 * 60 * 1000, body });
+    const resp = await client.bulk({ body }, { requestTimeout: 2 * 60 * 1000 });
     if (resp.errors) {
       throw new Error(`Failed to index all documents: ${JSON.stringify(resp, null, 2)}`);
     }
