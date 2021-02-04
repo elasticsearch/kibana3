@@ -118,7 +118,6 @@ export type ParameterName =
   | 'dynamic_toggle'
   | 'dynamic_strict'
   | 'enabled'
-  | 'boost'
   | 'locale'
   | 'format'
   | 'analyzer'

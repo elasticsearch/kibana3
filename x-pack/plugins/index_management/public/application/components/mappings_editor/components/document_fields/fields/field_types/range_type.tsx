@@ -15,7 +15,6 @@ import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,
   IndexParameter,
-  BoostParameter,
   CoerceNumberParameter,
   FormatParameter,
   LocaleParameter,
@@ -64,8 +63,6 @@ export const RangeType = ({ field }: Props) => {
         <StoreParameter />
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
-
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
       </AdvancedParametersSection>
     </>
   );
