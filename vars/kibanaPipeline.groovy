@@ -137,6 +137,7 @@ def ossCiGroupProcess(ciGroup, withDelay = false) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
+      "TEST_METADATA_PATH=${pwd()}/target/oss-ciGroup${ciGroup}-test_metadata.json",
     ]) {
       retryable("kibana-ciGroup${ciGroup}") {
         runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
@@ -153,6 +154,7 @@ def xpackCiGroupProcess(ciGroup, withDelay = false) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
+      "TEST_METADATA_PATH=${pwd()}/target/xpack-ciGroup${ciGroup}-test_metadata.json",
     ]) {
       retryable("xpack-kibana-ciGroup${ciGroup}") {
         runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
@@ -191,6 +193,7 @@ def withGcsArtifactUpload(workerName, closure) {
     'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
     'target/test-suites-ci-plan.json',
+    'target/*test_metadata.json',
     'test/**/screenshots/session/*.png',
     'test/**/screenshots/failure/*.png',
     'test/**/screenshots/diff/*.png',
