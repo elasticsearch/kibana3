@@ -9,14 +9,17 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHealth } from '@elastic/eui';
 import { useTrackMetric, METRIC_TYPE } from '../../../../../../../observability/public';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
-import { SidebarItem, LegendItem, NetworkItems } from './types';
+import {
+  SidebarItem,
+  LegendItem as LegendItemType,
+  NetworkItems,
+  Timings,
+  MimeTypesMap,
+} from './types';
 import { WaterfallProvider, WaterfallChart, RenderItem } from '../../waterfall';
 import { WaterfallFilter } from './waterfall_filter';
+import { LegendItem } from './legend_item';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
-
-export const renderLegendItem: RenderItem<LegendItem> = (item) => {
-  return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
-};
 
 interface Props {
   total: number;
@@ -36,11 +39,28 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters);
   }, [networkData, query, activeFilters, onlyHighlighted]);
 
+  const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
+  const [hoveredLegend, setHoveredLegend] = useState<string | null>(null);
+
   const sidebarItems = useMemo(() => {
     return getSidebarItems(networkData, onlyHighlighted, query, activeFilters);
   }, [networkData, query, activeFilters, onlyHighlighted]);
 
   const legendItems = getLegendItems();
+
+  const onHoverToggle = useCallback((val: string | null) => setHoveredLegend(val), []);
+
+  const onVisibleToggle = useCallback((val, label) => {
+    if (val) {
+      setHiddenLegends((prevState) => prevState.filter((legend) => legend !== label));
+    } else {
+      setHiddenLegends((prevState) => [...prevState, label]);
+    }
+  }, []);
+
+  const renderLegendItem: RenderItem<LegendItemType> = (item) => {
+    return <LegendItem item={item} onHoverToggle={onHoverToggle} onToggle={onVisibleToggle} />;
+  };
 
   const renderFilter = useCallback(() => {
     return (
@@ -92,15 +112,39 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
         tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
         domain={domain}
         barStyleAccessor={(datum) => {
-          if (!datum.datum.config.isHighlighted) {
+          const barConfig = datum.datum.config;
+
+          const lowOpacityStyle = {
+            rect: {
+              fill: barConfig.colour,
+              opacity: '0.1',
+            },
+          };
+
+          if (!barConfig.isHighlighted) {
+            return lowOpacityStyle;
+          }
+
+          if (hiddenLegends.length > 0 && hiddenLegends.includes(barConfig.timing)) {
             return {
               rect: {
-                fill: datum.datum.config.colour,
-                opacity: '0.1',
+                opacity: 0,
               },
             };
           }
-          return datum.datum.config.colour;
+          if (hoveredLegend) {
+            if (hoveredLegend !== barConfig.timing) {
+              if (
+                hoveredLegend === MimeTypesMap[barConfig.mimeType] &&
+                barConfig.timing === Timings.Receive
+              ) {
+                return barConfig.colour;
+              }
+              return lowOpacityStyle;
+            }
+          }
+
+          return barConfig.colour;
         }}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}

@@ -141,6 +141,8 @@ export const getSeriesAndDomain = (
             colour,
             isHighlighted,
             showTooltip: true,
+            timing,
+            mimeType: item.mimeType,
             tooltipProps: {
               value: getFriendlyTooltipValue({
                 value: y - currentOffset,
@@ -223,7 +225,12 @@ export const getLegendItems = (): LegendItems => {
     }
     timingItems = [
       ...timingItems,
-      { name: FriendlyTimingLabels[timing], colour: TIMING_PALETTE[timing] },
+      {
+        id: timing,
+        name: FriendlyTimingLabels[timing],
+        colour: TIMING_PALETTE[timing],
+        type: 'timing',
+      },
     ];
   });
 
@@ -231,7 +238,12 @@ export const getLegendItems = (): LegendItems => {
   Object.values(MimeType).forEach((mimeType) => {
     mimeTypeItems = [
       ...mimeTypeItems,
-      { name: FriendlyMimetypeLabels[mimeType], colour: MIME_TYPE_PALETTE[mimeType] },
+      {
+        id: mimeType,
+        name: FriendlyMimetypeLabels[mimeType],
+        colour: MIME_TYPE_PALETTE[mimeType],
+        type: 'mimeType',
+      },
     ];
   });
 

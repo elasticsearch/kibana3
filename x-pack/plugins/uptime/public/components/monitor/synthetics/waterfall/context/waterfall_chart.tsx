@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext, Context } from 'react';
 import { WaterfallData, WaterfallDataEntry } from '../types';
+import { LegendItem } from '../../step_detail/waterfall/types';
 import { SidebarItems } from '../../step_detail/waterfall/types';
 
 export interface IWaterfallContext {
@@ -17,6 +18,8 @@ export interface IWaterfallContext {
   showOnlyHighlightedNetworkRequests: boolean;
   sidebarItems?: SidebarItems;
   legendItems?: unknown[];
+  sidebarItems?: unknown[];
+  legendItems?: LegendItem[];
   renderTooltipItem: (
     item: WaterfallDataEntry['config']['tooltipProps'],
     index?: number
