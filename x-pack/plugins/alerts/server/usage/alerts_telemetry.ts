@@ -228,7 +228,7 @@ export async function getTotalCountAggregations(
     body: {
       query: {
         bool: {
-          filter: [{ term: { type: 'alert' } }],
+          filter: [{ term: { type: 'rule' } }],
         },
       },
       aggs: {
@@ -237,7 +237,7 @@ export async function getTotalCountAggregations(
         intervalTime: intervalTimeMetric,
         connectorsAgg: {
           nested: {
-            path: 'alert.actions',
+            path: 'rule.actions',
           },
           aggs: {
             connectors: connectorsMetric,
@@ -301,7 +301,7 @@ export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaIne
     body: {
       query: {
         bool: {
-          filter: [{ term: { type: 'alert' } }, { term: { 'alert.enabled': true } }],
+          filter: [{ term: { type: 'rule' } }, { term: { 'rule.enabled': true } }],
         },
       },
       aggs: {

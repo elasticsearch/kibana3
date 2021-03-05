@@ -325,7 +325,7 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: ['alert'],
+      includedHiddenTypes: ['rule'],
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
@@ -372,12 +372,12 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['rule']),
       alertTypeRegistry: this.alertTypeRegistry!,
       kibanaBaseUrl: this.kibanaBaseUrl,
     });
 
-    this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
+    this.eventLogService!.registerSavedObjectProvider('rule', (request) => {
       const client = getAlertsClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
@@ -394,7 +394,7 @@ export class AlertingPlugin {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest,
       getFrameworkHealth: async () =>
-        await getHealth(core.savedObjects.createInternalRepository(['alert'])),
+        await getHealth(core.savedObjects.createInternalRepository(['rule'])),
     };
   }
 
@@ -410,7 +410,7 @@ export class AlertingPlugin {
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
         getFrameworkHealth: async () =>
-          await getHealth(savedObjects.createInternalRepository(['alert'])),
+          await getHealth(savedObjects.createInternalRepository(['rule'])),
       };
     };
   };
@@ -433,7 +433,7 @@ export class AlertingPlugin {
     savedObjects: SavedObjectsServiceStart,
     request: KibanaRequest
   ) {
-    return savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert', 'action'] });
+    return savedObjects.getScopedClient(request, { includedHiddenTypes: ['rule', 'action'] });
   }
 
   public stop() {
