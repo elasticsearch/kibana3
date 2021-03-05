@@ -48,8 +48,12 @@ import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_reg
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
-import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
-import { IEvent } from '../../../event_log/server';
+import {
+  alertInstanceCreatedQueryAggregation,
+  alertActiveAndResolvedInstancesSummaryQueryAggregation,
+  alertsInstanceSummaryFromEventLog,
+  RawEventLogAlertsSummary,
+} from '../lib/alerts_instance_summary_from_event_log';
 import { AuditLogger, EventOutcome } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
@@ -412,28 +416,113 @@ export class AlertsClient {
     const eventLogClient = await this.getEventLogClient();
 
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
-    let events: IEvent[];
+    let instancesLatestStateSummaries: Array<{
+      savedObjectId: string;
+      summary: RawEventLogAlertsSummary;
+    }> = [];
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
-        page: 1,
-        per_page: 10000,
-        start: parsedDateStart.toISOString(),
-        end: dateNow.toISOString(),
-        sort_order: 'desc',
-      });
-      events = queryResults.data;
+      instancesLatestStateSummaries = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+        instances: Record<string, unknown>;
+        last_execution_state: Record<string, unknown>;
+        errors_state: Record<string, unknown>;
+      }>(
+        'alert',
+        [id],
+        alertActiveAndResolvedInstancesSummaryQueryAggregation,
+        parsedDateStart.toISOString(),
+        dateNow.toISOString()
+      );
     } catch (err) {
       this.logger.debug(
-        `alertsClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
+        `alertsClient.getAlertInstanceSummary(): error searching event log latest instances state for alert ${id}: ${err.message}`
       );
-      events = [];
     }
 
-    return alertInstanceSummaryFromEventLog({
-      alert,
-      events,
+    let instancesCreatedSummaries: Array<{
+      savedObjectId: string;
+      summary: Pick<RawEventLogAlertsSummary, 'instances'>;
+    }> = [];
+    try {
+      instancesCreatedSummaries = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+        instances: Record<string, unknown>;
+        last_execution_state: Record<string, unknown>;
+      }>('alert', [id], alertInstanceCreatedQueryAggregation);
+    } catch (err) {
+      this.logger.debug(
+        `alertsClient.getAlertInstanceSummary(): error searching event log instances created for alert ${id}: ${err.message}`
+      );
+    }
+
+    return alertsInstanceSummaryFromEventLog({
+      alerts: [alert],
+      instancesLatestStateSummaries,
+      instancesCreatedSummaries,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
+    })[0];
+  }
+
+  public async getAlertsInstanceSummaryFromEventLog(
+    alerts: Array<SanitizedAlert<{ bar: boolean }>>,
+    dateStart?: string,
+    dateEnd?: string
+  ): Promise<AlertInstanceSummary[]> {
+    const alertsIds = alerts.map((alert) => alert.id);
+    const eventLogClient = await this.getEventLogClient();
+    const dateNow = new Date();
+    const minDate = new Date('0001-01-01T00:00:00Z');
+    this.logger.debug(
+      `getAlertsInstanceSummaryFromEventLog(): search the event log for alerts by ids=[${alertsIds.join(
+        ','
+      )}]`
+    );
+    let instancesLatestStateSummaries: Array<{
+      savedObjectId: string;
+      summary: RawEventLogAlertsSummary;
+    }> = [];
+    try {
+      instancesLatestStateSummaries = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+        instances: Record<string, unknown>;
+        last_execution_state: Record<string, unknown>;
+        errors_state: Record<string, unknown>;
+      }>(
+        'alert',
+        alertsIds,
+        alertActiveAndResolvedInstancesSummaryQueryAggregation,
+        dateStart,
+        dateEnd
+      );
+    } catch (err) {
+      this.logger.debug(
+        `alertsClient.getAlertsInstanceSummaryFromEventLog(): error searching event log latest instances state for alerts by ids=[${alertsIds.join(
+          ','
+        )}]: ${err.message}`
+      );
+    }
+
+    let instancesCreatedSummaries: Array<{
+      savedObjectId: string;
+      summary: Pick<RawEventLogAlertsSummary, 'instances'>;
+    }> = [];
+    try {
+      instancesCreatedSummaries = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+        instances: Record<string, unknown>;
+        last_execution_state: Record<string, unknown>;
+      }>('alert', alertsIds, alertInstanceCreatedQueryAggregation);
+    } catch (err) {
+      this.logger.debug(
+        `alertsClient.getAlertsInstanceSummaryFromEventLog(): error searching event log instances created for alert alerts by ids=[${alertsIds.join(
+          ','
+        )}]: ${err.message}`
+      );
+    }
+
+    return alertsInstanceSummaryFromEventLog({
+      alerts,
+      instancesLatestStateSummaries,
+      instancesCreatedSummaries,
+      dateStart: dateStart ?? minDate.toISOString(),
+      dateEnd: dateEnd ?? dateNow.toISOString(),
     });
   }
 
