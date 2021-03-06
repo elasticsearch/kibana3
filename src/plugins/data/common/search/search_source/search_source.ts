@@ -671,6 +671,11 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
+    if (body.size === 0) {
+      delete body.fields;
+      delete body.docvalue_fields;
+    }
+
     const esQueryConfigs = getEsQueryConfig({ get: getConfig });
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
