@@ -28,6 +28,7 @@
       "kibanaUtils",
       "lens",
       "maps",
+      "presentationUtil",
       "reporting",
       "savedObjects",
       "visualizations"
