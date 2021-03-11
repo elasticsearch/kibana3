@@ -8,6 +8,7 @@
 import { CanvasServices, services } from '../';
 import { embeddablesService } from './embeddables';
 import { expressionsService } from './expressions';
+import { navigationService } from './navigation';
 import { navLinkService } from './nav_link';
 import { notifyService } from './notify';
 import { platformService } from './platform';
@@ -15,6 +16,7 @@ import { platformService } from './platform';
 export const stubs: CanvasServices = {
   embeddables: embeddablesService,
   expressions: expressionsService,
+  navigation: navigationService,
   navLink: navLinkService,
   notify: notifyService,
   platform: platformService,
