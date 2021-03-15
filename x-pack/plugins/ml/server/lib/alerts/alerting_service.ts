@@ -10,13 +10,12 @@ import rison from 'rison-node';
 import { ElasticsearchClient } from 'kibana/server';
 import moment from 'moment';
 import { Duration } from 'moment/moment';
+import { AnomalyRecordDoc, AnomalyResultType, ANOMALY_RESULT_TYPE } from '@kbn/ml-utils';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
   MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
-import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
-import { AnomalyRecordDoc, AnomalyResultType } from '../../../common/types/anomalies';
 import {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,

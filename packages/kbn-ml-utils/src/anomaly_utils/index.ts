@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -11,6 +12,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
@@ -73,37 +75,37 @@ function getSeverityTypes() {
   return (severityTypes = {
     critical: {
       id: ANOMALY_SEVERITY.CRITICAL,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
+      label: i18n.translate('mlUtils.anomalyUtils.severity.criticalLabel', {
         defaultMessage: 'critical',
       }),
     },
     major: {
       id: ANOMALY_SEVERITY.MAJOR,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
+      label: i18n.translate('mlUtils.anomalyUtils.severity.majorLabel', {
         defaultMessage: 'major',
       }),
     },
     minor: {
       id: ANOMALY_SEVERITY.MINOR,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
+      label: i18n.translate('mlUtils.anomalyUtils.severity.minorLabel', {
         defaultMessage: 'minor',
       }),
     },
     warning: {
       id: ANOMALY_SEVERITY.WARNING,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
+      label: i18n.translate('mlUtils.anomalyUtils.severity.warningLabel', {
         defaultMessage: 'warning',
       }),
     },
     unknown: {
       id: ANOMALY_SEVERITY.UNKNOWN,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.unknownLabel', {
+      label: i18n.translate('mlUtils.anomalyUtils.severity.unknownLabel', {
         defaultMessage: 'unknown',
       }),
     },
     low: {
       id: ANOMALY_SEVERITY.LOW,
-      label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
+      label: i18n.translate('mlUtils.anomalyUtils.severityWithLow.lowLabel', {
         defaultMessage: 'low',
       }),
     },
@@ -132,22 +134,6 @@ export function getSeverity(normalizedScore: number): SeverityType {
     return severityTypesList.warning;
   } else {
     return severityTypesList.unknown;
-  }
-}
-
-export function getSeverityType(normalizedScore: number): ANOMALY_SEVERITY {
-  if (normalizedScore >= 75) {
-    return ANOMALY_SEVERITY.CRITICAL;
-  } else if (normalizedScore >= 50) {
-    return ANOMALY_SEVERITY.MAJOR;
-  } else if (normalizedScore >= 25) {
-    return ANOMALY_SEVERITY.MINOR;
-  } else if (normalizedScore >= 3) {
-    return ANOMALY_SEVERITY.WARNING;
-  } else if (normalizedScore >= 0) {
-    return ANOMALY_SEVERITY.LOW;
-  } else {
-    return ANOMALY_SEVERITY.UNKNOWN;
   }
 }
 
@@ -195,19 +181,19 @@ export function getSeverityColor(normalizedScore: number): string {
 // which ranges from -5 to +5.
 export function getMultiBucketImpactLabel(multiBucketImpact: number): string {
   if (multiBucketImpact >= MULTI_BUCKET_IMPACT.HIGH) {
-    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.highLabel', {
+    return i18n.translate('mlUtils.anomalyUtils.multiBucketImpact.highLabel', {
       defaultMessage: 'high',
     });
   } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM) {
-    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.mediumLabel', {
+    return i18n.translate('mlUtils.anomalyUtils.multiBucketImpact.mediumLabel', {
       defaultMessage: 'medium',
     });
   } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW) {
-    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.lowLabel', {
+    return i18n.translate('mlUtils.anomalyUtils.multiBucketImpact.lowLabel', {
       defaultMessage: 'low',
     });
   } else {
-    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.noneLabel', {
+    return i18n.translate('mlUtils.anomalyUtils.multiBucketImpact.noneLabel', {
       defaultMessage: 'none',
     });
   }

@@ -7,11 +7,8 @@
 
 import React, { FC, memo } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MULTI_BUCKET_IMPACT } from '../../../../../common/constants/multi_bucket_impact';
-import {
-  getSeverityColor,
-  getFormattedSeverityScore,
-} from '../../../../../common/util/anomaly_utils';
+import { getSeverityColor, getFormattedSeverityScore } from '@kbn/ml-utils';
+import { MULTI_BUCKET_IMPACT } from '@kbn/ml-utils/target/constants/multi_bucket_impact';
 
 interface SeverityCellProps {
   /**
