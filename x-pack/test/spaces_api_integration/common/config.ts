@@ -51,6 +51,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         directory: path.join(__dirname, 'fixtures', 'es_archiver'),
       },
 
+      kbnArchiver: {
+        directory: path.join(__dirname, 'fixtures', 'kbn_archiver'),
+      },
+
       esTestCluster: {
         ...config.xpack.api.get('esTestCluster'),
         license,
