@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import worldbank from './worldbank.js';
-import Bluebird from 'bluebird';
 import Datasource from '../lib/classes/datasource';
 
 export default new Datasource('worldbank_indicators', {
@@ -54,20 +53,25 @@ export default new Datasource('worldbank_indicators', {
     });
 
     const countries = config.country.split(':');
-    const seriesLists = _.map(countries, function (country) {
+    const seriesListSets = _.map(countries, function (country) {
       const code = 'country/' + country + '/indicator/' + config.indicator;
       const wbArgs = [code];
       wbArgs.byName = { code: code };
       return worldbank.timelionFn(wbArgs, tlConfig);
     });
 
-    return Bluebird.map(seriesLists, function (seriesList) {
-      return seriesList.list[0];
-    }).then(function (list) {
-      return {
-        type: 'seriesList',
-        list: list,
-      };
-    });
+    return Promise.all(seriesListSets)
+      .then((seriesLists) => {
+        return seriesLists.reduce((acc, seriesList) => {
+          acc.push(seriesList.list[0]);
+          return acc;
+        }, []);
+      })
+      .then(function (list) {
+        return {
+          type: 'seriesList',
+          list: list,
+        };
+      });
   },
 });

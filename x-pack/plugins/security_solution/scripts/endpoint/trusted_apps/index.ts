@@ -9,8 +9,9 @@
 import minimist from 'minimist';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import bluebird from 'bluebird';
 import { basename } from 'path';
+import pMap from 'p-map';
+
 import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
 import { NewTrustedApp, OperatingSystem, TrustedApp } from '../../../common/endpoint/types';
 
@@ -73,19 +74,17 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
     path: TRUSTED_APPS_LIST_API,
   });
 
-  return bluebird.map(
+  return pMap(
     Array.from({ length: count }),
-    () =>
-      kbnClient
-        .request<TrustedApp>({
-          method: 'POST',
-          path: TRUSTED_APPS_CREATE_API,
-          body: generateTrustedAppEntry(),
-        })
-        .then(({ data }) => {
-          logger.write(data.id);
-          return data;
-        }),
+    async () => {
+      const { data } = await kbnClient.request<TrustedApp>({
+        method: 'POST',
+        path: TRUSTED_APPS_CREATE_API,
+        body: generateTrustedAppEntry(),
+      });
+      logger.write(data.id);
+      return data;
+    },
     { concurrency: 10 }
   );
 };

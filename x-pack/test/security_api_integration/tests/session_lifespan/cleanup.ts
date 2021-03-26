@@ -6,7 +6,7 @@
  */
 
 import request, { Cookie } from 'request';
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 10s, let's wait for 40s to make sure it runs multiple times and
       // when lifespan is exceeded.
-      await delay(40000);
+      await timer(40000).toPromise();
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
@@ -141,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 10s, let's wait for 40s to make sure it runs multiple times and
       // when lifespan is exceeded.
-      await delay(40000);
+      await timer(40000).toPromise();
 
       // Session for basic and SAML that used global session settings should not be valid anymore.
       expect(await getNumberOfSessionDocuments()).to.be(2);
