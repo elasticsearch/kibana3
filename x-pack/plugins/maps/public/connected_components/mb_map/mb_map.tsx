@@ -8,8 +8,9 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 // @ts-expect-error
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+import mapboxgl from 'maplibre-gl/dist/maplibre-gl-csp';
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
@@ -45,7 +46,7 @@ import { TileStatusTracker } from './tile_status_tracker';
 // @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 // @ts-expect-error
-import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
+import mbWorkerUrl from '!!file-loader!maplibre-gl/dist/maplibre-gl-csp-worker';
 
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
