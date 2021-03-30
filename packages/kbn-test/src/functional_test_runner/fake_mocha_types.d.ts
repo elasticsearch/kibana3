@@ -25,12 +25,21 @@ export interface Suite {
   suiteTag: string;
 }
 
-export interface Test {
+export interface Runnable {
   fullTitle(): string;
   title: string;
+  type: 'hook' | 'test';
   file?: string;
   parent?: Suite;
   isPassed: () => boolean;
+}
+
+export interface Test extends Runnable {
+  type: 'test';
+}
+
+export interface Hook extends Runnable {
+  type: 'hook';
 }
 
 export interface Runner extends EventEmitter {

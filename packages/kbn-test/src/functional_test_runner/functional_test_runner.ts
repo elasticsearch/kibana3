@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { inspect } from 'util';
 
-import { Suite, Test } from './fake_mocha_types';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { loadConfiguration } from '@kbn/apm-config-loader';
+import unloadedApm from 'elastic-apm-node';
+
+type Agent = typeof unloadedApm;
+type ApmTransaction = NonNullable<ReturnType<Agent['startTransaction']>>;
+
+import { Suite, Test, Runnable } from './fake_mocha_types';
 import {
   Lifecycle,
   LifecyclePhase,
@@ -22,6 +29,37 @@ import {
   Config,
   SuiteTracker,
 } from './lib';
+
+let LOADED_APM: Agent | null = null;
+function loadApm() {
+  if (LOADED_APM) {
+    return LOADED_APM;
+  }
+
+  // load APM config and start shipping stats for "ftr" service
+  unloadedApm.start({
+    ...loadConfiguration([], REPO_ROOT, false).getConfig('ftr'),
+    // disable raw HTTP instrumentation, capture higher level spans instead via services
+    disableInstrumentations: ['http', 'https'],
+  });
+
+  return (LOADED_APM = unloadedApm);
+}
+
+function printTitle(runnable: Runnable) {
+  const titles: string[] = [];
+
+  let cursor: Suite | Runnable | undefined = runnable;
+  while (cursor) {
+    const title = cursor.title?.trim();
+    if (title && titles[0] !== title) {
+      titles.unshift(title);
+    }
+    cursor = cursor.parent;
+  }
+
+  return titles.join(' > ');
+}
 
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
@@ -42,7 +80,42 @@ export class FunctionalTestRunner {
   }
 
   async run() {
+    const apm = loadApm();
+
     return await this._run(async (config, coreProviders) => {
+      const transactions = new WeakMap<Runnable, ApmTransaction | null>();
+      const runnableErrors = new WeakMap<Runnable, Error>();
+
+      this.lifecycle.beforeEachRunnable.add((runnable) => {
+        let transaction: ApmTransaction | null = null;
+
+        if (apm.isStarted()) {
+          transaction = apm.startTransaction(printTitle(runnable), 'runnable');
+          transaction?.setLabel('file', runnable.file ?? 'unknown');
+          transaction?.setLabel('ownTitle', runnable.title);
+          transaction?.setLabel('runnableType', runnable.type);
+        }
+
+        transactions.set(runnable, transaction);
+      });
+
+      this.lifecycle.failedRunnable.add((runnable, error) => {
+        runnableErrors.set(runnable, error);
+      });
+
+      this.lifecycle.afterEachRunnable.add((runnable) => {
+        const transaction = transactions.get(runnable);
+        if (transaction === undefined) {
+          throw new Error(`beforeEachRunnable() was not triggered for test: ${inspect(runnable)}`);
+        }
+
+        if (transaction !== null) {
+          const error = runnableErrors.get(runnable);
+          transaction.setOutcome(error ? 'failure' : 'success');
+          transaction.end();
+        }
+      });
+
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
       const providers = new ProviderCollection(this.log, [
@@ -61,8 +134,9 @@ export class FunctionalTestRunner {
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, apm);
       await this.lifecycle.beforeTests.trigger(mocha.suite);
+
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);

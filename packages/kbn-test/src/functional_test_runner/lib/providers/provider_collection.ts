@@ -12,6 +12,7 @@ import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
 import { Providers } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
+import { createApmInstrumentedInstance } from './apm_instrumented_instance';
 
 export class ProviderCollection {
   private readonly instances = new Map();
@@ -105,6 +106,18 @@ export class ProviderCollection {
             type === 'PageObject' ? `PageObjects.${name}` : name,
             instance
           );
+        }
+
+        if (
+          name !== '__webdriver__' &&
+          name !== 'log' &&
+          name !== 'config' &&
+          name !== 'lifecycle' &&
+          name !== 'failureMetadata' &&
+          typeof instance === 'object' &&
+          instance
+        ) {
+          instance = createApmInstrumentedInstance(instance, type, name);
         }
 
         instances.set(provider, instance);
