@@ -6,10 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerting/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -24,11 +21,7 @@ import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-
-interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
-  config$: Observable<APMConfig>;
-}
+import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -47,10 +40,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
-  alerting,
+  registry,
   config$,
-}: RegisterAlertParams) {
-  alerting.registerType({
+}: RegisterRuleDependencies) {
+  registry.registerType({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -101,7 +94,7 @@ export function registerTransactionDurationAlertType({
             },
           },
           aggs: {
-            agg:
+            metric:
               alertParams.aggregationType === 'avg'
                 ? { avg: { field: TRANSACTION_DURATION } }
                 : {
@@ -112,26 +105,23 @@ export function registerTransactionDurationAlertType({
                       ],
                     },
                   },
-            environments: {
-              terms: {
-                field: SERVICE_ENVIRONMENT,
-                size: maxServiceEnvironments,
-              },
-            },
           },
         },
       };
 
-      const { body: response } = await alertingEsClient(services, searchParams);
+      const response = await alertingEsClient(
+        services.scopedClusterClient,
+        searchParams
+      );
 
       if (!response.aggregations) {
-        return;
+        return {};
       }
 
-      const { agg, environments } = response.aggregations;
+      const { metric } = response.aggregations;
 
       const transactionDuration =
-        'values' in agg ? Object.values(agg.values)[0] : agg?.value;
+        'values' in metric ? Object.values(metric.values)[0] : metric?.value;
 
       const threshold = alertParams.threshold * 1000;
 
@@ -141,22 +131,27 @@ export function registerTransactionDurationAlertType({
           transactionDuration
         ).formatted;
 
-        environments.buckets.map((bucket) => {
-          const environment = bucket.key;
-          const alertInstance = services.alertInstanceFactory(
-            `${AlertType.TransactionDuration}_${environment}`
-          );
-
-          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+        services.check.warning({
+          name: `${AlertType.TransactionDuration}_${environment}`,
+          threshold,
+          value: transactionDuration,
+          context: {
             transactionType: alertParams.transactionType,
             serviceName: alertParams.serviceName,
             environment,
             threshold,
             triggerValue: transactionDurationFormatted,
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
-          });
+          },
+          fields: {
+            'service.name': alertParams.serviceName,
+            'service.environment': environment,
+            'transaction.type': alertParams.transactionType,
+          },
         });
       }
+
+      return {};
     },
   });
 }

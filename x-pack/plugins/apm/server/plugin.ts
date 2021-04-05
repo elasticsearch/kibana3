@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import {
   CoreSetup,
@@ -46,15 +46,8 @@ import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
 import { uiSettings } from './ui_settings';
 import type { ApmPluginRequestHandlerContext } from './routes/typings';
 
-export interface APMPluginSetup {
-  config$: Observable<APMConfig>;
-  getApmIndices: () => ReturnType<typeof getApmIndices>;
-  createApmEventClient: (params: {
-    debug?: boolean;
-    request: KibanaRequest;
-    context: ApmPluginRequestHandlerContext;
-  }) => Promise<ReturnType<typeof createApmEventClient>>;
-}
+export type APMPluginSetup = ReturnType<APMPlugin['setup']>;
+export type APMRuleRegistry = APMPluginSetup['registry'];
 
 export class APMPlugin implements Plugin<APMPluginSetup> {
   private currentConfig?: APMConfig;
@@ -75,7 +68,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       taskManager?: TaskManagerSetupContract;
       alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
-      observability?: ObservabilityPluginSetup;
+      observability: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
       security?: SecurityPluginSetup;
       ml?: MlPluginSetup;
@@ -91,15 +84,6 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     core.savedObjects.registerType(apmTelemetry);
 
     core.uiSettings.register(uiSettings);
-
-    if (plugins.actions && plugins.alerting) {
-      registerApmAlerts({
-        alerting: plugins.alerting,
-        actions: plugins.actions,
-        ml: plugins.ml,
-        config$: mergedConfig$,
-      });
-    }
 
     this.currentConfig = mergeConfigs(
       plugins.apmOss.config,
@@ -159,6 +143,28 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         config: await mergedConfig$.pipe(take(1)).toPromise(),
       });
 
+    const apmRuleRegistry = plugins.observability.registry.create({
+      namespace: 'apm',
+      fieldMap: {
+        'service.environment': {
+          type: 'keyword',
+        },
+        'transaction.type': {
+          type: 'keyword',
+        },
+        'processor.event': {
+          type: 'keyword',
+        },
+      },
+    });
+
+    registerApmAlerts({
+      registry: apmRuleRegistry,
+      ml: plugins.ml,
+      config$: mergedConfig$,
+      logger: this.logger!.get('rule'),
+    });
+
     return {
       config$: mergedConfig$,
       getApmIndices: boundGetApmIndices,
@@ -188,6 +194,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
           },
         });
       },
+      registry: apmRuleRegistry,
     };
   }
 
