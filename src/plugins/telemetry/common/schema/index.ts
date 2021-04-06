@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { PluginsService } from './plugins_service';
-export type { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from './plugins_service';
-export type { PluginScopedAPI } from './plugin_scoped_api';
-export { config } from './plugins_config';
-/** @internal */
-export { isNewPlatformPlugin } from './discovery';
-export * from './types';
+export type {
+  TelemetryRootSchema,
+  TelemetrySchemaObject,
+  TelemetrySchemaArray,
+  TelemetrySchemaValue,
+  TelemetryMeta,
+} from './types';

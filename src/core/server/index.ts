@@ -39,7 +39,13 @@ import {
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
-import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginOpaqueId,
+  PluginServiceSetup,
+  PluginServiceStart,
+} from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
@@ -54,7 +60,7 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
+import { AppenderConfigType, appendersSchema, loggerSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { DeprecationsServiceSetup } from './deprecations';
@@ -256,6 +262,8 @@ export type {
   PluginManifest,
   PluginName,
   SharedGlobalConfig,
+  PluginScopedAPI,
+  UnwrapScopedApi,
 } from './plugins';
 
 export {
@@ -481,6 +489,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   logging: LoggingServiceSetup;
   /** {@link MetricsServiceSetup} */
   metrics: MetricsServiceSetup;
+  /** {@link PluginServiceSetup} */
+  plugins: PluginServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */
@@ -520,6 +530,8 @@ export interface CoreStart {
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */
   metrics: MetricsServiceStart;
+  /** {@link PluginServiceStart} */
+  plugins: PluginServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
@@ -549,5 +561,6 @@ export const config = {
   },
   logging: {
     appenders: appendersSchema as Type<AppenderConfigType>,
+    loggers: loggerSchema,
   },
 };
