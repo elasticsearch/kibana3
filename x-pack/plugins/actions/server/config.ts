@@ -47,6 +47,9 @@ export const configSchema = schema.object({
   proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
+  refreshExpiredTokensTask: schema.object({
+    interval: schema.string({ defaultValue: '25m' }),
+  }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
