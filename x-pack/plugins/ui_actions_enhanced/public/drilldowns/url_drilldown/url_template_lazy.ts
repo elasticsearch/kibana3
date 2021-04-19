@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { ActionWizard } from './action_wizard';
+export async function urlDrilldownCompileUrl(
+  urlTemplate: string,
+  context: object,
+  doEncode: boolean = true
+) {
+  const { compile } = await import('./url_template');
+  return compile(urlTemplate, context, doEncode);
+}
