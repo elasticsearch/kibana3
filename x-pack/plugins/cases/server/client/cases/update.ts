@@ -134,7 +134,7 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
       options: {
         fields: [],
         // there should never be generated alerts attached to an individual case but we'll check anyway
-        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.osqueryAlert}`,
         page: 1,
         perPage: 1,
       },
@@ -191,7 +191,7 @@ async function getAlertComments({
     id: idsOfCasesToSync,
     includeSubCaseComments: true,
     options: {
-      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.osqueryAlert}`,
     },
   });
 }
