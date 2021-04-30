@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-// @ts-ignore
-import { compile } from 'vega-lite/build/vega-lite';
+jest.mock('../../../../../../../src/plugins/vis_type_vega/public/default_spec', () => ({
+  getDefaultSpec: () => ({}),
+}));
+
+import { getVegaSharedImports } from '../../../../../../../src/plugins/vis_type_vega/public';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
@@ -55,10 +58,13 @@ describe('getColorSpec()', () => {
 });
 
 describe('getScatterplotMatrixVegaLiteSpec()', () => {
-  it('should return the default spec for non-outliers without a legend', () => {
+  it('should return the default spec for non-outliers without a legend', async () => {
+    const { compile } = await getVegaSharedImports();
+
     const data = [{ x: 1, y: 1 }];
 
-    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeLight);
+    // Casting to any since vega-lite's TopLevelSpec union type has an issue with the scatterplots repeat spec.
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeLight) as any;
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
     expect(() => compile(vegaLiteSpec)).not.toThrow();
@@ -80,10 +86,18 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     ]);
   });
 
-  it('should return the spec for outliers', () => {
+  it('should return the spec for outliers', async () => {
+    const { compile } = await getVegaSharedImports();
+
     const data = [{ x: 1, y: 1 }];
 
-    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeLight, 'ml');
+    // Casting to any since vega-lite's TopLevelSpec union type has an issue with the scatterplots repeat spec.
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      data,
+      ['x', 'y'],
+      euiThemeLight,
+      'ml'
+    ) as any;
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
     expect(() => compile(vegaLiteSpec)).not.toThrow();
@@ -118,9 +132,12 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     ]);
   });
 
-  it('should return the spec for classification', () => {
+  it('should return the spec for classification', async () => {
+    const { compile } = await getVegaSharedImports();
+
     const data = [{ x: 1, y: 1 }];
 
+    // Casting to any since vega-lite's TopLevelSpec union type has an issue with the scatterplots repeat spec.
     const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
       data,
       ['x', 'y'],
@@ -128,7 +145,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       undefined,
       'the-color-field',
       LEGEND_TYPES.NOMINAL
-    );
+    ) as any;
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
     expect(() => compile(vegaLiteSpec)).not.toThrow();

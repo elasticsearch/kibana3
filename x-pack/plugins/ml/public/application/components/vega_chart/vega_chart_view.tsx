@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, FC } from 'react';
+import React, { useMemo, useEffect, useState, FC } from 'react';
 
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
-// @ts-ignore
-import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
-
-// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
-// @ts-ignore
-import { compile } from 'vega-lite/build/vega-lite';
-import { parse, View, Warn } from 'vega';
-import { Handler } from 'vega-tooltip';
+import type { TopLevelSpec } from 'vega-lite';
 
 import { htmlIdGenerator } from '@elastic/eui';
+
+import type { GetVegaSharedImports } from '../../../../../../../src/plugins/vis_type_vega/public';
 
 export interface VegaChartViewProps {
   vegaSpec: TopLevelSpec;
@@ -26,7 +21,26 @@ export interface VegaChartViewProps {
 export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
+  const [vega, setVega] = useState<GetVegaSharedImports>();
+
   useEffect(() => {
+    async function initializeVega() {
+      const { getVegaSharedImports } = await import(
+        '../../../../../../../src/plugins/vis_type_vega/public'
+      );
+      setVega(await getVegaSharedImports());
+    }
+
+    initializeVega();
+  }, []);
+
+  useEffect(() => {
+    if (typeof vega === 'undefined') {
+      return;
+    }
+
+    const { compile, parse, View, Warn, Handler } = vega;
+
     const vgSpec = compile(vegaSpec).spec;
 
     const view = new View(parse(vgSpec))
@@ -36,7 +50,7 @@ export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
       .initialize(`#${htmlId}`);
 
     view.runAsync(); // evaluate and render the view
-  }, [vegaSpec]);
+  }, [vega, vegaSpec]);
 
   return <div id={htmlId} className="mlVegaChart" data-test-subj="mlVegaChart" />;
 };

@@ -40,7 +40,8 @@
     "dashboard",
     "savedObjects",
     "home",
-    "maps"
+    "maps",
+    "visTypeVega"
   ],
   "extraPublicDirs": [
     "common"

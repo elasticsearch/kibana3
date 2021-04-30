@@ -13,3 +13,13 @@ import { VegaPlugin as Plugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new Plugin(initializerContext);
 }
+
+// Bundled shared exports
+// Exported this way so the code doesn't end up in the page load bundle
+/** @internal */
+export const getVegaSharedImports = async () => {
+  return await import('./shared');
+};
+
+type Await<T> = T extends PromiseLike<infer U> ? U : T;
+export type GetVegaSharedImports = Await<ReturnType<typeof getVegaSharedImports>>;
