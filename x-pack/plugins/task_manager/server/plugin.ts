@@ -27,6 +27,7 @@ import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
+import { CpuUtilizationObservation, observedCpuUtilization } from './lib/observed_cpu_utilization';
 
 export type TaskManagerSetupContract = {
   /**
@@ -54,6 +55,7 @@ export class TaskManagerPlugin
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
+  private cpuUtilizationObservation?: CpuUtilizationObservation;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -64,6 +66,7 @@ export class TaskManagerPlugin
 
   public setup(core: CoreSetup): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+    this.cpuUtilizationObservation = observedCpuUtilization(core.metrics.getOpsMetrics$());
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
@@ -137,6 +140,7 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+      cpuUtilizationObservation: this.cpuUtilizationObservation!,
       ...managedConfiguration,
     });
 
