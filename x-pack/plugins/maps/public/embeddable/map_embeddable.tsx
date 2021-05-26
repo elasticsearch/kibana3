@@ -45,6 +45,7 @@ import {
 import {
   getMapCenter,
   getMapBuffer,
+  getMapReady,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
@@ -267,9 +268,7 @@ export class MapEmbeddable
         timeFilters: this.input.timeRange,
         forceRefresh,
         searchSessionId: this.input.searchSessionId,
-        searchSessionMapBuffer: getIsRestore(this.input.searchSessionId)
-          ? this.input.mapBuffer
-          : undefined,
+        searchSessionMapBuffer: this.input.mapBuffer,
       })
     );
   }
@@ -426,9 +425,10 @@ export class MapEmbeddable
   }
 
   _handleStoreChanges() {
-    if (!this._isActive) {
+    if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
     }
+
     const center = getMapCenter(this._savedMap.getStore().getState());
     const zoom = getMapZoom(this._savedMap.getStore().getState());
 
