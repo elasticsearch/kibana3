@@ -31,7 +31,7 @@ export type MapFilters = {
   zoom: number;
 };
 
-type ESSearchSourceSyncMeta = {
+export type ESSearchSourceSyncMeta = {
   filterByMapBounds: boolean;
   sortField: string;
   sortOrder: SortDirection;
@@ -40,16 +40,16 @@ type ESSearchSourceSyncMeta = {
   topHitsSize: number;
 };
 
-type ESGeoGridSourceSyncMeta = {
+export type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
 };
 
-type ESGeoLineSourceSyncMeta = {
+export type ESGeoLineSourceSyncMeta = {
   splitField: string;
   sortField: string;
 };
 
-type ESTermSourceSyncMeta = {
+export type ESTermSourceSyncMeta = {
   size: number;
 };
 
@@ -58,6 +58,11 @@ export type VectorSourceSyncMeta =
   | ESGeoGridSourceSyncMeta
   | ESGeoLineSourceSyncMeta
   | ESTermSourceSyncMeta
+  | {
+      // todo : needs to be extensible
+      jobId: string;
+      typicalActual: 'typical' | 'actual';
+    }
   | null;
 
 export type VectorSourceRequestMeta = MapFilters & {

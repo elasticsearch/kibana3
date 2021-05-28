@@ -53,6 +53,7 @@ import {
 } from '../../triggers_actions_ui/public';
 import { FileDataVisualizerPluginStart } from '../../file_data_visualizer/public';
 import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+import { registerWithMaps } from './maps/register_with_maps';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -194,6 +195,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   }
 
   start(core: CoreStart, deps: MlStartDependencies) {
+    registerWithMaps(deps.maps);
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,

@@ -71,6 +71,7 @@ import {
 import { EMSSettings } from '../common/ems_settings';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import type { MapsSetupApi } from './api/setup_api';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -122,7 +123,7 @@ export class MapsPlugin
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -166,6 +167,11 @@ export class MapsPlugin
         return renderApp(params);
       },
     });
+
+    return {
+      registerLayerWizard,
+      registerSource,
+    };
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
