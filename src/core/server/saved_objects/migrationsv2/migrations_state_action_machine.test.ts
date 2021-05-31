@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
 import * as Either from 'fp-ts/lib/Either';
@@ -55,6 +54,7 @@ describe('migrationsStateActionMachine', () => {
   // A model that transitions through all the provided states
   const transitionModel = (states: AllControlStates[]) => {
     let i = 0;
+
     return (s: State, res: Either.Either<unknown, string>): State => {
       if (i < states.length) {
         const newState = {
@@ -709,38 +709,5 @@ describe('migrationsStateActionMachine', () => {
         ],
       ]
     `);
-  });
-  describe('cleanup', () => {
-    beforeEach(() => {
-      cleanupMock.mockClear();
-    });
-    it('calls cleanup function when an action throws', async () => {
-      await expect(
-        migrationStateActionMachine({
-          initialState: { ...initialState, reason: 'the fatal reason' } as State,
-          logger: mockLogger.get(),
-          model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
-          next: () => {
-            throw new Error('this action throws');
-          },
-          client: esClient,
-        })
-      ).rejects.toThrow();
-
-      expect(cleanupMock).toHaveBeenCalledTimes(1);
-    });
-    it('calls cleanup function when reaching the FATAL state', async () => {
-      await expect(
-        migrationStateActionMachine({
-          initialState: { ...initialState, reason: 'the fatal reason' } as State,
-          logger: mockLogger.get(),
-          model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
-          next,
-          client: esClient,
-        })
-      ).rejects.toThrow();
-
-      expect(cleanupMock).toHaveBeenCalledTimes(1);
-    });
   });
 });

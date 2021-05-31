@@ -27,6 +27,7 @@ import {
   DocumentsTransformSuccess,
 } from '../../migrations/core/migrate_raw_docs';
 export type { RetryableEsClientError };
+export { cleanup } from './cleanup';
 
 /**
  * Batch size for updateByQuery and reindex operations.
@@ -239,7 +240,8 @@ export const cloneIndex = (
             settings: {
               index: {
                 // The source we're cloning from will have a write block set, so
-                // we need to remove it to allow writes to our newly cloned index
+                // we need to explicitly overwrite the blocks.write setting during cloning
+                // otherwise we won't allow writes to our newly cloned index
                 'blocks.write': false,
                 number_of_shards: INDEX_NUMBER_OF_SHARDS,
                 auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,

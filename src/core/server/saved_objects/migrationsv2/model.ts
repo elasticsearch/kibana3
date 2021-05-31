@@ -10,6 +10,7 @@ import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
+import { cloneDeep } from 'lodash';
 import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
 import { AllActionStates, InitState, State } from './types';
 import { IndexMapping } from '../mappings';
@@ -124,6 +125,21 @@ function extractTransformFailuresReason(
       : '';
   return `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}. To allow migrations to proceed, please delete these documents.`;
 }
+
+function formatFinalFatalReason(originalReason: string, cleanupErrorMessage?: string): string {
+  return originalReason + (cleanupErrorMessage ? ` ${cleanupErrorMessage}` : '');
+}
+
+const cleanupBadResponseState = <S extends State>(state: S, res: any): S => {
+  return {
+    ...state,
+    controlState: 'CLEANUP_BAD_RESPONSE',
+    badResponseSource: {
+      state: cloneDeep(state),
+      res,
+    },
+  };
+};
 
 const delayRetryState = <S extends State>(
   state: S,
@@ -327,7 +343,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      return throwBadResponse(stateP, res);
+      return throwBadResponse(stateP, res); // nothing to clean up
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -541,8 +557,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           );
           return {
             ...stateP,
-            controlState: 'FATAL',
-            reason: transformFailureReason,
+            controlState: 'CLEANUP_FATAL',
+            // pass through the reason for transitioning to the FATAL state after cleanup actions have been performed
+            fatalReason: transformFailureReason,
           };
         } else {
           // we don't have any more outdated documents and we haven't encountered any document transformation issues.
@@ -555,7 +572,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         }
       }
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res); // cleanup pit if error is thrown
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -567,7 +584,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         sourceIndex: stateP.sourceIndex as Option.Some<string>,
       };
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res); // retry closing the pit search before throwing
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX') {
     // We follow a similar control flow as for
@@ -612,7 +629,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else {
         // should never happen
-        throwBadResponse(stateP, res as never);
+        // if it by some chance does, we cleanup the open pit search
+        return cleanupBadResponseState(stateP, res as never);
       }
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
@@ -626,7 +644,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         transformErrors: [],
       };
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'SET_TEMP_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -699,7 +717,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         transformErrors: [],
       };
     } else {
-      throwBadResponse(stateP, res);
+      // clean up any possible open pit
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_READ') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -725,8 +744,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           );
           return {
             ...stateP,
-            controlState: 'FATAL',
-            reason: transformFailureReason,
+            controlState: 'CLEANUP_FATAL',
+            fatalReason: transformFailureReason,
           };
         } else {
           // If there are no more results we have transformed all outdated
@@ -739,7 +758,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         }
       }
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -780,7 +799,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           progress,
         };
       } else {
-        throwBadResponse(stateP, res as never);
+        return cleanupBadResponseState(stateP, res as never);
       }
     }
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
@@ -794,7 +813,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         hasTransformedDocs: true,
       };
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -832,7 +851,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'UPDATE_TARGET_MAPPINGS',
       };
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -939,12 +958,39 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           indexVersion(aliases[stateP.currentAlias]) ?? aliases[stateP.currentAlias];
         return {
           ...stateP,
-          controlState: 'FATAL',
-          reason: `Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version ${conflictingKibanaVersion} completed this migration (this instance is running ${stateP.kibanaVersion}). Ensure that all Kibana instances are running on same version and try again.`,
+          controlState: 'CLEANUP_FATAL',
+          fatalReason: `Multiple versions of Kibana are attempting a migration in parallel. Another Kibana instance on version ${conflictingKibanaVersion} completed this migration (this instance is running ${stateP.kibanaVersion}). Ensure that all Kibana instances are running on same version and try again.`,
         };
       }
     } else {
-      throwBadResponse(stateP, res);
+      return cleanupBadResponseState(stateP, res);
+    }
+  } else if (stateP.controlState === 'CLEANUP_FATAL') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    const { fatalReason, ...state } = stateP;
+    if (Either.isRight(res)) {
+      return {
+        ...state,
+        controlState: 'FATAL',
+        reason: fatalReason,
+      };
+    } else {
+      return {
+        ...state,
+        controlState: 'FATAL',
+        // we append any extra errors caused during cleanup.
+        // Alternatively, we could ignore cleanup errors but I chose to make everything as visible as possible
+        reason: formatFinalFatalReason(fatalReason, res.left.cleanupFatalError?.message),
+      };
+    }
+  } else if (stateP.controlState === 'CLEANUP_BAD_RESPONSE') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    const { badResponseSource } = stateP;
+    if (Either.isRight(res)) {
+      throwBadResponse(badResponseSource.state, badResponseSource.res as never);
+    } else {
+      // how should we handle a failed cleanup phase? We're only throwing the original bad response
+      throwBadResponse(badResponseSource.state, badResponseSource.res as never);
     }
   } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
     // The state-action machine will never call the model in the terminating states

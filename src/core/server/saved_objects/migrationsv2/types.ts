@@ -10,7 +10,7 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { estypes } from '@elastic/elasticsearch';
 import { ControlState } from './state_action_machine';
-import { AliasAction } from './actions';
+import { AliasAction, RetryableEsClientError } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
 import { TransformErrorObjects } from '../migrations/core';
@@ -224,7 +224,9 @@ export type SetTempWriteBlock = PostInitState & {
 
 export interface CloneTempToSource extends PostInitState {
   /**
-   * Clone the temporary reindex index into
+   * Clone the temporary reindex index into the target index
+   * sourceIndex is the temp index
+   * target is the destination index
    */
   readonly controlState: 'CLONE_TEMP_TO_TARGET';
   readonly sourceIndex: Option.Some<string>;
@@ -381,6 +383,34 @@ export interface LegacyDeleteState extends LegacyBaseState {
   readonly controlState: 'LEGACY_DELETE';
 }
 
+export interface CleanupFatalState extends PostInitState {
+  /**
+   * Before transitioning to the FATAL state, we need to execute any cleanup actions
+   * e.g. closePit
+   */
+  readonly controlState: 'CLEANUP_FATAL';
+  readonly fatalReason: string;
+  readonly pitId?: string;
+  readonly cleanupFatalError?: RetryableEsClientError;
+}
+
+/** @internal */
+export interface BadResponseSource {
+  state: State;
+  res: any;
+}
+export interface CleanupBadResponse extends PostInitState {
+  /**
+   * Before throwing the bad response, we need to execute any cleanup actions
+   * e.g. closePit
+   * the bad response takes the state.controlState that threw and the res from that controlState's action, so we pass those along
+   */
+  readonly controlState: 'CLEANUP_BAD_RESPONSE';
+  readonly badResponseSource: BadResponseSource;
+  readonly pitId?: string;
+  readonly cleanupFatalError?: RetryableEsClientError;
+}
+
 export type State = Readonly<
   | FatalState
   | InitState
@@ -412,6 +442,8 @@ export type State = Readonly<
   | LegacyReindexState
   | LegacyReindexWaitForTaskState
   | LegacyDeleteState
+  | CleanupFatalState
+  | CleanupBadResponse
 >;
 
 export type AllControlStates = State['controlState'];
