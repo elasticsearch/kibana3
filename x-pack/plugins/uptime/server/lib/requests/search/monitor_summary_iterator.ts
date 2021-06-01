@@ -133,7 +133,6 @@ export class MonitorSummaryIterator {
    *  Attempts to buffer more results fetching a single chunk.
    * If trim is set to true, which is the default, it will delete all items in the buffer prior to the current item.
    * to free up space.
-   * @param size the number of items to chunk
    */
   async attemptBufferMore(): Promise<{ gotHit: boolean }> {
     // Trim the buffer to just the current element since we'll be fetching more
@@ -156,7 +155,7 @@ export class MonitorSummaryIterator {
 
     // Remember, the chunk fetcher might return no results in one chunk, but still have more matching
     // results, so we use the searchAfter field to determine whether we keep going.
-    if (!results.searchAfter) {
+    if (!results.searchAfter || this.queryContext.skipRefinePhase) {
       this.endOfResults = true;
     }
 
@@ -167,11 +166,6 @@ export class MonitorSummaryIterator {
 
   // Get a CursorPaginator object that will resume after the current() value.
   async paginationAfterCurrent(): Promise<CursorPagination | null> {
-    const peek = await this.peek();
-    if (!peek) {
-      return null;
-    }
-
     const current = this.getCurrent();
     if (!current) {
       return null;

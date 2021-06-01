@@ -15,12 +15,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
+import { X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
-import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
@@ -33,6 +32,8 @@ import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
+import { ListPagination } from './list_pagination';
+import { useMonitorHistogram } from './use_monitor_histogram';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -70,6 +71,8 @@ export const MonitorListComponent: ({
       };
     }, {});
   };
+
+  const { histograms, minInterval } = useMonitorHistogram({ items });
 
   const columns = [
     {
@@ -125,13 +128,16 @@ export const MonitorListComponent: ({
     },
     {
       align: 'center' as const,
-      field: 'histogram.points',
+      field: 'monitor_id',
       name: labels.HISTORY_COLUMN_LABEL,
       mobileOptions: {
         show: false,
       },
-      render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
-        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={summary.minInterval!} />
+      render: (monitorId: string) => (
+        <MonitorBarSeries
+          histogramSeries={histograms?.[monitorId]?.points}
+          minInterval={minInterval!}
+        />
       ),
     },
     {
@@ -195,22 +201,12 @@ export const MonitorListComponent: ({
           <MonitorListPageSizeSelect size={pageSize} setSize={setPageSize} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <OverviewPageLink
-                dataTestSubj="xpack.uptime.monitorList.prevButton"
-                direction="prev"
-                pagination={prevPagePagination}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <OverviewPageLink
-                dataTestSubj="xpack.uptime.monitorList.nextButton"
-                direction="next"
-                pagination={nextPagePagination}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <ListPagination
+            next={nextPagePagination}
+            items={items}
+            previous={prevPagePagination}
+            loading={loading}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`apis uptime uptime REST endpoints with real-world data monitor states pagination will fetch next page info for a first page result 1`] = `
+Object {
+  "after": Object {
+    "after_key": Object {
+      "monitorId": "0001-up",
+    },
+    "buckets": Array [
+      Object {
+        "doc_count": 20,
+        "key": Object {
+          "monitorId": "0001-up",
+        },
+      },
+    ],
+  },
+  "before": Object {
+    "buckets": Array [],
+  },
+}
+`;
+
+exports[`apis uptime uptime REST endpoints with real-world data monitor states pagination will fetch next page info for a first page result 2`] = `
+Object {
+  "hits": Array [],
+  "max_score": null,
+  "total": Object {
+    "relation": "eq",
+    "value": 1857,
+  },
+}
+`;
+
+exports[`apis uptime uptime REST endpoints with real-world data monitor states pagination will fetch no pagination info for a single page 1`] = `
+Object {
+  "after": Object {
+    "buckets": Array [],
+  },
+  "before": Object {
+    "buckets": Array [],
+  },
+}
+`;
+
+exports[`apis uptime uptime REST endpoints with real-world data monitor states pagination will fetch no pagination info for a single page 2`] = `
+Object {
+  "hits": Array [],
+  "max_score": null,
+  "total": Object {
+    "relation": "eq",
+    "value": 143,
+  },
+}
+`;
