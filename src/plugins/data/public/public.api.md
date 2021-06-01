@@ -1139,10 +1139,7 @@ export type IEsError = KibanaServerError<IEsErrorAttributes>;
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
-    // (undocumented)
-    indexType?: string;
-}
+export type IEsSearchRequest = IKibanaSearchRequest<ISearchRequestParams>;
 
 // Warning: (ae-missing-release-tag) "IEsSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

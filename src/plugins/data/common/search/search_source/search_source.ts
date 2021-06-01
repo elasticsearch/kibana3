@@ -96,6 +96,7 @@ import {
 } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { extractReferences } from './extract_references';
+import { ROLLUP_SEARCH_STRATEGY } from '../strategies/rollup_search';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -276,10 +277,11 @@ export class SearchSource {
   ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
     const { getConfig } = this.dependencies;
     const syncSearchByDefault = getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES);
+    const hasExplicitStrategy = !!options.strategy;
 
     // Use the sync search strategy if legacy search is enabled.
     // This still uses bfetch for batching.
-    if (!options?.strategy && syncSearchByDefault) {
+    if (!hasExplicitStrategy && syncSearchByDefault) {
       options.strategy = ES_SEARCH_STRATEGY;
     }
 
@@ -289,6 +291,9 @@ export class SearchSource {
         this.history = [searchRequest];
         if (searchRequest.index) {
           options.indexPattern = searchRequest.index;
+          if (searchRequest.indexType === 'rollup' && !hasExplicitStrategy) {
+            options.strategy = ROLLUP_SEARCH_STRATEGY;
+          }
         }
 
         return this.fetchSearch$(searchRequest, options);
@@ -445,7 +450,7 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+    return search({ params }, options).pipe(
       switchMap((response) => {
         return new Observable<IKibanaSearchResponse<any>>((obs) => {
           if (isErrorResponse(response)) {
