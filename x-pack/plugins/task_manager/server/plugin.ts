@@ -27,6 +27,8 @@ import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import { EphemeralTask } from './task';
 
 export type TaskManagerSetupContract = {
   /**
@@ -38,7 +40,7 @@ export type TaskManagerSetupContract = {
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
-  'schedule' | 'runNow' | 'ensureScheduled'
+  'schedule' | 'runNow' | 'ephemeralRunNow' | 'ensureScheduled'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
@@ -47,6 +49,7 @@ export type TaskManagerStartContract = Pick<
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
   private taskPollingLifecycle?: TaskPollingLifecycle;
+  private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
   private config: TaskManagerConfig;
   private logger: Logger;
@@ -140,6 +143,16 @@ export class TaskManagerPlugin
       ...managedConfiguration,
     });
 
+    this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
+      config: this.config!,
+      definitions: this.definitions,
+      logger: this.logger,
+      middleware: this.middleware,
+      elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+      pool: this.taskPollingLifecycle.pool,
+      lifecycleEvent: this.taskPollingLifecycle.events,
+    });
+
     createMonitoringStats(
       this.taskPollingLifecycle,
       taskStore,
@@ -154,7 +167,9 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
       definitions: this.definitions,
+      taskManagerId: taskStore.taskManagerId,
     });
 
     return {
@@ -165,6 +180,7 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
+      ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
     };
   }
 
