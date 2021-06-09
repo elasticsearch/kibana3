@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
 import rison from 'rison-node';
+import url from 'url';
 import { HttpSetup } from 'src/core/public';
 import {
   API_BASE_GENERATE,
@@ -111,10 +111,13 @@ export class ReportingAPIClient {
   /*
    * Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
    */
-  public getReportingJobPath = (exportType: string, jobParams: JobParams) => {
-    const params = stringify({ jobParams: rison.encode(jobParams) });
-    return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
-  };
+  public getReportingJobPath = (exportType: string, jobParams: JobParams) => ({
+    url: url.resolve(
+      window.location.href,
+      `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}`
+    ),
+    payload: JSON.stringify({ jobParams: rison.encode(jobParams) }),
+  });
 
   /*
    * Sends a request to queue a job, with the job params in the POST body
