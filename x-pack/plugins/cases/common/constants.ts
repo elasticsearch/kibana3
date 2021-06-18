@@ -58,7 +58,11 @@ export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts`;
  */
 
 export const ACTION_URL = '/api/actions';
-export const ACTION_TYPES_URL = '/api/actions/list_action_types';
+export const ACTION_TYPES_URL = `${ACTION_URL}/connector_types`;
+
+/**
+ * Connector type id
+ */
 export const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
 export const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';
 export const JIRA_ACTION_TYPE_ID = '.jira';
