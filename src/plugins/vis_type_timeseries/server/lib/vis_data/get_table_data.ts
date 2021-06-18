@@ -18,6 +18,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
+import { createFieldFormatAccessor } from './create_field_format_accessor';
 import { extractFieldLabel } from '../../../common/fields_utils';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -32,13 +33,18 @@ export async function getTableData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+  const {
+    cachedIndexPatternFetcher,
+    searchStrategyRegistry,
+    indexPatternsService,
+    esQueryConfig,
+    uiSettings,
+    fieldFormatService,
+  } = services;
 
-  const strategy = await services.searchStrategyRegistry.getViableStrategy(
-    requestContext,
-    req,
-    panelIndex
-  );
+  const panelIndex = await cachedIndexPatternFetcher(panel.index_pattern);
+
+  const strategy = await searchStrategyRegistry.getViableStrategy(requestContext, req, panelIndex);
 
   if (!strategy) {
     throw new Error(
@@ -51,8 +57,8 @@ export async function getTableData(
   const { searchStrategy, capabilities } = strategy;
 
   const extractFields = createFieldsFetcher(req, {
-    indexPatternsService: services.indexPatternsService,
-    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+    indexPatternsService,
+    cachedIndexPatternFetcher,
     searchStrategy,
     capabilities,
   });
@@ -75,10 +81,10 @@ export async function getTableData(
     const body = await buildRequestBody(
       req,
       panel,
-      services.esQueryConfig,
+      esQueryConfig,
       panelIndex,
       capabilities,
-      services.uiSettings
+      uiSettings
     );
 
     const [resp] = await searchStrategy.search(requestContext, req, [
@@ -97,8 +103,15 @@ export async function getTableData(
       []
     );
 
+    const getFieldFormatByName = createFieldFormatAccessor(
+      fieldFormatService,
+      panelIndex.indexPattern?.fieldFormatMap
+    );
+
     const series = await Promise.all(
-      buckets.map(processBucket(panel, req, searchStrategy, capabilities, extractFields))
+      buckets.map(
+        processBucket(panel, req, searchStrategy, capabilities, extractFields, getFieldFormatByName)
+      )
     );
 
     return {

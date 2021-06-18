@@ -136,6 +136,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(aggregationLength).to.be.equal(2);
         });
       });
+
+      describe('applying field formats from Advanced Settings for values', () => {
+        before(async () => {
+          await visualBuilder.resetPage();
+          await visualBuilder.clickMarkdown();
+          await visualBuilder.markdownSwitchSubTab('markdown');
+          await visualBuilder.enterMarkdown('{{ average_of_bytes.last.formatted }}');
+          await visualBuilder.markdownSwitchSubTab('data');
+          await visualBuilder.selectAggType('Average');
+          await visualBuilder.setFieldForAggregation('bytes');
+          await visualBuilder.clickSeriesOption();
+        });
+
+        it('should apply TSVB formatting by default', async () => {
+          await visualBuilder.changeDataFormatter('Percent');
+
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('572,241.265%');
+        });
+
+        it('should apply field formatting when ignore field formatting is disabled', async () => {
+          await visualBuilder.setSeriesIgnoreFieldFormatting(false);
+
+          const text = await visualBuilder.getMarkdownText();
+          expect(text).to.be('5.588KB');
+        });
+      });
     });
   });
 }

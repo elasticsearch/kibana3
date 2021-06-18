@@ -17,11 +17,13 @@ import {
   FieldsFetcherServices,
 } from '../../search_strategies/lib/fields_fetcher';
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
+import type { FieldFormatsRegistry } from '../../../../../data/common';
 
 export function handleResponseBody(
   panel: Panel,
   req: VisTypeTimeseriesVisDataRequest,
-  services: FieldsFetcherServices
+  services: FieldsFetcherServices,
+  fieldFormatService: FieldFormatsRegistry
 ) {
   return async (resp: any) => {
     if (resp.error) {
@@ -49,7 +51,16 @@ export function handleResponseBody(
 
     const extractFields = createFieldsFetcher(req, services);
 
-    const processor = buildProcessorFunction(processors, resp, panel, series, meta, extractFields);
+    const processor = buildProcessorFunction(
+      processors,
+      resp,
+      panel,
+      series,
+      meta,
+      extractFields,
+      fieldFormatService,
+      services.cachedIndexPatternFetcher
+    );
 
     return await processor([]);
   };

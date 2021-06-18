@@ -9,11 +9,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { startsWith, get, cloneDeep, map } from 'lodash';
+import { startsWith, get, cloneDeep, map, last } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
@@ -51,6 +52,16 @@ class TimeseriesVisualization extends Component {
   };
 
   applyDocTo = (template) => (doc) => {
+    const { fieldFormatMap } = this.props;
+
+    // formatting each doc value with custom field formatter if fieldFormatMap contains that doc field name
+    Object.keys(doc).forEach((fieldName) => {
+      if (fieldFormatMap?.[fieldName]) {
+        const valueFieldFormatter = createFieldFormatter(fieldName, fieldFormatMap);
+        doc[fieldName] = valueFieldFormatter(doc[fieldName]);
+      }
+    });
+
     const vars = replaceVars(template, null, doc);
 
     if (vars instanceof Error) {
@@ -137,7 +148,15 @@ class TimeseriesVisualization extends Component {
   };
 
   render() {
-    const { model, visData, onBrush, onFilterClick, syncColors, palettesService } = this.props;
+    const {
+      model,
+      visData,
+      onBrush,
+      onFilterClick,
+      syncColors,
+      palettesService,
+      fieldFormatMap,
+    } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -150,9 +169,30 @@ class TimeseriesVisualization extends Component {
     const yAxis = [];
     let mainDomainAdded = false;
 
-    const allSeriesHaveSameFormatters = seriesModel.every(
-      (seriesGroup) => seriesGroup.formatter === seriesModel[0].formatter
+    const allSeriesHaveSameIgnoreFieldFormatting = seriesModel.every(
+      (seriesGroup) =>
+        seriesGroup.ignore_field_formatting === seriesModel[0].ignore_field_formatting
     );
+
+    let allSeriesHaveSameFormatters;
+
+    if (allSeriesHaveSameIgnoreFieldFormatting) {
+      if (seriesModel[0].ignore_field_formatting) {
+        allSeriesHaveSameFormatters = seriesModel.every(
+          (seriesGroup) =>
+            seriesGroup.formatter === seriesModel[0].formatter &&
+            seriesGroup.value_template === seriesModel[0].value_template
+        );
+      } else {
+        const seriesUsedFieldFormats = seriesModel.map(
+          (seriesGroup) => fieldFormatMap[last(seriesGroup.metrics)?.field]
+        );
+        allSeriesHaveSameFormatters = seriesUsedFieldFormats.every(
+          (usedFieldFormat) =>
+            JSON.stringify(usedFieldFormat) === JSON.stringify(seriesUsedFieldFormats[0])
+        );
+      }
+    }
 
     this.showToastNotification = null;
 
@@ -164,10 +204,11 @@ class TimeseriesVisualization extends Component {
         ? TimeseriesVisualization.getYAxisDomain(seriesGroup)
         : undefined;
       const isCustomDomain = groupId !== mainAxisGroupId;
-      const seriesGroupTickFormatter = TimeseriesVisualization.getTickFormatter(
-        seriesGroup,
-        this.props.getConfig
-      );
+
+      const seriesGroupTickFormatter = seriesGroup.ignore_field_formatting
+        ? TimeseriesVisualization.getTickFormatter(seriesGroup, this.props.getConfig)
+        : createFieldFormatter(last(seriesGroup.metrics)?.field, fieldFormatMap);
+
       const palette = {
         ...seriesGroup.palette,
         name:

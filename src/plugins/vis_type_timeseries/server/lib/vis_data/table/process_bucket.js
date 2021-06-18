@@ -23,7 +23,14 @@ function trendSinceLastBucket(data) {
   return Number.isNaN(trend) ? 0 : trend;
 }
 
-export function processBucket(panel, req, searchStrategy, capabilities, extractFields) {
+export function processBucket(
+  panel,
+  req,
+  searchStrategy,
+  capabilities,
+  extractFields,
+  getFieldFormatByName
+) {
   return async (bucket) => {
     const series = await Promise.all(
       getActiveSeries(panel).map(async (series) => {
@@ -57,6 +64,8 @@ export function processBucket(panel, req, searchStrategy, capabilities, extractF
       })
     );
 
-    return { key: bucket.key, series };
+    const key = getFieldFormatByName?.(panel.pivot_id).convert(bucket.key) ?? bucket.key;
+
+    return { key, series };
   };
 }

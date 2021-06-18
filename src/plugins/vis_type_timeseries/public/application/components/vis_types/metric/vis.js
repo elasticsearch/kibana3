@@ -10,7 +10,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { get, isUndefined, assign, includes, pick } from 'lodash';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { get, isUndefined, assign, includes, pick, last } from 'lodash';
 import { Metric } from '../../../visualizations/views/metric';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
@@ -36,7 +37,7 @@ function getColors(props) {
 }
 
 function MetricVisualization(props) {
-  const { backgroundColor, model, visData } = props;
+  const { backgroundColor, model, visData, fieldFormatMap } = props;
   const colors = getColors(props);
   const series = get(visData, `${model.id}.series`, [])
     .filter((row) => row)
@@ -44,11 +45,9 @@ function MetricVisualization(props) {
       const seriesDef = model.series.find((s) => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = createTickFormatter(
-          seriesDef.formatter,
-          seriesDef.value_template,
-          props.getConfig
-        );
+        newProps.formatter = seriesDef.ignore_field_formatting
+          ? createTickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig)
+          : createFieldFormatter(last(seriesDef.metrics)?.field, fieldFormatMap);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
       return assign({}, pick(row, ['label', 'data']), newProps);
