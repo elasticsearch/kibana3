@@ -25,6 +25,9 @@ export {
   LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
+  LazyDebugComponent,
+  LazyErrorComponent,
+  LazyPopoverComponent,
   withSuspense,
 } from './components';
 

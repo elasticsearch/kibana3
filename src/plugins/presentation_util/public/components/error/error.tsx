@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { get } from 'lodash';
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
 import { ShowDebugging } from './show_debugging';
 
 export interface Props {
@@ -18,7 +19,16 @@ export interface Props {
   };
 }
 
-const { Error: strings } = ComponentStrings;
+const strings = {
+  getDescription: () =>
+    i18n.translate('xpack.canvas.errorComponent.description', {
+      defaultMessage: 'Expression failed with the message:',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.errorComponent.title', {
+      defaultMessage: 'Whoops! Expression failed',
+    }),
+};
 
 export const Error: FC<Props> = ({ payload }) => {
   const message = get(payload, 'error.message');
