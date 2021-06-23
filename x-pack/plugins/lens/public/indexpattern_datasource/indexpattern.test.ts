@@ -383,7 +383,16 @@ describe('IndexPattern Data Source', () => {
                             true,
                           ],
                           "extended_bounds": Array [
-                            "{}",
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {},
+                                  "function": "extendedBounds",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
                           ],
                           "field": Array [
                             "timestamp",
