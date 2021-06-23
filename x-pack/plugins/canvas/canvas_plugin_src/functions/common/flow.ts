@@ -44,16 +44,16 @@ interface Arguments {
 }
 
 export interface Output extends Arguments {
-  type: 'shape';
+  type: 'flow';
 }
 
-export function shape(): ExpressionFunctionDefinition<'shape', null, Arguments, Output> {
-  const { help, args: argHelp } = getFunctionHelp().shape;
+export function flow(): ExpressionFunctionDefinition<'flow', null, Arguments, Output> {
+  const { help, args: argHelp } = getFunctionHelp().flow;
 
   return {
-    name: 'shape',
+    name: 'flow',
     aliases: [],
-    type: 'shape',
+    type: 'flow',
     inputTypes: ['null'],
     help,
     args: {
@@ -88,7 +88,7 @@ export function shape(): ExpressionFunctionDefinition<'shape', null, Arguments, 
       },
     },
     fn: (input, args) => ({
-      type: 'shape',
+      type: 'flow',
       ...args,
     }),
   };
