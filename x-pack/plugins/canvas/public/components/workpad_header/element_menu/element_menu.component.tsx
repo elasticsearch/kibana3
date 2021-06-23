@@ -14,14 +14,20 @@ import {
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import {
+  withSuspense,
+  LazyPopoverComponent,
+  ClosePopoverFn,
+} from '../../../../../../../src/plugins/presentation_util/public';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ComponentStrings } from '../../../../i18n/components';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { getId } from '../../../lib/get_id';
-import { Popover, ClosePopoverFn } from '../../popover';
 import { AssetManager } from '../../asset_manager';
 import { SavedElementsModal } from '../../saved_elements_modal';
+
+const Popover = withSuspense(LazyPopoverComponent);
 
 interface CategorizedElementLists {
   [key: string]: ElementSpec[];

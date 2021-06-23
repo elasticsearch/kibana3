@@ -18,10 +18,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  withSuspense,
+  LazyErrorComponent,
+} from '../../../../../../../src/plugins/presentation_util/public';
 import { Datatable } from '../../datatable';
-import { Error } from '../../error';
 import { ComponentStrings } from '../../../../i18n';
 
+const Error = withSuspense(LazyErrorComponent);
 const { DatasourceDatasourcePreview: strings } = ComponentStrings;
 const { DatasourceDatasourceComponent: datasourceStrings } = ComponentStrings;
 

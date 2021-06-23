@@ -9,10 +9,14 @@ import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { IBasePath } from 'kibana/public';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent, useState } from 'react';
+import {
+  withSuspense,
+  LazyPopoverComponent,
+  ClosePopoverFn,
+} from '../../../../../../../src/plugins/presentation_util/public';
 import { ReportingStart } from '../../../../../reporting/public';
 import { ComponentStrings } from '../../../../i18n/components';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
 import { CanvasWorkpadSharingData, getPdfJobParams } from './utils';
 
@@ -25,6 +29,8 @@ type CloseTypes = 'share';
 export type OnCopyFn = (type: CopyTypes) => void;
 export type OnExportFn = (type: ExportTypes) => void;
 export type OnCloseFn = (type: CloseTypes) => void;
+
+const Popover = withSuspense(LazyPopoverComponent);
 
 export interface Props {
   /** Canvas workpad to export as PDF **/

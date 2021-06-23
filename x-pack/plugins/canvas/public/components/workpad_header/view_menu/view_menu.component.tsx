@@ -14,19 +14,25 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import {
+  withSuspense,
+  LazyPopoverComponent,
+  ClosePopoverFn,
+} from '../../../../../../../src/plugins/presentation_util/public';
+import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
   CONTEXT_MENU_TOP_BORDER_CLASSNAME,
 } from '../../../../common/lib/constants';
 import { ComponentStrings } from '../../../../i18n/components';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import { KioskControls } from './kiosk_controls';
 
 const { WorkpadHeaderViewMenu: strings } = ComponentStrings;
 
 const QUICK_ZOOM_LEVELS = [0.5, 1, 2];
+
+const Popover = withSuspense(LazyPopoverComponent);
 
 export interface Props {
   /**
