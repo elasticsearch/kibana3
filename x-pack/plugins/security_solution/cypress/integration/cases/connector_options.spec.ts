@@ -31,21 +31,21 @@ describe('Cases connector incident fields', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept('GET', '/api/cases/configure/connectors/_find', mockConnectorsResponse);
-    cy.intercept('POST', `/api/actions/action/${connectorIds.sn}/_execute`, (req) => {
+    cy.intercept('POST', `/api/actions/connector/${connectorIds.sn}/_execute`, (req) => {
       const response =
         req.body.params.subAction === 'getChoices'
           ? executeResponses.servicenow.choices
           : { status: 'ok', data: [] };
       req.reply(response);
     });
-    cy.intercept('POST', `/api/actions/action/${connectorIds.jira}/_execute`, (req) => {
+    cy.intercept('POST', `/api/actions/connector/${connectorIds.jira}/_execute`, (req) => {
       const response =
         req.body.params.subAction === 'issueTypes'
           ? executeResponses.jira.issueTypes
           : executeResponses.jira.fieldsByIssueType;
       req.reply(response);
     });
-    cy.intercept('POST', `/api/actions/action/${connectorIds.resilient}/_execute`, (req) => {
+    cy.intercept('POST', `/api/actions/connector/${connectorIds.resilient}/_execute`, (req) => {
       const response =
         req.body.params.subAction === 'incidentTypes'
           ? executeResponses.resilient.incidentTypes
