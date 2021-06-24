@@ -8,6 +8,7 @@
 import React, { MouseEventHandler, FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   withSuspense,
   LazyPopoverComponent,
@@ -15,9 +16,13 @@ import {
 import { ArgAdd } from '../arg_add';
 // @ts-expect-error untyped local
 import { Arg } from '../../expression_types/arg';
-import { ComponentStrings } from '../../../i18n';
 
-const { ArgAddPopover: strings } = ComponentStrings;
+const strings = {
+  getAddAriaLabel: () =>
+    i18n.translate('xpack.canvas.argAddPopover.addAriaLabel', {
+      defaultMessage: 'Add argument',
+    }),
+};
 
 const Popover = withSuspense(LazyPopoverComponent);
 

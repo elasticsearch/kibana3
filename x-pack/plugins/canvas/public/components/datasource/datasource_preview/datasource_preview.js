@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
   EuiModalBody,
@@ -23,11 +24,31 @@ import {
   LazyErrorComponent,
 } from '../../../../../../../src/plugins/presentation_util/public';
 import { Datatable } from '../../datatable';
-import { ComponentStrings } from '../../../../i18n';
 
 const Error = withSuspense(LazyErrorComponent);
-const { DatasourceDatasourcePreview: strings } = ComponentStrings;
-const { DatasourceDatasourceComponent: datasourceStrings } = ComponentStrings;
+
+const strings = {
+  getEmptyFirstLineDescription: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyFirstLineDescription', {
+      defaultMessage: "We couldn't find any documents matching your search criteria.",
+    }),
+  getEmptySecondLineDescription: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptySecondLineDescription', {
+      defaultMessage: 'Check your datasource settings and try again.',
+    }),
+  getEmptyTitle: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.emptyTitle', {
+      defaultMessage: 'No documents found',
+    }),
+  getModalTitle: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.modalTitle', {
+      defaultMessage: 'Datasource preview',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourcePreview.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+};
 
 export const DatasourcePreview = ({ done, datatable }) => (
   <EuiModal onClose={done} maxWidth="1000px" className="canvasModal--fixedSize">
@@ -41,7 +62,7 @@ export const DatasourcePreview = ({ done, datatable }) => (
             id="xpack.canvas.datasourceDatasourcePreview.modalDescription"
             defaultMessage="The following data will be available to the selected element upon clicking {saveLabel} in the sidebar."
             values={{
-              saveLabel: <strong>{datasourceStrings.getSaveButtonLabel()}</strong>,
+              saveLabel: <strong>{strings.getSaveButtonLabel()}</strong>,
             }}
           />
         </p>
