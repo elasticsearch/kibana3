@@ -11,7 +11,6 @@ import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { ShowDebugging } from './show_debugging';
 
 const strings = {
