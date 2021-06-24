@@ -6112,7 +6112,6 @@
     "xpack.canvas.error.workpadRoutes.loadFailureErrorMessage": "ID でワークパッドを読み込めませんでした",
     "presentationUtil.errorComponent.description": "表現が失敗し次のメッセージが返されました：",
     "presentationUtil.errorComponent.title": "おっと！表現が失敗しました",
-    "xpack.canvas.errors.workpadUpload.fileUploadFileWithFileNameErrorMessage": "「{fileName}」をアップロードできませんでした",
     "xpack.canvas.expression.cancelButtonLabel": "キャンセル",
     "xpack.canvas.expression.closeButtonLabel": "閉じる",
     "xpack.canvas.expression.learnLinkText": "表現構文の詳細",

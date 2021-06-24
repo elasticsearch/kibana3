@@ -6151,7 +6151,6 @@
     "xpack.canvas.error.workpadRoutes.loadFailureErrorMessage": "无法加载具有以下 ID 的 Workpad",
     "presentationUtil.errorComponent.description": "表达式失败，并显示消息：",
     "presentationUtil.errorComponent.title": "哎哟！表达式失败",
-    "xpack.canvas.errors.workpadUpload.fileUploadFileWithFileNameErrorMessage": "无法上传“{fileName}”",
     "xpack.canvas.expression.cancelButtonLabel": "取消",
     "xpack.canvas.expression.closeButtonLabel": "关闭",
     "xpack.canvas.expression.learnLinkText": "学习表达式语法",
