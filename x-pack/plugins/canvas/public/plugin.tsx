@@ -22,6 +22,7 @@ import { getSessionStorage } from './lib/storage';
 import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
+import { ExpressionRevealImagePluginSetup } from '../../../../src/plugins/expression_reveal_image/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
@@ -31,6 +32,7 @@ import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
+
 export { CoreStart, CoreSetup };
 
 /**
@@ -45,6 +47,8 @@ export interface CanvasSetupDeps {
   usageCollection?: UsageCollectionSetup;
   bfetch: BfetchPublicSetup;
   charts: ChartsPluginSetup;
+
+  expressionRevealImage?: ExpressionRevealImagePluginSetup;
 }
 
 export interface CanvasStartDeps {

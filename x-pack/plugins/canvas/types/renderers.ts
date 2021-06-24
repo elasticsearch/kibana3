@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 
 type GenericRendererCallback = (callback: () => void) => void;
 
@@ -18,16 +18,15 @@ export interface CanvasSpecificRendererHandlers {
   getFilter: () => string;
   /** Handler to invoke when a renderer is considered complete */
   onComplete: (fn: () => void) => void;
-  /** Handler to invoke when a rendered embeddable is destroyed */
-  onEmbeddableDestroyed: () => void;
-  /** Handler to invoke when the input to a function has changed internally */
-  onEmbeddableInputChange: (expression: string) => void;
   /** Handler to invoke when an element's dimensions have changed*/
   onResize: GenericRendererCallback;
   /** Handler to invoke when an element should be resized. */
   resize: (size: { height: number; width: number }) => void;
   /** Sets the value of the filter property on the element object persisted on the workpad */
   setFilter: (filter: string) => void;
+
+  embeddableInputChange: (expression: string) => void;
+  embeddableDestroyed: () => void;
 }
 
 export type RendererHandlers = IInterpreterRenderHandlers & CanvasSpecificRendererHandlers;
@@ -35,9 +34,9 @@ export interface RendererSpec<RendererConfig = {}> {
   /** The render type */
   name: string;
   /** The name to display */
-  displayName: string;
+  displayName?: string;
   /** A description of what is rendered */
-  help: string;
+  help?: string;
   /** Indicate whether the element should reuse the existing DOM element when re-rendering */
   reuseDomNode: boolean;
   /** The default width of the element in pixels */
@@ -50,5 +49,7 @@ export interface RendererSpec<RendererConfig = {}> {
 
 export type RendererFactory<RendererConfig = {}> = () => RendererSpec<RendererConfig>;
 
-export type AnyRendererFactory = RendererFactory<any>;
+export type AnyRendererFactory =
+  | RendererFactory<any>
+  | Array<() => ExpressionRenderDefinition<any>>;
 export type AnyRendererSpec = RendererSpec<any>;

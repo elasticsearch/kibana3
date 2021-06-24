@@ -72,6 +72,7 @@ export interface IInterpreterRenderHandlers {
   hasCompatibleActions?: (event: any) => Promise<boolean>;
   getRenderMode: () => RenderMode;
   isSyncColorsEnabled: () => boolean;
+  on: (this: any, event: any, fn: (...args: any) => void) => void;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
    * but expressions cannot know about vis or it creates a mess of circular dependencies.
@@ -79,3 +80,19 @@ export interface IInterpreterRenderHandlers {
    */
   uiState?: unknown;
 }
+
+type DefaultEmitters<T extends IInterpreterRenderHandlers> = Pick<T, 'done' | 'reload' | 'update'>;
+
+type DefaultInterpreterRenderHandlers<Emitters = {}> = IInterpreterRenderHandlers &
+  {
+    [K in keyof Emitters]: Emitters[K];
+  } & {
+    on: (
+      this: any,
+      event: keyof Emitters | keyof DefaultEmitters<IInterpreterRenderHandlers>,
+      fn: (...args: any) => void
+    ) => void;
+  };
+
+export type InterpreterRenderHandlers<Emitters = {}> = Emitters &
+  DefaultInterpreterRenderHandlers<Emitters>;
