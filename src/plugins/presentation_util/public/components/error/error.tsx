@@ -11,19 +11,8 @@ import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { ShowDebugging } from './show_debugging';
 
-const strings = {
-  getDescription: () =>
-    i18n.translate('xpack.canvas.errorComponent.description', {
-      defaultMessage: 'Expression failed with the message:',
-    }),
-  getTitle: () =>
-    i18n.translate('xpack.canvas.errorComponent.title', {
-      defaultMessage: 'Whoops! Expression failed',
-    }),
-};
 export interface Props {
   payload: {
     error: Error;
