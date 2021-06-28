@@ -96,20 +96,16 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
-      executor: (
+      executor: async (
         options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
           state: ExecutedState;
         }
-      ): Promise<any> => this.execute(options),
+      ): Promise<any> => await this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
       },
     };
-  }
-
-  public getId() {
-    return this.rawAlert?.id;
   }
 
   public async createIfDoesNotExist(
@@ -222,6 +218,9 @@ export class BaseAlert {
   }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
     state: ExecutedState;
   }): Promise<any> {
+    if (!this.rawAlert?.id) {
+      return Promise.resolve();
+    }
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
@@ -283,7 +282,7 @@ export class BaseAlert {
         .filter((node) => node.shouldFire)
         .map((node) => node.meta.nodeId || node.meta.instanceId)
         .join(',');
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
+      const instanceId = `${this.rawAlert!.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
       const newAlertStates: AlertNodeState[] = [];
       const key = this.alertOptions.accessorKey;
