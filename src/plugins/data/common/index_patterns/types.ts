@@ -234,6 +234,7 @@ export interface FieldSpec {
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
+  parent?: string;
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;

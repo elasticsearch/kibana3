@@ -375,7 +375,7 @@ export class IndexPattern implements IIndexPattern {
    * @param runtimeField Runtime field definition
    */
   addRuntimeField(name: string, runtimeField: KibanaRuntimeField) {
-    const { type, script, customLabel, format, popularity } = runtimeField;
+    const { type, script, parent, customLabel, format, popularity } = runtimeField;
 
     const esRuntimeField = { type, script };
 
@@ -391,6 +391,7 @@ export class IndexPattern implements IIndexPattern {
         searchable: true,
         count: popularity ?? 0,
         readFromDocValues: false,
+        parent,
       });
     }
     this.runtimeFieldMap[name] = esRuntimeField;
@@ -464,7 +465,7 @@ export class IndexPattern implements IIndexPattern {
     const { script, subFields } = runtimeObject;
 
     for (const [subFieldName, subField] of Object.entries(subFields)) {
-      this.addRuntimeField(subFieldName, { ...subField, parent: name });
+      this.addRuntimeField(`${name}.${subFieldName}`, { ...subField, parent: name });
     }
 
     this.runtimeObjectMap[name] = { name, script, subFields: Object.keys(subFields) };
@@ -527,7 +528,7 @@ export class IndexPattern implements IIndexPattern {
     if (!!existingRuntimeObject) {
       // Remove all previous subFields
       for (const subFieldName of existingRuntimeObject.subFields) {
-        this.removeRuntimeField(subFieldName);
+        this.removeRuntimeField(`${name}.${subFieldName}`);
       }
 
       delete this.runtimeObjectMap[name];
