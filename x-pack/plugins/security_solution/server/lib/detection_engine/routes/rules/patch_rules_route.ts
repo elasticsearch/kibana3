@@ -28,11 +28,13 @@ import { updateRulesNotifications } from '../../rules/update_rules_notifications
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
 
 export const patchRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null,
+  ruleExecutionLogClient?: RuleExecutionLogClient | null
 ) => {
   router.patch(
     {

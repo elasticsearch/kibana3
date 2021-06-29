@@ -14,7 +14,11 @@ import { createRuleTypeMocks } from './__mocks__/rule_type';
 describe('EQL alerts', () => {
   it('does not send an alert when sequence not found', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
-    const eqlAlertType = createEqlAlertType(dependencies.ruleDataClient, dependencies.logger);
+    const eqlAlertType = createEqlAlertType(
+      dependencies.ruleDataClient,
+      dependencies.logger,
+      dependencies.ruleExecutionLogClient
+    );
 
     dependencies.alerting.registerType(eqlAlertType);
 
@@ -51,7 +55,11 @@ describe('EQL alerts', () => {
 
   it('sends a properly formatted alert when sequence is found', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
-    const eqlAlertType = createEqlAlertType(dependencies.ruleDataClient, dependencies.logger);
+    const eqlAlertType = createEqlAlertType(
+      dependencies.ruleDataClient,
+      dependencies.logger,
+      dependencies.ruleExecutionLogClient
+    );
 
     dependencies.alerting.registerType(eqlAlertType);
 

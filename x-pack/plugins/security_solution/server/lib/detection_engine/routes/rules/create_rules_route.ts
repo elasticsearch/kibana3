@@ -22,11 +22,13 @@ import { createRulesSchema } from '../../../../../common/detection_engine/schema
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null,
+  ruleExecutionLogClient?: RuleExecutionLogClient | null
 ): void => {
   router.post(
     {

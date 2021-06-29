@@ -38,6 +38,7 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import { Alert } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -460,7 +461,7 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
       attributes: {
         alertId: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
         statusDate: '2020-02-18T15:26:49.783Z',
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         lastFailureAt: undefined,
         lastSuccessAt: '2020-02-18T15:26:49.783Z',
         lastFailureMessage: undefined,
@@ -481,7 +482,7 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
       attributes: {
         alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
         statusDate: '2020-02-18T15:15:58.806Z',
-        status: 'failed',
+        status: RuleExecutionStatus.failed,
         lastFailureAt: '2020-02-18T15:15:58.806Z',
         lastSuccessAt: '2020-02-13T20:31:59.855Z',
         lastFailureMessage:

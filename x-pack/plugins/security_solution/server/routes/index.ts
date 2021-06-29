@@ -56,6 +56,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { RuleExecutionLogClient } from '../lib/detection_engine/rule_execution_log/rule_execution_log_client';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -63,16 +64,17 @@ export const initRoutes = (
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
-  ruleDataClient: RuleDataClient | null
+  ruleDataClient: RuleDataClient | null,
+  ruleExecutionLogClient: RuleExecutionLogClient | null
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(router, ml, ruleDataClient);
-  readRulesRoute(router, ruleDataClient);
-  updateRulesRoute(router, ml, ruleDataClient);
-  patchRulesRoute(router, ml, ruleDataClient);
-  deleteRulesRoute(router, ruleDataClient);
-  findRulesRoute(router, ruleDataClient);
+  createRulesRoute(router, ml, ruleDataClient, ruleExecutionLogClient);
+  readRulesRoute(router, ruleDataClient, ruleExecutionLogClient);
+  updateRulesRoute(router, ml, ruleDataClient, ruleExecutionLogClient);
+  patchRulesRoute(router, ml, ruleDataClient, ruleExecutionLogClient);
+  deleteRulesRoute(router, ruleDataClient, ruleExecutionLogClient);
+  findRulesRoute(router, config, ruleDataClient, ruleExecutionLogClient);
 
   // TODO: pass ruleDataClient to all relevant routes
 
@@ -103,7 +105,7 @@ export const initRoutes = (
   persistNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
 
-  findRulesStatusesRoute(router);
+  findRulesStatusesRoute(router, config, ruleExecutionLogClient);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status

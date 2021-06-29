@@ -17,7 +17,8 @@ describe('Threshold alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
     const thresholdAlertType = createThresholdAlertType(
       dependencies.ruleDataClient,
-      dependencies.logger
+      dependencies.logger,
+      dependencies.ruleExecutionLogClient
     );
 
     dependencies.alerting.registerType(thresholdAlertType);
@@ -64,7 +65,8 @@ describe('Threshold alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
     const thresholdAlertType = createThresholdAlertType(
       dependencies.ruleDataClient,
-      dependencies.logger
+      dependencies.logger,
+      dependencies.ruleExecutionLogClient
     );
 
     dependencies.alerting.registerType(thresholdAlertType);

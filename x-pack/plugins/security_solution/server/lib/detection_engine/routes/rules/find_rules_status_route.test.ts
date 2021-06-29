@@ -11,7 +11,7 @@ import {
   getAlertMock,
   getFindBulkResultStatus,
 } from '../__mocks__/request_responses';
-import { serverMock, requestContextMock, requestMock } from '../__mocks__';
+import { serverMock, requestContextMock, requestMock, createMockConfig } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
 import { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
@@ -28,7 +28,7 @@ describe('find_statuses', () => {
     ({ clients, context } = requestContextMock.createTools());
     clients.savedObjectsClient.find.mockResolvedValue(getFindBulkResultStatus()); // successful status search
     clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-    findRulesStatusesRoute(server.router);
+    findRulesStatusesRoute(server.router, createMockConfig());
   });
 
   describe('status codes with actionClient and alertClient', () => {

@@ -25,16 +25,18 @@ type PersistenceAlertQueryService = (
   query: ESSearchRequest
 ) => Promise<Array<Record<string, unknown>>>;
 
+export interface PersistenceRuleTypeServices<TAlertInstanceContext extends AlertInstanceContext> {
+  alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
+  findAlerts: PersistenceAlertQueryService;
+}
+
 type CreatePersistenceRuleTypeFactory = (options: {
   ruleDataClient: RuleDataClient;
   logger: Logger;
 }) => <
   TParams extends AlertTypeParams,
   TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends {
-    alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
-    findAlerts: PersistenceAlertQueryService;
-  }
+  TServices extends PersistenceRuleTypeServices<TAlertInstanceContext>
 >(
   type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
 ) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;

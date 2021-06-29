@@ -12,6 +12,7 @@ import { getAlertMock, getFindResultStatus } from '../__mocks__/request_response
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const ruleOutput = (): RulesSchema => ({
   actions: [],
@@ -112,7 +113,7 @@ describe('validate', () => {
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null, ruleStatus);
       const expected: RulesSchema = {
         ...ruleOutput(),
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         status_date: '2020-02-18T15:26:49.783Z',
         last_success_at: '2020-02-18T15:26:49.783Z',
         last_success_message: 'succeeded',

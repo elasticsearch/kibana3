@@ -12,7 +12,7 @@ import {
   getFindResultWithSingleHit,
   getFindBulkResultStatus,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { requestContextMock, serverMock, requestMock, createMockConfig } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
@@ -29,7 +29,7 @@ describe('find_rules', () => {
     clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getFindBulkResultStatus());
 
-    findRulesRoute(server.router);
+    findRulesRoute(server.router, createMockConfig());
   });
 
   describe('status codes with actionClient and alertClient', () => {

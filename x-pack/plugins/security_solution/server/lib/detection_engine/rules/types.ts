@@ -86,7 +86,7 @@ import {
   QueryFilterOrUndefined,
   FieldsOrUndefined,
   SortOrderOrUndefined,
-  JobStatus,
+  RuleExecutionStatus,
   LastSuccessAt,
   StatusDate,
   LastSuccessMessage,
@@ -118,7 +118,7 @@ export interface IRuleStatusSOAttributes extends Record<string, any> {
   lastFailureMessage: LastFailureMessage | null | undefined;
   lastSuccessAt: LastSuccessAt | null | undefined;
   lastSuccessMessage: LastSuccessMessage | null | undefined;
-  status: JobStatus | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
   lastLookBackDate: string | null | undefined;
   gap: string | null | undefined;
   bulkCreateTimeDurations: string[] | null | undefined;
@@ -132,7 +132,7 @@ export interface IRuleStatusResponseAttributes {
   last_failure_message: LastFailureMessage | null | undefined;
   last_success_at: LastSuccessAt | null | undefined;
   last_success_message: LastSuccessMessage | null | undefined;
-  status: JobStatus | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
   last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;

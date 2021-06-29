@@ -26,6 +26,9 @@ export const createMockConfig = (): ConfigType => ({
   endpointResultListDefaultPageSize: 10,
   packagerTaskInterval: '60s',
   alertMergeStrategy: 'missingFields',
+  ruleExecutionLog: {
+    enabled: false,
+  },
 });
 
 export const mockGetCurrentUser = {
