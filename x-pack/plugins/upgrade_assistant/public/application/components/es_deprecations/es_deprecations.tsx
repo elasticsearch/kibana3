@@ -149,7 +149,7 @@ export const EsDeprecationsContent = withRouter(
         setTelemetryState(TelemetryState.Running);
 
         async function sendTelemetryData() {
-          await api.sendTelemetryData({
+          await api.sendPageTelemetryInfo({
             [tabName]: true,
           });
           setTelemetryState(TelemetryState.Complete);
