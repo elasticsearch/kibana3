@@ -18,12 +18,32 @@ import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-export interface RuntimeField {
+
+export interface EsRuntimeField {
   type: RuntimeType;
   script?: {
     source: string;
   };
 }
+
+export interface KibanaRuntimeField extends EsRuntimeField {
+  format?: SerializedFieldFormat;
+  customLabel?: string;
+  popularity?: number;
+  parent?: string;
+}
+
+export interface RuntimeObject {
+  name: string;
+  script: {
+    source: string;
+  };
+  subFields: string[];
+}
+
+export type RuntimeObjectWithSubFields = Omit<RuntimeObject, 'subFields'> & {
+  subFields: Record<string, KibanaRuntimeField>;
+};
 
 /**
  * @deprecated
@@ -61,6 +81,7 @@ export interface IndexPatternAttributes {
   fieldFormatMap?: string;
   fieldAttrs?: string;
   runtimeFieldMap?: string;
+  runtimeObjectMap?: string;
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -209,7 +230,7 @@ export interface FieldSpec {
   subType?: IFieldSubType;
   indexed?: boolean;
   customLabel?: string;
-  runtimeField?: RuntimeField;
+  runtimeField?: EsRuntimeField;
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
@@ -242,7 +263,8 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
-  runtimeFieldMap?: Record<string, RuntimeField>;
+  runtimeFieldMap?: Record<string, EsRuntimeField>;
+  runtimeObjectMap?: Record<string, RuntimeObject>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }
