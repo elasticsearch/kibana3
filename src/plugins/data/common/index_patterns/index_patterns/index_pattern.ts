@@ -9,8 +9,8 @@
 import _, { each, reject } from 'lodash';
 import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
 import type {
-  KibanaRuntimeField,
-  EsRuntimeField,
+  EnhancedRuntimeField,
+  RuntimeField,
   RuntimeObject,
   RuntimeObjectWithSubFields,
 } from '../types';
@@ -81,7 +81,7 @@ export class IndexPattern implements IIndexPattern {
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
-  private runtimeFieldMap: Record<string, EsRuntimeField>;
+  private runtimeFieldMap: Record<string, RuntimeField>;
   private runtimeObjectMap: Record<string, RuntimeObject>;
 
   /**
@@ -405,7 +405,7 @@ export class IndexPattern implements IIndexPattern {
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-  addRuntimeField(name: string, runtimeField: KibanaRuntimeField): IndexPatternField {
+  addRuntimeField(name: string, runtimeField: EnhancedRuntimeField): IndexPatternField {
     const { type, script, parent, customLabel, format, popularity } = runtimeField;
 
     const esRuntimeField = { type, script, parent };
@@ -451,7 +451,7 @@ export class IndexPattern implements IIndexPattern {
    * Returns runtime field if exists
    * @param name
    */
-  getRuntimeField(name: string): EsRuntimeField | null {
+  getRuntimeField(name: string): RuntimeField | null {
     return this.runtimeFieldMap[name] ?? null;
   }
 
@@ -459,7 +459,7 @@ export class IndexPattern implements IIndexPattern {
    * Replaces all existing runtime fields with new fields
    * @param newFields
    */
-  replaceAllRuntimeFields(newFields: Record<string, EsRuntimeField>) {
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
     const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
     oldRuntimeFieldNames.forEach((name) => {
       this.removeRuntimeField(name);
@@ -541,7 +541,7 @@ export class IndexPattern implements IIndexPattern {
         return acc;
       }
 
-      const runtimeField: KibanaRuntimeField = {
+      const runtimeField: EnhancedRuntimeField = {
         type: 'object',
         parent: name,
         customLabel: field.customLabel,
@@ -553,7 +553,7 @@ export class IndexPattern implements IIndexPattern {
         ...acc,
         [subFieldName]: runtimeField,
       };
-    }, {} as Record<string, KibanaRuntimeField>);
+    }, {} as Record<string, EnhancedRuntimeField>);
 
     return {
       ...existingRuntimeObject,

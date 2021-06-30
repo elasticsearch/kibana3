@@ -28,9 +28,9 @@ import {
 
 import { DocLinksStart, CoreStart } from 'src/core/public';
 
-import { Field, InternalFieldType, PluginStart, EsRuntimeField } from '../types';
+import { Field, InternalFieldType, PluginStart } from '../types';
 import { getLinks, RuntimeFieldPainlessError } from '../lib';
-import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
+import type { IndexPattern, DataPublicPluginStart, RuntimeField } from '../shared_imports';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 
 const geti18nTexts = (field?: Field) => {
@@ -101,7 +101,7 @@ export interface Props {
   /** The internal field type we are dealing with (concrete|runtime)*/
   fieldTypeToProcess: InternalFieldType;
   /** Handler to validate the script  */
-  runtimeFieldValidator: (field: EsRuntimeField) => Promise<RuntimeFieldPainlessError | null>;
+  runtimeFieldValidator: (field: RuntimeField) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
 
