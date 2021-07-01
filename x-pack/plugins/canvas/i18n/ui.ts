@@ -655,6 +655,24 @@ export const ViewStrings = {
         defaultMessage: 'Column from which to extract values to make available in the dropdown',
       }),
   },
+  Embeddable: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.embeddableTitle', {
+        defaultMessage: 'Embeddable',
+      }),
+    getHideTitleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.embeddable.args.hideTitleLabel', {
+        defaultMessage: 'Hide title',
+      }),
+    getTitleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.embeddable.args.titleLabel', {
+        defaultMessage: 'Title',
+      }),
+    getPaletteDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.embeddable.args.paletteLabel', {
+        defaultMessage: 'Palette',
+      }),
+  },
   GetCell: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.getCellTitle', {
