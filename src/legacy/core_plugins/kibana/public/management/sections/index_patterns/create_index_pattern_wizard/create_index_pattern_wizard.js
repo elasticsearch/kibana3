@@ -109,7 +109,13 @@ export class CreateIndexPatternWizard extends Component {
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
+        getIndices(
+          services.es,
+          this.indexPatternCreationType,
+          `*`,
+          MAX_SEARCH_SIZE,
+          this.state.isIncludingSystemIndices
+        ),
         [],
         indicesFailMsg
       )
@@ -118,7 +124,13 @@ export class CreateIndexPatternWizard extends Component {
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(services.es, this.indexPatternCreationType, `*:*`, 1),
+      getIndices(
+        services.es,
+        this.indexPatternCreationType,
+        `*:*`,
+        1,
+        this.state.isIncludingSystemIndices
+      ),
       ['a'],
       clustersFailMsg
     ).then((remoteIndices) => this.setState({ remoteClustersExist: !!remoteIndices.length }));
@@ -173,10 +185,8 @@ export class CreateIndexPatternWizard extends Component {
     this.setState({ step: 1 });
   };
 
-  onChangeIncludingSystemIndices = () => {
-    this.setState((state) => ({
-      isIncludingSystemIndices: !state.isIncludingSystemIndices,
-    }));
+  onChangeIncludingSystemIndices = (event) => {
+    this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
   };
 
   renderHeader() {
