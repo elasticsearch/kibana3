@@ -122,7 +122,6 @@ const converter = new Stories2SnapsConverter();
 initStoryshots({
   configPath: path.resolve(__dirname),
   framework: 'react',
-  // test: multiSnapshotWithOptions({}),
   asyncJest: true,
   test: async ({ story, context, done }) => {
     const renderer = create(createElement(story.render));
@@ -133,6 +132,7 @@ initStoryshots({
     expect(renderer).toMatchSpecificSnapshot(snapshotFileName);
     done?.();
   },
+  test: multiSnapshotWithOptions(),
   // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,
   renderer: shallow,
