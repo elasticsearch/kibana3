@@ -1,0 +1,7 @@
+{
+  "prefix": "expressionRepeatImage",
+  "paths": {
+    "expressionRepeatImage": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
