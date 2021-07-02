@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
-import { withSuspense } from '../../../presentation_util/public';
+import { elasticOutline, isValidUrl, withSuspense } from '../../../presentation_util/public';
 import { RepeatImageRendererConfig } from '../../common/types';
 
 const strings = {
@@ -21,6 +21,17 @@ const strings = {
   getHelpDescription: () =>
     i18n.translate('expressionRepeatImage.renderer.repeatImage.helpDescription', {
       defaultMessage: 'Render a basic repeatImage',
+    }),
+};
+
+const errors = {
+  getMissingMaxArgumentErrorMessage: () =>
+    i18n.translate('expressionRepeatImage.error.repeatImage.missingMaxArgument', {
+      defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
+      values: {
+        maxArgument: '`max`',
+        emptyImageArgument: '`emptyImage`',
+      },
     }),
 };
 
@@ -37,13 +48,23 @@ export const repeatImageRenderer = (): ExpressionRenderDefinition<RepeatImageRen
     config: RepeatImageRendererConfig,
     handlers: IInterpreterRenderHandlers
   ) => {
+    const settings = {
+      ...config,
+      image: isValidUrl(config.image) ? config.image : elasticOutline,
+      emptyImage: config.emptyImage || '',
+    };
+
+    if (isValidUrl(settings.emptyImage) && settings.max == null) {
+      throw new Error(errors.getMissingMaxArgumentErrorMessage());
+    }
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     render(
       <I18nProvider>
-        <RepeatImageComponent />
+        <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
       </I18nProvider>,
       domNode
     );

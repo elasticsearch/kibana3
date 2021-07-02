@@ -46,7 +46,7 @@ export const strings = {
   },
 };
 
-export const repeatImage: ExpressionRepeatImageFunction = () => {
+export const repeatImageFunction: ExpressionRepeatImageFunction = () => {
   const { help, args: argHelp } = strings;
 
   return {

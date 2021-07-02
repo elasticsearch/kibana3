@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { RepeatImage } from './expression_functions';
 
 export type OriginString = 'bottom' | 'left' | 'top' | 'right';
 export interface RepeatImageRendererConfig {
-  border: string;
-  borderWidth: number;
-  repeatImage: RepeatImage;
-  fill: string;
-  maintainAspect: boolean;
+  max: number;
+  count: number;
+  emptyImage: string;
+  image: string;
+  size: number;
 }
 
 export interface NodeDimensions {

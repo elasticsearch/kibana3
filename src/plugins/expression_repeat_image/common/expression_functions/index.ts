@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { repeatImageFunction } from './repeatImage_function';
+import { repeatImageFunction } from './repeat_image_function';
 
 export const functions = [repeatImageFunction];
 

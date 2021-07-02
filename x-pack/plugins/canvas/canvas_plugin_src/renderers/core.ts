@@ -12,7 +12,7 @@ import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progress } from './progress';
-import { repeatImage } from './repeat_image';
+// import { repeatImage } from './repeat_image';
 import { table } from './table';
 import { text } from './text';
 
@@ -24,7 +24,7 @@ export const renderFunctions = [
   pie,
   plot,
   progress,
-  repeatImage,
+  // repeatImage,
   table,
   text,
 ];

@@ -12,10 +12,10 @@ import {
   elasticOutline,
   functionWrapper,
 } from '../../../presentation_util/common/lib';
-import { repeatImage } from './repeat_image_function';
+import { repeatImageFunction } from './repeat_image_function';
 
 describe('repeatImage', () => {
-  const fn = functionWrapper(repeatImage);
+  const fn = functionWrapper(repeatImageFunction);
 
   it('returns a render as repeatImage', () => {
     const result = fn(10, {}, {} as ExecutionContext);
