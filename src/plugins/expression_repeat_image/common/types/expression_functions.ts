@@ -5,42 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-
-export enum RepeatImage {
-  ARROW = 'arrow',
-  ARROW_MULTI = 'arrowMulti',
-  BOOKMARK = 'bookmark',
-  CIRCLE = 'circle',
-  CROSS = 'cross',
-  HEXAGON = 'hexagon',
-  KITE = 'kite',
-  PENTAGON = 'pentagon',
-  RHOMBUS = 'rhombus',
-  SEMICIRCLE = 'semicircle',
-  SPEECH_BUBBLE = 'speechBubble',
-  SQUARE = 'square',
-  STAR = 'star',
-  TAG = 'tag',
-  TRIANGLE = 'triangle',
-  TRIANGLE_RIGHT = 'triangleRight',
-}
+import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions';
 
 interface Arguments {
-  border: string;
-  borderWidth: number;
-  repeatImage: RepeatImage;
-  fill: string;
-  maintainAspect: boolean;
+  image: string | null;
+  size: number;
+  max: number;
+  emptyImage: string | null;
 }
 
-export interface Output extends Arguments {
-  type: 'repeatImage';
+export interface Return {
+  count: number;
+  image: string;
+  size: number;
+  max: number;
+  emptyImage: string | null;
 }
 
 export type ExpressionRepeatImageFunction = () => ExpressionFunctionDefinition<
   'repeatImage',
-  number | null,
+  number,
   Arguments,
-  Output
+  ExpressionValueRender<Arguments>
 >;

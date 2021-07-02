@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions/common';
 import { elasticOutline, resolveWithMissingImage } from '../../../presentation_util/common/lib';
 import { CONTEXT, BASE64, URL } from '../constants';
+import { ExpressionRepeatImageFunction } from '../types';
 
 export const strings = {
   help: i18n.translate('xpack.canvas.functions.repeatImageHelpText', {
@@ -46,27 +46,7 @@ export const strings = {
   },
 };
 
-interface Arguments {
-  image: string | null;
-  size: number;
-  max: number;
-  emptyImage: string | null;
-}
-
-export interface Return {
-  count: number;
-  image: string;
-  size: number;
-  max: number;
-  emptyImage: string | null;
-}
-
-export function repeatImage(): ExpressionFunctionDefinition<
-  'repeatImage',
-  number,
-  Arguments,
-  ExpressionValueRender<Arguments>
-> {
+export const repeatImage: ExpressionRepeatImageFunction = () => {
   const { help, args: argHelp } = strings;
 
   return {
@@ -110,4 +90,4 @@ export function repeatImage(): ExpressionFunctionDefinition<
       };
     },
   };
-}
+};
