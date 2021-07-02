@@ -54,6 +54,8 @@ import {
   cidrFunction,
   dateRangeFunction,
   extendedBoundsFunction,
+  geoBoundingBoxFunction,
+  geoPointFunction,
   ipRangeFunction,
   kibana,
   kibanaContext,
@@ -175,6 +177,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
+    expressions.registerFunction(geoBoundingBoxFunction);
+    expressions.registerFunction(geoPointFunction);
     expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);
