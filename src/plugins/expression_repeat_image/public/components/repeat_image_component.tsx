@@ -60,26 +60,38 @@ function RepeatImageComponent({
   size,
   onLoaded,
 }: RepeatImageComponentProps) {
-  const [imagesLoaded, setImagesLoaded] = useState<boolean>(false);
   const [images, setImages] = useState<LoadedImages>({
     image: null,
     emptyImage: null,
   });
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     loadImages([imageSrc, emptyImageSrc]).then((result) => {
       const [image, emptyImage] = result;
+
+      if (!image) {
+        setError('Failed while loading `image`');
+        return;
+      }
+
+      if (emptyImageSrc && !emptyImage) {
+        setError('Failed while loading `emptyImage');
+        return;
+      }
+
       setImages({ image, emptyImage });
       onLoaded();
-      setImagesLoaded(true);
     });
   }, [imageSrc, emptyImageSrc, onLoaded]);
+
+  // @todo rewrite to `useNotifyService().error(...)
+  if (error) throw new Error(error);
+
   const imagesToRender: Array<ReactElement | null> = [];
 
   const { image, emptyImage } = images;
-  if (!image && imagesLoaded) {
-    throw new Error('Load of `image` failed');
-  }
 
   if (max && count > max) count = max;
 

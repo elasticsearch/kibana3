@@ -54,7 +54,7 @@ export const repeatImageRenderer = (): ExpressionRenderDefinition<RepeatImageRen
       emptyImage: config.emptyImage || '',
     };
 
-    if (isValidUrl(settings.emptyImage) && settings.max == null) {
+    if (isValidUrl(settings.emptyImage) && !settings.max) {
       throw new Error(errors.getMissingMaxArgumentErrorMessage());
     }
 

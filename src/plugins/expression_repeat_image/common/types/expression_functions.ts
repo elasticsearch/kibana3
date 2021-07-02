@@ -10,7 +10,7 @@ import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../ex
 interface Arguments {
   image: string | null;
   size: number;
-  max: number;
+  max: number | null;
   emptyImage: string | null;
 }
 

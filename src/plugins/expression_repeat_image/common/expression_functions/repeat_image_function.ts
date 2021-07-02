@@ -67,7 +67,7 @@ export const repeatImageFunction: ExpressionRepeatImageFunction = () => {
         default: elasticOutline,
       },
       max: {
-        types: ['number'],
+        types: ['number', 'null'],
         help: argHelp.max,
         default: 1000,
       },
