@@ -7,89 +7,107 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionRepeatImageFunction, RepeatImage } from '../types';
-import { SVG } from '../constants';
+import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions/common';
+import { elasticOutline, resolveWithMissingImage } from '../../../presentation_util/common/lib';
+import { CONTEXT, BASE64, URL } from '../constants';
 
 export const strings = {
-  help: i18n.translate('expressionRepeatImage.functions.repeatImageHelpText', {
-    defaultMessage: 'Creates a repeatImage.',
+  help: i18n.translate('xpack.canvas.functions.repeatImageHelpText', {
+    defaultMessage: 'Configures a repeating image element.',
   }),
   args: {
-    repeatImage: i18n.translate(
-      'expressionRepeatImage.functions.repeatImage.args.repeatImageHelpText',
-      {
-        defaultMessage: 'Pick a repeatImage.',
-      }
-    ),
-    border: i18n.translate('expressionRepeatImage.functions.repeatImage.args.borderHelpText', {
-      defaultMessage: 'An {SVG} color for the border outlining the repeatImage.',
+    emptyImage: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
+      defaultMessage:
+        'Fills the difference between the {CONTEXT} and {maxArg} parameter for the element with this image. ' +
+        'Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
       values: {
-        SVG,
+        BASE64,
+        CONTEXT,
+        maxArg: '`max`',
+        URL,
       },
     }),
-    borderWidth: i18n.translate(
-      'expressionRepeatImage.functions.repeatImage.args.borderWidthHelpText',
-      {
-        defaultMessage: 'The thickness of the border.',
-      }
-    ),
-    fill: i18n.translate('expressionRepeatImage.functions.repeatImage.args.fillHelpText', {
-      defaultMessage: 'An {SVG} color to fill the repeatImage.',
+    image: i18n.translate('xpack.canvas.functions.repeatImage.args.imageHelpText', {
+      defaultMessage:
+        'The image to repeat. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
       values: {
-        SVG,
+        BASE64,
+        URL,
       },
     }),
-    maintainAspect: i18n.translate(
-      'expressionRepeatImage.functions.repeatImage.args.maintainAspectHelpText',
-      {
-        defaultMessage: `Maintain the repeatImage's original aspect ratio?`,
-      }
-    ),
+    max: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {
+      defaultMessage: 'The maximum number of times the image can repeat.',
+    }),
+    size: i18n.translate('xpack.canvas.functions.repeatImage.args.sizeHelpText', {
+      defaultMessage:
+        'The maximum height or width of the image, in pixels. ' +
+        'When the image is taller than it is wide, this function limits the height.',
+    }),
   },
 };
 
-export const repeatImageFunction: ExpressionRepeatImageFunction = () => {
+interface Arguments {
+  image: string | null;
+  size: number;
+  max: number;
+  emptyImage: string | null;
+}
+
+export interface Return {
+  count: number;
+  image: string;
+  size: number;
+  max: number;
+  emptyImage: string | null;
+}
+
+export function repeatImage(): ExpressionFunctionDefinition<
+  'repeatImage',
+  number,
+  Arguments,
+  ExpressionValueRender<Arguments>
+> {
   const { help, args: argHelp } = strings;
 
   return {
     name: 'repeatImage',
     aliases: [],
-    inputTypes: ['null'],
+    type: 'render',
+    inputTypes: ['number'],
     help,
     args: {
-      repeatImage: {
-        types: ['string'],
-        help: argHelp.repeatImage,
-        aliases: ['_'],
-        default: 'square',
-        options: Object.values(RepeatImage),
+      emptyImage: {
+        types: ['string', 'null'],
+        help: argHelp.emptyImage,
+        default: null,
       },
-      border: {
-        types: ['string'],
-        aliases: ['stroke'],
-        help: argHelp.border,
+      image: {
+        types: ['string', 'null'],
+        help: argHelp.image,
+        default: elasticOutline,
       },
-      borderWidth: {
+      max: {
         types: ['number'],
-        aliases: ['strokeWidth'],
-        help: argHelp.borderWidth,
-        default: 0,
+        help: argHelp.max,
+        default: 1000,
       },
-      fill: {
-        types: ['string'],
-        help: argHelp.fill,
-        default: 'black',
-      },
-      maintainAspect: {
-        types: ['boolean'],
-        help: argHelp.maintainAspect,
-        default: false,
-        options: [true, false],
+      size: {
+        types: ['number'],
+        default: 100,
+        help: argHelp.size,
       },
     },
-    fn: (input, args) => ({
-      type: 'repeatImage',
-      ...args,
-    }),
+    fn: (count, args) => {
+      return {
+        type: 'render',
+        as: 'repeatImage',
+        value: {
+          count: Math.floor(count),
+          ...args,
+          image: resolveWithMissingImage(args.image, elasticOutline),
+          emptyImage: resolveWithMissingImage(args.emptyImage),
+        },
+      };
+    },
   };
-};
+}

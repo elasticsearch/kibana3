@@ -8,4 +8,7 @@
 
 export const PLUGIN_ID = 'expressionRepeatImage';
 export const PLUGIN_NAME = 'expressionRepeatImage';
-export const SVG = 'SVG';
+
+export const CONTEXT = '_context_';
+export const BASE64 = '`base64`';
+export const URL = 'URL';
