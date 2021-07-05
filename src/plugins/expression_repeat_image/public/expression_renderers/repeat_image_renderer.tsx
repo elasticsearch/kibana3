@@ -24,17 +24,6 @@ const strings = {
     }),
 };
 
-const errors = {
-  getMissingMaxArgumentErrorMessage: () =>
-    i18n.translate('expressionRepeatImage.error.repeatImage.missingMaxArgument', {
-      defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
-      values: {
-        maxArgument: '`max`',
-        emptyImageArgument: '`emptyImage`',
-      },
-    }),
-};
-
 const LazyRepeatImageComponent = lazy(() => import('../components/repeat_image_component'));
 const RepeatImageComponent = withSuspense(LazyRepeatImageComponent, null);
 
@@ -53,10 +42,6 @@ export const repeatImageRenderer = (): ExpressionRenderDefinition<RepeatImageRen
       image: isValidUrl(config.image) ? config.image : elasticOutline,
       emptyImage: config.emptyImage || '',
     };
-
-    if (isValidUrl(settings.emptyImage) && !settings.max) {
-      throw new Error(errors.getMissingMaxArgumentErrorMessage());
-    }
 
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);

@@ -7,7 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { elasticOutline, resolveWithMissingImage } from '../../../presentation_util/common/lib';
+import {
+  elasticOutline,
+  isValidUrl,
+  resolveWithMissingImage,
+} from '../../../presentation_util/common/lib';
 import { CONTEXT, BASE64, URL } from '../constants';
 import { ExpressionRepeatImageFunction } from '../types';
 
@@ -46,6 +50,17 @@ export const strings = {
   },
 };
 
+const errors = {
+  getMissingMaxArgumentErrorMessage: () =>
+    i18n.translate('expressionRepeatImage.error.repeatImage.missingMaxArgument', {
+      defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
+      values: {
+        maxArgument: '`max`',
+        emptyImageArgument: '`emptyImage`',
+      },
+    }),
+};
+
 export const repeatImageFunction: ExpressionRepeatImageFunction = () => {
   const { help, args: argHelp } = strings;
 
@@ -78,6 +93,10 @@ export const repeatImageFunction: ExpressionRepeatImageFunction = () => {
       },
     },
     fn: (count, args) => {
+      if (args.emptyImage !== null && isValidUrl(args.emptyImage) && args.max === null) {
+        throw new Error(errors.getMissingMaxArgumentErrorMessage());
+      }
+
       return {
         type: 'render',
         as: 'repeatImage',
