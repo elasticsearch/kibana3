@@ -8,19 +8,21 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { repeatImageRenderer as repeatImage } from '../';
 import { Render } from '../../../../presentation_util/public/__stories__';
-import { RepeatImage } from '../../../common/types';
+import { repeatImageRenderer } from '../repeat_image_renderer';
+import {
+  elasticLogo,
+  elasticOutline,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 
 storiesOf('renderers/repeatImage', module).add('default', () => {
   const config = {
-    type: 'repeatImage' as 'repeatImage',
-    border: '#FFEEDD',
-    borderWidth: 8,
-    repeatImage: RepeatImage.BOOKMARK,
-    fill: '#112233',
-    maintainAspect: true,
+    count: 42,
+    image: elasticLogo,
+    size: 20,
+    max: 60,
+    emptyImage: elasticOutline,
   };
 
-  return <Render renderer={repeatImage} config={config} />;
+  return <Render renderer={repeatImageRenderer} config={config} width="400px" />;
 });
