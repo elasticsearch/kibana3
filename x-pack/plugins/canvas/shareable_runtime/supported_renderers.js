@@ -7,7 +7,6 @@
 
 import { debug } from '../canvas_plugin_src/renderers/debug';
 import { image } from '../canvas_plugin_src/renderers/image';
-import { repeatImage } from '../canvas_plugin_src/renderers/repeat_image';
 import { markdown } from '../canvas_plugin_src/renderers/markdown';
 import { metric } from '../canvas_plugin_src/renderers/metric';
 import { pie } from '../canvas_plugin_src/renderers/pie';
@@ -15,8 +14,9 @@ import { plot } from '../canvas_plugin_src/renderers/plot';
 import { progress } from '../canvas_plugin_src/renderers/progress';
 import { table } from '../canvas_plugin_src/renderers/table';
 import { text } from '../canvas_plugin_src/renderers/text';
-import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
 import { errorRenderer as error } from '../../../../src/plugins/expression_error/public';
+import { repeatImageRenderer as repeatImage } from '../../../../src/plugins/expression_repeat_image/public';
+import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
 import { shapeRenderer as shape } from '../../../../src/plugins/expression_shape/public';
 
 /**

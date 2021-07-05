@@ -82,16 +82,6 @@ export const ErrorStrings = {
         },
       }),
   },
-  RepeatImage: {
-    getMissingMaxArgumentErrorMessage: () =>
-      i18n.translate('xpack.canvas.error.repeatImage.missingMaxArgument', {
-        defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
-        values: {
-          maxArgument: '`max`',
-          emptyImageArgument: '`emptyImage`',
-        },
-      }),
-  },
   WorkpadDropzone: {
     getTooManyFilesErrorMessage: () =>
       i18n.translate('xpack.canvas.error.workpadDropzone.tooManyFilesErrorMessage', {
