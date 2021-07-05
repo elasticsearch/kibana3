@@ -16,22 +16,25 @@ import { CONTEXT, BASE64, URL } from '../constants';
 import { ExpressionRepeatImageFunction } from '../types';
 
 export const strings = {
-  help: i18n.translate('xpack.canvas.functions.repeatImageHelpText', {
+  help: i18n.translate('expressionRepeatImage.functions.repeatImageHelpText', {
     defaultMessage: 'Configures a repeating image element.',
   }),
   args: {
-    emptyImage: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
-      defaultMessage:
-        'Fills the difference between the {CONTEXT} and {maxArg} parameter for the element with this image. ' +
-        'Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
-      values: {
-        BASE64,
-        CONTEXT,
-        maxArg: '`max`',
-        URL,
-      },
-    }),
-    image: i18n.translate('xpack.canvas.functions.repeatImage.args.imageHelpText', {
+    emptyImage: i18n.translate(
+      'expressionRepeatImage.functions.repeatImage.args.emptyImageHelpText',
+      {
+        defaultMessage:
+          'Fills the difference between the {CONTEXT} and {maxArg} parameter for the element with this image. ' +
+          'Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
+        values: {
+          BASE64,
+          CONTEXT,
+          maxArg: '`max`',
+          URL,
+        },
+      }
+    ),
+    image: i18n.translate('expressionRepeatImage.functions.repeatImage.args.imageHelpText', {
       defaultMessage:
         'The image to repeat. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
       values: {
@@ -39,10 +42,10 @@ export const strings = {
         URL,
       },
     }),
-    max: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {
+    max: i18n.translate('expressionRepeatImage.functions.repeatImage.args.maxHelpText', {
       defaultMessage: 'The maximum number of times the image can repeat.',
     }),
-    size: i18n.translate('xpack.canvas.functions.repeatImage.args.sizeHelpText', {
+    size: i18n.translate('expressionRepeatImage.functions.repeatImage.args.sizeHelpText', {
       defaultMessage:
         'The maximum height or width of the image, in pixels. ' +
         'When the image is taller than it is wide, this function limits the height.',
