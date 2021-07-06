@@ -176,6 +176,5 @@ type TestSubject =
   | 'fieldsValueField.input'
   | 'saltValueField.input'
   | 'methodsValueField'
-  | 'copyFromField'
   | 'copyFromField.input'
   | 'trimSwitch.input';
