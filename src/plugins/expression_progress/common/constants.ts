@@ -9,6 +9,8 @@
 export const PLUGIN_ID = 'expressionProgress';
 export const PLUGIN_NAME = 'expressionProgress';
 
-export const CONTEXT = '_context_';
-export const BASE64 = '`base64`';
-export const URL = 'URL';
+export const CSS = 'CSS';
+export const FONT_FAMILY = '`font-family`';
+export const FONT_WEIGHT = '`font-weight`';
+export const BOOLEAN_TRUE = '`true`';
+export const BOOLEAN_FALSE = '`false`';
