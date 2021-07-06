@@ -10,18 +10,13 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { imageRenderer } from '../image_renderer';
-import {
-  elasticLogo,
-  elasticOutline,
-} from '../../../../../../src/plugins/presentation_util/common/lib';
+import { elasticLogo } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { ImageMode } from '../../../common';
 
 storiesOf('renderers/image', module).add('default', () => {
   const config = {
-    count: 42,
-    image: elasticLogo,
-    size: 20,
-    max: 60,
-    emptyImage: elasticOutline,
+    dataurl: elasticLogo,
+    mode: ImageMode.COVER,
   };
 
   return <Render renderer={imageRenderer} config={config} width="400px" />;

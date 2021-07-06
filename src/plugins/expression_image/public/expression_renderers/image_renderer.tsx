@@ -5,27 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
-import { elasticOutline, isValidUrl, withSuspense } from '../../../presentation_util/public';
+import { elasticLogo, isValidUrl } from '../../../presentation_util/public';
 import { ImageRendererConfig } from '../../common/types';
 
 const strings = {
   getDisplayName: () =>
-    i18n.translate('expressionImage.renderer.image.displayName', {
+    i18n.translate('xpack.canvas.renderer.image.displayName', {
       defaultMessage: 'Image',
     }),
   getHelpDescription: () =>
-    i18n.translate('expressionImage.renderer.image.helpDescription', {
-      defaultMessage: 'Render a basic image',
+    i18n.translate('xpack.canvas.renderer.image.helpDescription', {
+      defaultMessage: 'Render an image',
     }),
 };
-
-const LazyImageComponent = lazy(() => import('../components/image_component'));
-const ImageComponent = withSuspense(LazyImageComponent, null);
 
 export const imageRenderer = (): ExpressionRenderDefinition<ImageRendererConfig> => ({
   name: 'image',
@@ -37,21 +33,20 @@ export const imageRenderer = (): ExpressionRenderDefinition<ImageRendererConfig>
     config: ImageRendererConfig,
     handlers: IInterpreterRenderHandlers
   ) => {
-    const settings = {
-      ...config,
-      image: isValidUrl(config.image) ? config.image : elasticOutline,
-      emptyImage: config.emptyImage || '',
+    const dataurl = isValidUrl(config.dataurl ?? '') ? config.dataurl : elasticLogo;
+
+    const style = {
+      height: '100%',
+      backgroundImage: `url(${dataurl})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center center',
+      backgroundSize: config.mode as string,
     };
 
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
-    render(
-      <I18nProvider>
-        <ImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
-      </I18nProvider>,
-      domNode
-    );
+    render(<div style={style} />, domNode, () => handlers.done());
   },
 });

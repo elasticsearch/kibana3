@@ -7,56 +7,50 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  elasticOutline,
-  isValidUrl,
-  resolveWithMissingImage,
-} from '../../../presentation_util/common/lib';
-import { CONTEXT, BASE64, URL } from '../constants';
-import { ExpressionImageFunction } from '../types';
+import { elasticLogo, resolveWithMissingImage } from '../../../presentation_util/common/lib';
+import { BASE64, URL } from '../constants';
+import { ExpressionImageFunction, ImageMode } from '../types';
 
 export const strings = {
   help: i18n.translate('expressionImage.functions.imageHelpText', {
-    defaultMessage: 'Configures a repeating image element.',
+    defaultMessage:
+      'Displays an image. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
+    values: {
+      BASE64,
+      URL,
+    },
   }),
   args: {
-    emptyImage: i18n.translate('expressionImage.functions.image.args.emptyImageHelpText', {
-      defaultMessage:
-        'Fills the difference between the {CONTEXT} and {maxArg} parameter for the element with this image. ' +
-        'Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
+    dataurl: i18n.translate('expressionImage.functions.image.args.dataurlHelpText', {
+      defaultMessage: 'The {https} {URL} or {BASE64} data {URL} of an image.',
       values: {
         BASE64,
-        CONTEXT,
-        maxArg: '`max`',
+        https: 'HTTP(S)',
         URL,
       },
     }),
-    image: i18n.translate('expressionImage.functions.image.args.imageHelpText', {
+    mode: i18n.translate('expressionImage.functions.image.args.modeHelpText', {
       defaultMessage:
-        'The image to repeat. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
+        '{contain} shows the entire image, scaled to fit. ' +
+        '{cover} fills the container with the image, cropping from the sides or bottom as needed. ' +
+        '{stretch} resizes the height and width of the image to 100% of the container.',
       values: {
-        BASE64,
-        URL,
+        contain: `\`"${ImageMode.CONTAIN}"\``,
+        cover: `\`"${ImageMode.COVER}"\``,
+        stretch: `\`"${ImageMode.STRETCH}"\``,
       },
-    }),
-    max: i18n.translate('expressionImage.functions.image.args.maxHelpText', {
-      defaultMessage: 'The maximum number of times the image can repeat.',
-    }),
-    size: i18n.translate('expressionImage.functions.image.args.sizeHelpText', {
-      defaultMessage:
-        'The maximum height or width of the image, in pixels. ' +
-        'When the image is taller than it is wide, this function limits the height.',
     }),
   },
 };
 
 const errors = {
-  getMissingMaxArgumentErrorMessage: () =>
-    i18n.translate('expressionImage.error.image.missingMaxArgument', {
-      defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
+  invalidImageMode: () =>
+    i18n.translate('expressionImage.functions.image.invalidImageModeErrorMessage', {
+      defaultMessage: '"mode" must be "{contain}", "{cover}", or "{stretch}"',
       values: {
-        maxArgument: '`max`',
-        emptyImageArgument: '`emptyImage`',
+        contain: ImageMode.CONTAIN,
+        cover: ImageMode.COVER,
+        stretch: ImageMode.STRETCH,
       },
     }),
 };
@@ -67,45 +61,35 @@ export const imageFunction: ExpressionImageFunction = () => {
   return {
     name: 'image',
     aliases: [],
-    type: 'render',
-    inputTypes: ['number'],
+    type: 'image',
+    inputTypes: ['null'],
     help,
     args: {
-      emptyImage: {
+      dataurl: {
+        // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.
         types: ['string', 'null'],
-        help: argHelp.emptyImage,
-        default: null,
+        help: argHelp.dataurl,
+        aliases: ['_', 'url'],
+        default: elasticLogo,
       },
-      image: {
-        types: ['string', 'null'],
-        help: argHelp.image,
-        default: elasticOutline,
-      },
-      max: {
-        types: ['number', 'null'],
-        help: argHelp.max,
-        default: 1000,
-      },
-      size: {
-        types: ['number'],
-        default: 100,
-        help: argHelp.size,
+      mode: {
+        types: ['string'],
+        help: argHelp.mode,
+        default: 'contain',
+        options: Object.values(ImageMode),
       },
     },
-    fn: (count, args) => {
-      if (args.emptyImage !== null && isValidUrl(args.emptyImage) && args.max === null) {
-        throw new Error(errors.getMissingMaxArgumentErrorMessage());
+    fn: (input, { dataurl, mode }) => {
+      if (!mode || !Object.values(ImageMode).includes(mode)) {
+        throw new Error(errors.invalidImageMode());
       }
 
+      const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
+
       return {
-        type: 'render',
-        as: 'image',
-        value: {
-          count: Math.floor(count),
-          ...args,
-          image: resolveWithMissingImage(args.image, elasticOutline),
-          emptyImage: resolveWithMissingImage(args.emptyImage),
-        },
+        type: 'image',
+        mode: modeStyle,
+        dataurl: resolveWithMissingImage(dataurl, elasticLogo) as string,
       };
     },
   };

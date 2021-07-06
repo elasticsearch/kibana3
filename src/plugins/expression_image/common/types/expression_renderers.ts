@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { ImageMode } from './expression_functions';
+
 export type OriginString = 'bottom' | 'left' | 'top' | 'right';
+
 export interface ImageRendererConfig {
-  max: number;
-  count: number;
-  emptyImage: string;
-  image: string;
-  size: number;
+  dataurl: string | null;
+  mode: ImageMode | null;
 }
 
 export interface NodeDimensions {

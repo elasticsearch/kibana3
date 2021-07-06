@@ -5,26 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions';
+import { ExpressionFunctionDefinition } from '../../../expressions';
+
+export enum ImageMode {
+  CONTAIN = 'contain',
+  COVER = 'cover',
+  STRETCH = 'stretch',
+}
 
 interface Arguments {
-  image: string | null;
-  size: number;
-  max: number | null;
-  emptyImage: string | null;
+  dataurl: string | null;
+  mode: ImageMode | null;
 }
 
 export interface Return {
-  count: number;
-  image: string;
-  size: number;
-  max: number;
-  emptyImage: string | null;
+  type: 'image';
+  mode: string;
+  dataurl: string;
 }
 
 export type ExpressionImageFunction = () => ExpressionFunctionDefinition<
   'image',
-  number,
+  null,
   Arguments,
-  ExpressionValueRender<Arguments>
+  Return
 >;
