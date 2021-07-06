@@ -1,0 +1,7 @@
+{
+  "prefix": "expressionProgress",
+  "paths": {
+    "expressionProgress": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
