@@ -89,7 +89,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "10.12.27",
+    "**/@types/node": "12.20.14",
     "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
     "**/cross-fetch/node-fetch": "^2.6.1",
     "**/cypress/lodash": "^4.17.21",
@@ -294,6 +294,7 @@
     "@kbn/plugin-generator": "1.0.0",
     "@kbn/test": "1.0.0",
     "@octokit/rest": "^15.10.0",
+    "@testing-library/react": "^9.5.0",
     "@types/angular": "1.6.50",
     "@types/angular-mocks": "^1.7.0",
     "@types/babel-core": "^6.25.5",
@@ -329,7 +330,7 @@
     "@types/minimatch": "^2.0.29",
     "@types/moment-timezone": "^0.5.8",
     "@types/mustache": "^0.8.31",
-    "@types/node": "^10.12.27",
+    "@types/node": "^12.20.14",
     "@types/opn": "^5.1.0",
     "@types/prop-types": "^15.7.3",
     "@types/puppeteer-core": "^1.9.0",
@@ -439,14 +440,14 @@
     "tslint-config-prettier": "^1.15.0",
     "tslint-microsoft-contrib": "^6.0.0",
     "tslint-plugin-prettier": "^2.0.0",
-    "typescript": "^3.0.3",
+    "typescript": "~3.1.0",
     "vinyl-fs": "^3.0.2",
     "xml2js": "^0.4.19",
     "xmlbuilder": "9.0.4",
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.24.1",
+    "node": "12.22.3",
     "yarn": "^1.21.1"
   }
 }
