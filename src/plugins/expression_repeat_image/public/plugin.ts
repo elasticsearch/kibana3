@@ -18,16 +18,17 @@ interface StartDeps {
   expression: ExpressionsStart;
 }
 
-export type ExpressionShapePluginSetup = void;
-export type ExpressionShapePluginStart = void;
+export type ExpressionMetricPluginSetup = void;
+export type ExpressionMetricPluginStart = void;
 
-export class ExpressionShapePlugin
-  implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
+export class ExpressionMetricPlugin
+  implements
+    Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
     expressions.registerRenderer(repeatImageRenderer);
   }
 
-  public start(core: CoreStart): ExpressionShapePluginStart {}
+  public start(core: CoreStart): ExpressionMetricPluginStart {}
 
   public stop() {}
 }
