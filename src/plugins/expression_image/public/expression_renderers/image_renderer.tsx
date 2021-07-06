@@ -14,11 +14,11 @@ import { ImageRendererConfig } from '../../common/types';
 
 const strings = {
   getDisplayName: () =>
-    i18n.translate('xpack.canvas.renderer.image.displayName', {
+    i18n.translate('expressionImage.renderer.image.displayName', {
       defaultMessage: 'Image',
     }),
   getHelpDescription: () =>
-    i18n.translate('xpack.canvas.renderer.image.helpDescription', {
+    i18n.translate('expressionImage.renderer.image.helpDescription', {
       defaultMessage: 'Render an image',
     }),
 };
