@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { Style, openSans } from 'src/plugins/expressions/common';
+import { Style, openSans } from '../../../expressions/common';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../constants';
 import { ExpressionProgressFunction, Shape } from '../types';
 
@@ -62,7 +62,7 @@ export const strings = {
   },
 };
 
-const errors = {
+export const errors = {
   invalidMaxValue: (max: number) =>
     new Error(
       i18n.translate('xpack.canvas.functions.progress.invalidMaxValueErrorMessage', {
