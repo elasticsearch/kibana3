@@ -19,6 +19,7 @@
     "expressionError": "src/plugins/expression_error",
     "expressionImage": "src/plugins/expression_image",
     "expressionMetric": "src/plugins/expression_metric",
+    "expressionProgress": "src/plugins/expression_progress",
     "expressionRepeatImage": "src/plugins/expression_repeat_image",
     "expressionRevealImage": "src/plugins/expression_reveal_image",
     "expressionShape": "src/plugins/expression_shape",
