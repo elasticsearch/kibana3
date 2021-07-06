@@ -19,5 +19,5 @@ storiesOf('renderers/image', module).add('default', () => {
     mode: ImageMode.COVER,
   };
 
-  return <Render renderer={imageRenderer} config={config} width="400px" />;
+  return <Render renderer={imageRenderer} config={config} width="500px" height="500px" />;
 });
