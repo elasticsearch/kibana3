@@ -10,7 +10,6 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { times } from 'lodash';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { RepeatImageRendererConfig } from '../../common';
-import './repeat_image.scss';
 
 interface RepeatImageComponentProps extends RepeatImageRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
