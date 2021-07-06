@@ -1,0 +1,7 @@
+{
+  "prefix": "expressionMetric",
+  "paths": {
+    "expressionMetric": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
