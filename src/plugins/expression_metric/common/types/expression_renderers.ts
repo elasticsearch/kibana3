@@ -6,13 +6,19 @@
  * Side Public License, v 1.
  */
 
-export type OriginString = 'bottom' | 'left' | 'top' | 'right';
+import { Style } from '../../../expressions/common';
+
 export interface MetricRendererConfig {
-  max: number;
-  count: number;
-  emptyImage: string;
-  image: string;
-  size: number;
+  /** The text to display under the metric */
+  label: string;
+  /** Font settings for the label */
+  labelFont: Style;
+  /** Value of the metric to display */
+  metric: string | number | null;
+  /** Font settings for the metric */
+  metricFont: Style;
+  /** NumeralJS format string */
+  metricFormat: string;
 }
 
 export interface NodeDimensions {

@@ -7,66 +7,88 @@
  */
 
 import { ExecutionContext } from 'src/plugins/expressions';
-import {
-  elasticLogo,
-  elasticOutline,
-  functionWrapper,
-} from '../../../presentation_util/common/lib';
+import { functionWrapper, fontStyle } from '../../../presentation_util/common/lib';
 import { metricFunction } from './metric_function';
 
 describe('metric', () => {
   const fn = functionWrapper(metricFunction);
 
   it('returns a render as metric', () => {
-    const result = fn(10, {}, {} as ExecutionContext);
+    const result = fn(null, {}, {} as ExecutionContext);
     expect(result).toHaveProperty('type', 'render');
     expect(result).toHaveProperty('as', 'metric');
   });
 
+  it('sets the metric to context', () => {
+    const result = fn('2', {}, {} as ExecutionContext);
+    expect(result.value).toHaveProperty('metric', '2');
+  });
+
+  it(`defaults metric to '?' when context is missing`, () => {
+    const result = fn(null, {}, {} as ExecutionContext);
+    expect(result.value).toHaveProperty('metric', '?');
+  });
+
   describe('args', () => {
-    describe('image', () => {
-      it('sets the source of the repeated image', () => {
-        const result = fn(10, { image: elasticLogo }, {} as ExecutionContext).value;
-        expect(result).toHaveProperty('image', elasticLogo);
-      });
+    describe('label', () => {
+      it('sets the label of the metric', () => {
+        const result = fn(
+          null,
+          {
+            label: 'My Label',
+          },
+          {} as ExecutionContext
+        );
 
-      it('defaults to the Elastic outline logo', () => {
-        const result = fn(100000, {}, {} as ExecutionContext).value;
-        expect(result).toHaveProperty('image', elasticOutline);
+        expect(result.value).toHaveProperty('label', 'My Label');
       });
     });
 
-    describe('size', () => {
-      it('sets the size of the image', () => {
-        const result = fn(-5, { size: 200 }, {} as ExecutionContext).value;
-        expect(result).toHaveProperty('size', 200);
+    describe('metricFont', () => {
+      it('sets the font style for the metric', () => {
+        const result = fn(
+          null,
+          {
+            metricFont: fontStyle,
+          },
+          {} as ExecutionContext
+        );
+
+        expect(result.value).toHaveProperty('metricFont', fontStyle);
       });
 
-      it('defaults to 100', () => {
-        const result = fn(-5, {}, {} as ExecutionContext).value;
-        expect(result).toHaveProperty('size', 100);
-      });
+      // TODO: write test when using an instance of the interpreter
+      // it("sets a default style for the metric when not provided, () => {});
     });
 
-    describe('max', () => {
-      it('sets the maximum number of a times the image is repeated', () => {
-        const result = fn(100000, { max: 20 }, {} as ExecutionContext).value;
-        expect(result).toHaveProperty('max', 20);
+    describe('labelFont', () => {
+      it('sets the font style for the label', () => {
+        const result = fn(
+          null,
+          {
+            labelFont: fontStyle,
+          },
+          {} as ExecutionContext
+        );
+
+        expect(result.value).toHaveProperty('labelFont', fontStyle);
       });
-      it('defaults to 1000', () => {
-        const result = fn(100000, {}, {} as ExecutionContext).value;
-        expect(result).toHaveProperty('max', 1000);
-      });
+
+      // TODO: write test when using an instance of the interpreter
+      // it("sets a default style for the label when not provided, () => {});
     });
 
-    describe('emptyImage', () => {
-      it('returns metric object with emptyImage as undefined', () => {
-        const result = fn(100000, { emptyImage: elasticLogo }, {} as ExecutionContext).value;
-        expect(result).toHaveProperty('emptyImage', elasticLogo);
-      });
-      it('sets emptyImage to null', () => {
-        const result = fn(100000, {}, {} as ExecutionContext).value;
-        expect(result).toHaveProperty('emptyImage', null);
+    describe('metricFormat', () => {
+      it('sets the number format of the metric value', () => {
+        const result = fn(
+          null,
+          {
+            metricFormat: '0.0%',
+          },
+          {} as ExecutionContext
+        );
+
+        expect(result.value).toHaveProperty('metricFormat', '0.0%');
       });
     });
   });

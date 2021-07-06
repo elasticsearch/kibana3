@@ -6,95 +6,40 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
-import { times } from 'lodash';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { MetricRendererConfig } from '../../common';
-import './metric.scss';
+import React, { FunctionComponent, CSSProperties } from 'react';
+import numeral from '@elastic/numeral';
 
-interface MetricComponentProps extends MetricRendererConfig {
-  onLoaded: IInterpreterRenderHandlers['done'];
-  parentNode: HTMLElement;
+interface Props {
+  /** The text to display under the metric */
+  label?: string;
+  /** CSS font properties for the label */
+  labelFont: CSSProperties;
+  /** Value of the metric to display */
+  metric: string | number | null;
+  /** CSS font properties for the metric */
+  metricFont: CSSProperties;
+  /** NumeralJS format string */
+  metricFormat?: string;
 }
 
-interface LoadedImages {
-  image: HTMLImageElement | null;
-  emptyImage: HTMLImageElement | null;
-}
-
-async function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = (error) => reject(error);
-    img.src = src;
-  });
-}
-
-async function loadImages(images: string[]): Promise<Array<HTMLImageElement | null>> {
-  const results = await Promise.allSettled([...images.map(loadImage)]);
-  return results.map((loadedImage) =>
-    loadedImage.status === 'rejected' ? null : loadedImage.value
-  );
-}
-
-function setImageSize(img: HTMLImageElement, size: number) {
-  if (img.naturalHeight > img.naturalWidth) {
-    img.height = size;
-  } else {
-    img.width = size;
-  }
-}
-
-function createImageJSX(img: HTMLImageElement | null) {
-  if (!img) return null;
-  const params = img.width > img.height ? { heigth: img.height } : { width: img.width };
-  return <img src={img.src} {...params} alt="" />;
-}
-
-function MetricComponent({
-  max,
-  count,
-  emptyImage: emptyImageSrc,
-  image: imageSrc,
-  size,
-  onLoaded,
-}: MetricComponentProps) {
-  const [images, setImages] = useState<LoadedImages>({
-    image: null,
-    emptyImage: null,
-  });
-
-  useEffect(() => {
-    loadImages([imageSrc, emptyImageSrc]).then((result) => {
-      const [image, emptyImage] = result;
-      setImages({ image, emptyImage });
-      onLoaded();
-    });
-  }, [imageSrc, emptyImageSrc, onLoaded]);
-
-  const imagesToRender: Array<ReactElement | null> = [];
-
-  const { image, emptyImage } = images;
-
-  if (max && count > max) count = max;
-
-  if (image) {
-    setImageSize(image, size);
-    times(count, () => imagesToRender.push(createImageJSX(image)));
-  }
-
-  if (emptyImage) {
-    setImageSize(emptyImage, size);
-    times(max - count, () => imagesToRender.push(createImageJSX(emptyImage)));
-  }
-
-  return (
-    <div className="metric" style={{ pointerEvents: 'none' }}>
-      {imagesToRender}
+const Metric: FunctionComponent<Props> = ({
+  label,
+  metric,
+  labelFont,
+  metricFont,
+  metricFormat,
+}) => (
+  <div className="canvasMetric">
+    <div className="canvasMetric__metric" style={metricFont}>
+      {metricFormat ? numeral(metric).format(metricFormat) : metric}
     </div>
-  );
-}
-// default export required for React.Lazy
+    {label && (
+      <div className="canvasMetric__label" style={labelFont}>
+        {label}
+      </div>
+    )}
+  </div>
+);
+
 // eslint-disable-next-line import/no-default-export
-export { MetricComponent as default };
+export { Metric as default };

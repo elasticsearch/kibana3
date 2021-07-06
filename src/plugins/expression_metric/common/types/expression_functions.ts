@@ -5,26 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions';
+import { ExpressionFunctionDefinition, ExpressionValueRender, Style } from '../../../expressions';
 
-interface Arguments {
-  image: string | null;
-  size: number;
-  max: number | null;
-  emptyImage: string | null;
-}
+export type Input = number | string | null;
 
-export interface Return {
-  count: number;
-  image: string;
-  size: number;
-  max: number;
-  emptyImage: string | null;
+export interface Arguments {
+  label: string;
+  metricFont: Style;
+  metricFormat: string;
+  labelFont: Style;
 }
 
 export type ExpressionMetricFunction = () => ExpressionFunctionDefinition<
   'metric',
-  number,
+  Input,
   Arguments,
   ExpressionValueRender<Arguments>
 >;

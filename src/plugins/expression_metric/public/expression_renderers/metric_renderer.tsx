@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { lazy } from 'react';
+import React, { CSSProperties, lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
-import { elasticOutline, isValidUrl, withSuspense } from '../../../presentation_util/public';
+import { withSuspense } from '../../../presentation_util/public';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {
@@ -20,7 +19,7 @@ const strings = {
     }),
   getHelpDescription: () =>
     i18n.translate('expressionMetric.renderer.metric.helpDescription', {
-      defaultMessage: 'Render a basic metric',
+      defaultMessage: 'Render a number over a label',
     }),
 };
 
@@ -37,21 +36,20 @@ export const metricRenderer = (): ExpressionRenderDefinition<MetricRendererConfi
     config: MetricRendererConfig,
     handlers: IInterpreterRenderHandlers
   ) => {
-    const settings = {
-      ...config,
-      image: isValidUrl(config.image) ? config.image : elasticOutline,
-      emptyImage: config.emptyImage || '',
-    };
-
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     render(
-      <I18nProvider>
-        <MetricComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
-      </I18nProvider>,
-      domNode
+      <MetricComponent
+        label={config.label}
+        labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
+        metric={config.metric}
+        metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
+        metricFormat={config.metricFormat}
+      />,
+      domNode,
+      () => handlers.done()
     );
   },
 });

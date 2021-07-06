@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { metricFunction } from '../../../../../../src/plugins/expression_metric/common';
 import { shapeFunction } from '../../../../../../src/plugins/expression_shape/common';
 
-export const functions = [shapeFunction];
+export const functions = [metricFunction, shapeFunction];

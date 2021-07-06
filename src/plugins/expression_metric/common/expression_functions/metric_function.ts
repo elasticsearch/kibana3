@@ -7,58 +7,46 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  elasticOutline,
-  isValidUrl,
-  resolveWithMissingImage,
-} from '../../../presentation_util/common/lib';
-import { CONTEXT, BASE64, URL } from '../constants';
+import { openSans } from '../../../expressions/common/fonts';
+import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../constants';
 import { ExpressionMetricFunction } from '../types';
 
 export const strings = {
-  help: i18n.translate('expressionMetric.functions.metricHelpText', {
-    defaultMessage: 'Configures a repeating image element.',
+  help: i18n.translate('xpack.canvas.functions.metricHelpText', {
+    defaultMessage: 'Displays a number over a label.',
   }),
   args: {
-    emptyImage: i18n.translate('expressionMetric.functions.metric.args.emptyImageHelpText', {
+    label: i18n.translate('xpack.canvas.functions.metric.args.labelHelpText', {
+      defaultMessage: 'The text describing the metric.',
+    }),
+    labelFont: i18n.translate('xpack.canvas.functions.metric.args.labelFontHelpText', {
       defaultMessage:
-        'Fills the difference between the {CONTEXT} and {maxArg} parameter for the element with this image. ' +
-        'Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
+        'The {CSS} font properties for the label. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
-        BASE64,
-        CONTEXT,
-        maxArg: '`max`',
-        URL,
+        CSS,
+        FONT_FAMILY,
+        FONT_WEIGHT,
       },
     }),
-    image: i18n.translate('expressionMetric.functions.metric.args.imageHelpText', {
+    metricFont: i18n.translate('xpack.canvas.functions.metric.args.metricFontHelpText', {
       defaultMessage:
-        'The image to repeat. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
+        'The {CSS} font properties for the metric. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
-        BASE64,
-        URL,
+        CSS,
+        FONT_FAMILY,
+        FONT_WEIGHT,
       },
     }),
-    max: i18n.translate('expressionMetric.functions.metric.args.maxHelpText', {
-      defaultMessage: 'The maximum number of times the image can repeat.',
-    }),
-    size: i18n.translate('expressionMetric.functions.metric.args.sizeHelpText', {
-      defaultMessage:
-        'The maximum height or width of the image, in pixels. ' +
-        'When the image is taller than it is wide, this function limits the height.',
+    // TODO: Find a way to generate the docs URL here
+    metricFormat: i18n.translate('xpack.canvas.functions.metric.args.metricFormatHelpText', {
+      defaultMessage: 'A {NUMERALJS} format string. For example, {example1} or {example2}.',
+      values: {
+        example1: '`"0.0a"`',
+        example2: '`"0%"`',
+        NUMERALJS,
+      },
     }),
   },
-};
-
-const errors = {
-  getMissingMaxArgumentErrorMessage: () =>
-    i18n.translate('expressionMetric.error.metric.missingMaxArgument', {
-      defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
-      values: {
-        maxArgument: '`max`',
-        emptyImageArgument: '`emptyImage`',
-      },
-    }),
 };
 
 export const metricFunction: ExpressionMetricFunction = () => {
@@ -68,43 +56,41 @@ export const metricFunction: ExpressionMetricFunction = () => {
     name: 'metric',
     aliases: [],
     type: 'render',
-    inputTypes: ['number'],
+    inputTypes: ['number', 'string', 'null'],
     help,
     args: {
-      emptyImage: {
-        types: ['string', 'null'],
-        help: argHelp.emptyImage,
-        default: null,
+      label: {
+        types: ['string'],
+        aliases: ['_', 'text', 'description'],
+        help: argHelp.label,
+        default: '""',
       },
-      image: {
-        types: ['string', 'null'],
-        help: argHelp.image,
-        default: elasticOutline,
+      labelFont: {
+        types: ['style'],
+        help: argHelp.labelFont,
+        default: `{font size=14 family="${openSans.value}" color="#000000" align=center}`,
       },
-      max: {
-        types: ['number', 'null'],
-        help: argHelp.max,
-        default: 1000,
+      metricFont: {
+        types: ['style'],
+        help: argHelp.metricFont,
+        default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
       },
-      size: {
-        types: ['number'],
-        default: 100,
-        help: argHelp.size,
+      metricFormat: {
+        types: ['string'],
+        aliases: ['format'],
+        help: argHelp.metricFormat,
       },
     },
-    fn: (count, args) => {
-      if (args.emptyImage !== null && isValidUrl(args.emptyImage) && args.max === null) {
-        throw new Error(errors.getMissingMaxArgumentErrorMessage());
-      }
-
+    fn: (input, { label, labelFont, metricFont, metricFormat }) => {
       return {
         type: 'render',
         as: 'metric',
         value: {
-          count: Math.floor(count),
-          ...args,
-          image: resolveWithMissingImage(args.image, elasticOutline),
-          emptyImage: resolveWithMissingImage(args.emptyImage),
+          metric: input === null ? '?' : input,
+          label,
+          labelFont,
+          metricFont,
+          metricFormat,
         },
       };
     },

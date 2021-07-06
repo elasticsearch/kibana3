@@ -9,6 +9,7 @@
 export const PLUGIN_ID = 'expressionMetric';
 export const PLUGIN_NAME = 'expressionMetric';
 
-export const CONTEXT = '_context_';
-export const BASE64 = '`base64`';
-export const URL = 'URL';
+export const FONT_FAMILY = '`font-family`';
+export const FONT_WEIGHT = '`font-weight`';
+export const CSS = 'CSS';
+export const NUMERALJS = 'Numeral pattern';
