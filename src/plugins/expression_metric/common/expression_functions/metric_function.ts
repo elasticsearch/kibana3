@@ -12,14 +12,14 @@ import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../constants';
 import { ExpressionMetricFunction } from '../types';
 
 export const strings = {
-  help: i18n.translate('xpack.canvas.functions.metricHelpText', {
+  help: i18n.translate('expressionMetric.functions.metricHelpText', {
     defaultMessage: 'Displays a number over a label.',
   }),
   args: {
-    label: i18n.translate('xpack.canvas.functions.metric.args.labelHelpText', {
+    label: i18n.translate('expressionMetric.functions.metric.args.labelHelpText', {
       defaultMessage: 'The text describing the metric.',
     }),
-    labelFont: i18n.translate('xpack.canvas.functions.metric.args.labelFontHelpText', {
+    labelFont: i18n.translate('expressionMetric.functions.metric.args.labelFontHelpText', {
       defaultMessage:
         'The {CSS} font properties for the label. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
@@ -28,7 +28,7 @@ export const strings = {
         FONT_WEIGHT,
       },
     }),
-    metricFont: i18n.translate('xpack.canvas.functions.metric.args.metricFontHelpText', {
+    metricFont: i18n.translate('expressionMetric.functions.metric.args.metricFontHelpText', {
       defaultMessage:
         'The {CSS} font properties for the metric. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
@@ -38,7 +38,7 @@ export const strings = {
       },
     }),
     // TODO: Find a way to generate the docs URL here
-    metricFormat: i18n.translate('xpack.canvas.functions.metric.args.metricFormatHelpText', {
+    metricFormat: i18n.translate('expressionMetric.functions.metric.args.metricFormatHelpText', {
       defaultMessage: 'A {NUMERALJS} format string. For example, {example1} or {example2}.',
       values: {
         example1: '`"0.0a"`',
