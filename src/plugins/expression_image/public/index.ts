@@ -6,20 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../../../core/server';
+import { ExpressionImagePlugin } from './plugin';
 
-export function defineRoutes(router: IRouter) {
-  router.get(
-    {
-      path: '/api/expression_image/example',
-      validate: false,
-    },
-    async (context, request, response) => {
-      return response.ok({
-        body: {
-          time: new Date().toISOString(),
-        },
-      });
-    }
-  );
+export type { ExpressionImagePluginSetup, ExpressionImagePluginStart } from './plugin';
+
+export function plugin() {
+  return new ExpressionImagePlugin();
 }
+
+export * from './expression_renderers';

@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ExpressionImagePluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ExpressionImagePluginStart {}
+export const PLUGIN_ID = 'expressionImage';
+export const PLUGIN_NAME = 'expressionImage';
+
+export const CONTEXT = '_context_';
+export const BASE64 = '`base64`';
+export const URL = 'URL';

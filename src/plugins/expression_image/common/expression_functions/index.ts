@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './types';
-export * from './expression_functions';
+import { imageFunction } from './image_function';
+
+export const functions = [imageFunction];
+
+export { imageFunction };

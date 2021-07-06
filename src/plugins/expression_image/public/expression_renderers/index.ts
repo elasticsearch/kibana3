@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './types';
-export * from './expression_functions';
+import { imageRenderer } from './image_renderer';
+
+export const renderers = [imageRenderer];
+
+export { imageRenderer };

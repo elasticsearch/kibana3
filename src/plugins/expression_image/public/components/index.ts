@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './types';
-export * from './expression_functions';
+export * from './image_component';

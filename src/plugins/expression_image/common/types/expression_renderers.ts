@@ -6,6 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * from './types';
-export * from './expression_functions';
+export type OriginString = 'bottom' | 'left' | 'top' | 'right';
+export interface ImageRendererConfig {
+  max: number;
+  count: number;
+  emptyImage: string;
+  image: string;
+  size: number;
+}
+
+export interface NodeDimensions {
+  width: number;
+  height: number;
+}

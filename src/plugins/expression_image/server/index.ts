@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
 import { ExpressionImagePlugin } from './plugin';
 
-//  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
+export type { ExpressionImagePluginSetup, ExpressionImagePluginStart } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionImagePlugin(initializerContext);
+export function plugin() {
+  return new ExpressionImagePlugin();
 }
-
-export { ExpressionImagePluginSetup, ExpressionImagePluginStart } from './types';
