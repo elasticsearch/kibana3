@@ -5,22 +5,33 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../expressions';
+import { ExpressionFunctionDefinition, ExpressionValueRender, Style } from '../../../expressions';
 
-interface Arguments {
-  image: string | null;
-  size: number;
-  max: number | null;
-  emptyImage: string | null;
+export enum Shape {
+  GAUGE = 'gauge',
+  HORIZONTAL_BAR = 'horizontalBar',
+  HORIZONTAL_PILL = 'horizontalPill',
+  SEMICIRCLE = 'semicircle',
+  UNICORN = 'unicorn',
+  VERTICAL_BAR = 'verticalBar',
+  VERTICAL_PILL = 'verticalPill',
+  WHEEL = 'wheel',
 }
 
-export interface Return {
-  count: number;
-  image: string;
-  size: number;
+export interface Arguments {
+  barColor: string;
+  barWeight: number;
+  font: Style;
+  label: boolean | string;
   max: number;
-  emptyImage: string | null;
+  shape: Shape;
+  valueColor: string;
+  valueWeight: number;
 }
+
+export type Output = Arguments & {
+  value: number;
+};
 
 export type ExpressionProgressFunction = () => ExpressionFunctionDefinition<
   'progress',

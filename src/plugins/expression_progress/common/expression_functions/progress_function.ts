@@ -7,58 +7,83 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  elasticOutline,
-  isValidUrl,
-  resolveWithMissingImage,
-} from '../../../presentation_util/common/lib';
-import { CONTEXT, BASE64, URL } from '../constants';
-import { ExpressionProgressFunction } from '../types';
+import { get } from 'lodash';
+import { Style, openSans } from 'src/plugins/expressions/common';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../constants';
+import { ExpressionProgressFunction, Shape } from '../types';
 
 export const strings = {
-  help: i18n.translate('expressionProgress.functions.progressHelpText', {
-    defaultMessage: 'Configures a repeating image element.',
+  help: i18n.translate('xpack.canvas.functions.progressHelpText', {
+    defaultMessage: 'Configures a progress element.',
   }),
   args: {
-    emptyImage: i18n.translate('expressionProgress.functions.progress.args.emptyImageHelpText', {
+    barColor: i18n.translate('xpack.canvas.functions.progress.args.barColorHelpText', {
+      defaultMessage: 'The color of the background bar.',
+    }),
+    barWeight: i18n.translate('xpack.canvas.functions.progress.args.barWeightHelpText', {
+      defaultMessage: 'The thickness of the background bar.',
+    }),
+    font: i18n.translate('xpack.canvas.functions.progress.args.fontHelpText', {
       defaultMessage:
-        'Fills the difference between the {CONTEXT} and {maxArg} parameter for the element with this image. ' +
-        'Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
+        'The {CSS} font properties for the label. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
-        BASE64,
-        CONTEXT,
-        maxArg: '`max`',
-        URL,
+        CSS,
+        FONT_FAMILY,
+        FONT_WEIGHT,
       },
     }),
-    image: i18n.translate('expressionProgress.functions.progress.args.imageHelpText', {
+    label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
       defaultMessage:
-        'The image to repeat. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
+        'To show or hide the label, use {BOOLEAN_TRUE} or {BOOLEAN_FALSE}. Alternatively, provide a string to display as a label.',
       values: {
-        BASE64,
-        URL,
+        BOOLEAN_TRUE,
+        BOOLEAN_FALSE,
       },
     }),
-    max: i18n.translate('expressionProgress.functions.progress.args.maxHelpText', {
-      defaultMessage: 'The maximum number of times the image can repeat.',
+    max: i18n.translate('xpack.canvas.functions.progress.args.maxHelpText', {
+      defaultMessage: 'The maximum value of the progress element.',
     }),
-    size: i18n.translate('expressionProgress.functions.progress.args.sizeHelpText', {
-      defaultMessage:
-        'The maximum height or width of the image, in pixels. ' +
-        'When the image is taller than it is wide, this function limits the height.',
+    shape: i18n.translate('xpack.canvas.functions.progress.args.shapeHelpText', {
+      defaultMessage: `Select {list}, or {end}.`,
+      values: {
+        list: Object.values(Shape)
+          .slice(0, -1)
+          .map((shape) => `\`"${shape}"\``)
+          .join(', '),
+        end: `\`"${Object.values(Shape).slice(-1)[0]}"\``,
+      },
+    }),
+    valueColor: i18n.translate('xpack.canvas.functions.progress.args.valueColorHelpText', {
+      defaultMessage: 'The color of the progress bar.',
+    }),
+    valueWeight: i18n.translate('xpack.canvas.functions.progress.args.valueWeightHelpText', {
+      defaultMessage: 'The thickness of the progress bar.',
     }),
   },
 };
 
 const errors = {
-  getMissingMaxArgumentErrorMessage: () =>
-    i18n.translate('expressionProgress.error.progress.missingMaxArgument', {
-      defaultMessage: '{maxArgument} must be set if providing an {emptyImageArgument}',
-      values: {
-        maxArgument: '`max`',
-        emptyImageArgument: '`emptyImage`',
-      },
-    }),
+  invalidMaxValue: (max: number) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.progress.invalidMaxValueErrorMessage', {
+        defaultMessage: "Invalid {arg} value: '{max, number}'. '{arg}' must be greater than 0",
+        values: {
+          arg: 'max',
+          max,
+        },
+      })
+    ),
+  invalidValue: (value: number, max: number = 1) =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.progress.invalidValueErrorMessage', {
+        defaultMessage:
+          "Invalid value: '{value, number}'. Value must be between 0 and {max, number}",
+        values: {
+          value,
+          max,
+        },
+      })
+    ),
 };
 
 export const progressFunction: ExpressionProgressFunction = () => {
@@ -71,40 +96,77 @@ export const progressFunction: ExpressionProgressFunction = () => {
     inputTypes: ['number'],
     help,
     args: {
-      emptyImage: {
-        types: ['string', 'null'],
-        help: argHelp.emptyImage,
-        default: null,
+      shape: {
+        aliases: ['_'],
+        types: ['string'],
+        help: argHelp.shape,
+        options: Object.values(Shape),
+        default: 'gauge',
       },
-      image: {
-        types: ['string', 'null'],
-        help: argHelp.image,
-        default: elasticOutline,
+      barColor: {
+        types: ['string'],
+        help: argHelp.barColor,
+        default: `#f0f0f0`,
+      },
+      barWeight: {
+        types: ['number'],
+        help: argHelp.barWeight,
+        default: 20,
+      },
+      font: {
+        types: ['style'],
+        help: argHelp.font,
+        default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
+      },
+      label: {
+        types: ['boolean', 'string'],
+        help: argHelp.label,
+        default: true,
       },
       max: {
-        types: ['number', 'null'],
-        help: argHelp.max,
-        default: 1000,
-      },
-      size: {
         types: ['number'],
-        default: 100,
-        help: argHelp.size,
+        help: argHelp.max,
+        default: 1,
+      },
+      valueColor: {
+        types: ['string'],
+        help: argHelp.valueColor,
+        default: `#1785b0`,
+      },
+      valueWeight: {
+        types: ['number'],
+        help: argHelp.valueWeight,
+        default: 20,
       },
     },
-    fn: (count, args) => {
-      if (args.emptyImage !== null && isValidUrl(args.emptyImage) && args.max === null) {
-        throw new Error(errors.getMissingMaxArgumentErrorMessage());
+    fn: (value, args) => {
+      if (args.max <= 0) {
+        throw errors.invalidMaxValue(args.max);
+      }
+      if (value > args.max || value < 0) {
+        throw errors.invalidValue(value, args.max);
+      }
+
+      let label = '';
+      if (args.label) {
+        label = typeof args.label === 'string' ? args.label : `${value}`;
+      }
+
+      let font: Style = {} as Style;
+
+      if (get(args, 'font.spec')) {
+        font = { ...args.font };
+        font.spec.fill = args.font.spec.color; // SVG <text> uses fill for font color
       }
 
       return {
         type: 'render',
         as: 'progress',
         value: {
-          count: Math.floor(count),
+          value,
           ...args,
-          image: resolveWithMissingImage(args.image, elasticOutline),
-          emptyImage: resolveWithMissingImage(args.emptyImage),
+          label,
+          font,
         },
       };
     },
