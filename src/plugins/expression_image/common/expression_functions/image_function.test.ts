@@ -7,59 +7,61 @@
  */
 
 import expect from '@kbn/expect';
-import { elasticLogo, elasticOutline } from '../../../presentation_util/common/lib';
-// import { image } from './image';
+import { ExecutionContext } from 'src/plugins/expressions';
+import {
+  elasticLogo,
+  elasticOutline,
+  functionWrapper,
+} from '../../../presentation_util/common/lib';
+import { imageFunction as image } from './image_function';
 
-// TODO: the test was not running and is not up to date
-describe.skip('image', () => {
-  const fn = jest.fn();
+describe('image', () => {
+  const fn = functionWrapper(image);
 
   it('returns an image object using a dataUrl', () => {
-    const result = fn(null, { dataurl: elasticOutline, mode: 'cover' });
+    const result = fn(null, { dataurl: elasticOutline, mode: 'cover' }, {} as ExecutionContext);
     expect(result).to.have.property('type', 'image');
   });
 
   describe('args', () => {
     describe('dataurl', () => {
       it('sets the source of the image using dataurl', () => {
-        const result = fn(null, { dataurl: elasticOutline });
+        const result = fn(null, { dataurl: elasticOutline }, {} as ExecutionContext);
         expect(result).to.have.property('dataurl', elasticOutline);
       });
 
       it.skip('sets the source of the image using url', () => {
         // This is skipped because functionWrapper doesn't use the actual
         // interpreter and doesn't resolve aliases
-        const result = fn(null, { url: elasticOutline });
+        const result = fn(null, { url: elasticOutline }, {} as ExecutionContext);
         expect(result).to.have.property('dataurl', elasticOutline);
       });
 
       it('defaults to the elasticLogo if not provided', () => {
-        const result = fn(null);
+        const result = fn(null, {}, {} as ExecutionContext);
         expect(result).to.have.property('dataurl', elasticLogo);
       });
     });
 
-    describe('mode', () => {
-      it('sets the mode', () => {
-        it('to contain', () => {
-          const result = fn(null, { mode: 'contain' });
-          expect(result).to.have.property('mode', 'contain');
-        });
+    describe('sets the mode', () => {
+      it('to contain', () => {
+        const result = fn(null, { mode: 'contain' }, {} as ExecutionContext);
+        expect(result).to.have.property('mode', 'contain');
+      });
 
-        it('to cover', () => {
-          const result = fn(null, { mode: 'cover' });
-          expect(result).to.have.property('mode', 'cover');
-        });
+      it('to cover', () => {
+        const result = fn(null, { mode: 'cover' }, {} as ExecutionContext);
+        expect(result).to.have.property('mode', 'cover');
+      });
 
-        it('to stretch', () => {
-          const result = fn(null, { mode: 'stretch' });
-          expect(result).to.have.property('mode', 'stretch');
-        });
+      it('to stretch', () => {
+        const result = fn(null, { mode: 'stretch' }, {} as ExecutionContext);
+        expect(result).to.have.property('mode', '100% 100%');
+      });
 
-        it("defaults to 'contain' if not provided", () => {
-          const result = fn(null);
-          expect(result).to.have.property('mode', 'contain');
-        });
+      it("defaults to 'contain' if not provided", () => {
+        const result = fn(null, {}, {} as ExecutionContext);
+        expect(result).to.have.property('mode', 'contain');
       });
     });
   });
