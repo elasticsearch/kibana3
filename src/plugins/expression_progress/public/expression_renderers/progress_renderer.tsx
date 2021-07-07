@@ -7,11 +7,13 @@
  */
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
-import { elasticOutline, isValidUrl, withSuspense } from '../../../presentation_util/public';
 import { ProgressRendererConfig } from '../../common/types';
+import { LazyProgressComponent } from '../components';
+import { withSuspense } from '../../../presentation_util/public';
+
+const ProgressComponent = withSuspense(LazyProgressComponent);
 
 const strings = {
   getDisplayName: () =>
@@ -24,9 +26,6 @@ const strings = {
     }),
 };
 
-const LazyProgressComponent = lazy(() => import('../components/progress_component'));
-const ProgressComponent = withSuspense(LazyProgressComponent, null);
-
 export const progressRenderer = (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
   name: 'progress',
   displayName: strings.getDisplayName(),
@@ -37,20 +36,12 @@ export const progressRenderer = (): ExpressionRenderDefinition<ProgressRendererC
     config: ProgressRendererConfig,
     handlers: IInterpreterRenderHandlers
   ) => {
-    const settings = {
-      ...config,
-      image: isValidUrl(config.image) ? config.image : elasticOutline,
-      emptyImage: config.emptyImage || '',
-    };
-
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     render(
-      <I18nProvider>
-        <ProgressComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
-      </I18nProvider>,
+      <ProgressComponent {...config} parentNode={domNode} onLoaded={handlers.done} />,
       domNode
     );
   },

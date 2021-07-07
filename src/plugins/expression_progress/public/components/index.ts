@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './progress_component';
+import { lazy } from 'react';
+
+export const LazyProgressComponent = lazy(() => import('./progress_component'));

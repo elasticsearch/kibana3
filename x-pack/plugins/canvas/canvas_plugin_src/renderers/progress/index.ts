@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getId } from '../../../public/lib/get_id';
+import { getId } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { RendererStrings } from '../../../i18n';
 import { shapes } from './shapes';
 import { Output as Arguments } from '../../functions/common/progress';

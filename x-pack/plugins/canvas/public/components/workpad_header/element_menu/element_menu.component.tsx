@@ -20,10 +20,10 @@ import {
   LazyPopoverComponent,
   ClosePopoverFn,
 } from '../../../../../../../src/plugins/presentation_util/public';
+import { getId } from '../../../../../../../src/plugins/presentation_util/common/lib';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { getId } from '../../../lib/get_id';
 import { AssetManager } from '../../asset_manager';
 import { SavedElementsModal } from '../../saved_elements_modal';
 

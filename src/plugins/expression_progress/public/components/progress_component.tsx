@@ -6,94 +6,138 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
-import { times } from 'lodash';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { ProgressRendererConfig } from '../../common';
+import React from 'react';
+import { useResizeObserver } from '@elastic/eui';
+import { IInterpreterRenderHandlers } from '../../../expressions';
+import { ProgressRendererConfig } from '../../common/types';
+import { shapes } from './shapes';
+import './shape.scss';
+import { getId } from '../../../presentation_util/public';
 
 interface ProgressComponentProps extends ProgressRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
   parentNode: HTMLElement;
 }
 
-interface LoadedImages {
-  image: HTMLImageElement | null;
-  emptyImage: HTMLImageElement | null;
-}
-
-async function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = (error) => reject(error);
-    img.src = src;
-  });
-}
-
-async function loadImages(images: string[]): Promise<Array<HTMLImageElement | null>> {
-  const results = await Promise.allSettled([...images.map(loadImage)]);
-  return results.map((loadedImage) =>
-    loadedImage.status === 'rejected' ? null : loadedImage.value
-  );
-}
-
-function setImageSize(img: HTMLImageElement, size: number) {
-  if (img.naturalHeight > img.naturalWidth) {
-    img.height = size;
-  } else {
-    img.width = size;
-  }
-}
-
-function createImageJSX(img: HTMLImageElement | null) {
-  if (!img) return null;
-  const params = img.width > img.height ? { heigth: img.height } : { width: img.width };
-  return <img src={img.src} {...params} alt="" />;
-}
-
 function ProgressComponent({
-  max,
-  count,
-  emptyImage: emptyImageSrc,
-  image: imageSrc,
-  size,
   onLoaded,
+  parentNode,
+  shape,
+  value,
+  max,
+  valueColor,
+  barColor,
+  valueWeight,
+  barWeight,
+  label,
+  font,
 }: ProgressComponentProps) {
-  const [images, setImages] = useState<LoadedImages>({
-    image: null,
-    emptyImage: null,
-  });
+  const parentNodeDimensions = useResizeObserver(parentNode);
+  const percent = value / max;
+  const shapeDef = shapes[shape];
+  const offset = Math.max(valueWeight, barWeight);
 
-  useEffect(() => {
-    loadImages([imageSrc, emptyImageSrc]).then((result) => {
-      const [image, emptyImage] = result;
-      setImages({ image, emptyImage });
-      onLoaded();
-    });
-  }, [imageSrc, emptyImageSrc, onLoaded]);
+  if (shapeDef) {
+    const parser = new DOMParser();
+    const shapeSvg = parser
+      .parseFromString(shapeDef, 'image/svg+xml')
+      .getElementsByTagName('svg')
+      .item(0)!;
 
-  const imagesToRender: Array<ReactElement | null> = [];
+    const initialViewBox = shapeSvg
+      .getAttribute('viewBox')!
+      .split(' ')
+      .map((v) => parseInt(v, 10));
+    let [minX, minY, width, height] = initialViewBox;
 
-  const { image, emptyImage } = images;
+    if (shape !== 'horizontalBar') {
+      minX -= offset / 2;
+      width += offset;
+    }
 
-  if (max && count > max) count = max;
+    if (shape === 'semicircle') {
+      minY -= offset / 2;
+      height += offset / 2;
+    } else if (shape !== 'verticalBar') {
+      minY -= offset / 2;
+      height += offset;
+    }
 
-  if (image) {
-    setImageSize(image, size);
-    times(count, () => imagesToRender.push(createImageJSX(image)));
+    shapeSvg.setAttribute('className', 'canvasProgress');
+
+    const svgId = getId('svg');
+    shapeSvg.id = svgId;
+
+    const bar = shapeSvg.getElementsByTagName('path').item(0)!;
+    bar.setAttribute('className', 'canvasProgress__background');
+    bar.setAttribute('fill', 'none');
+    bar.setAttribute('stroke', barColor);
+    bar.setAttribute('stroke-width', `${barWeight}px`);
+
+    const valueSvg = bar.cloneNode(true) as SVGPathElement;
+    valueSvg.setAttribute('className', 'canvasProgress__value');
+    valueSvg.setAttribute('stroke', valueColor);
+    valueSvg.setAttribute('stroke-width', `${valueWeight}px`);
+
+    const length = valueSvg.getTotalLength();
+    const to = length * (1 - percent);
+    valueSvg.setAttribute('stroke-dasharray', String(length));
+    valueSvg.setAttribute('stroke-dashoffset', String(Math.max(0, to)));
+
+    shapeSvg.appendChild(valueSvg);
+
+    const text = shapeSvg.getElementsByTagName('text').item(0);
+
+    if (label && text) {
+      text.textContent = String(label);
+      text.setAttribute('className', 'canvasProgress__label');
+
+      if (shape === 'horizontalPill') {
+        text.setAttribute('x', String(parseInt(text.getAttribute('x')!, 10) + offset / 2));
+      }
+      if (shape === 'verticalPill') {
+        text.setAttribute('y', String(parseInt(text.getAttribute('y')!, 10) - offset / 2));
+      }
+
+      Object.assign(text.style, font.spec);
+      shapeSvg.appendChild(text);
+      parentNode.appendChild(shapeSvg);
+
+      const { width: labelWidth, height: labelHeight } = text.getBBox();
+
+      if (shape === 'horizontalBar' || shape === 'horizontalPill') {
+        text.setAttribute('x', String(parseInt(text.getAttribute('x')!, 10)));
+        width += labelWidth;
+      }
+      if (shape === 'verticalBar' || shape === 'verticalPill') {
+        if (labelWidth > width) {
+          minX = -labelWidth / 2;
+          width = labelWidth;
+        }
+        minY -= labelHeight;
+        height += labelHeight;
+      }
+    }
+
+    shapeSvg.setAttribute('viewBox', [minX, minY, width, height].join(' '));
+    shapeSvg.setAttribute('width', String(parentNode.offsetWidth));
+    shapeSvg.setAttribute('height', String(parentNode.offsetHeight));
+
+    if (parentNode.firstChild) {
+      parentNode.removeChild(parentNode.firstChild);
+    }
+    parentNode.appendChild(shapeSvg);
+
+    // handlers.onResize(() => {
+    //   shapeSvg.setAttribute('width', String(parentNode.offsetWidth));
+    //   shapeSvg.setAttribute('height', String(parentNode.offsetHeight));
+    // });
   }
 
-  if (emptyImage) {
-    setImageSize(emptyImage, size);
-    times(max - count, () => imagesToRender.push(createImageJSX(emptyImage)));
-  }
-
-  return (
-    <div className="progress" style={{ pointerEvents: 'none' }}>
-      {imagesToRender}
-    </div>
-  );
+  onLoaded();
+  return <>progress</>;
 }
+
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
 export { ProgressComponent as default };

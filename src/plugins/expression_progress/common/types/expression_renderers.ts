@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Output as Arguments } from './expression_functions';
+
 export type OriginString = 'bottom' | 'left' | 'top' | 'right';
-export interface ProgressRendererConfig {
-  max: number;
-  count: number;
-  emptyImage: string;
-  image: string;
-  size: number;
-}
+export type ProgressRendererConfig = Arguments;
 
 export interface NodeDimensions {
   width: number;
