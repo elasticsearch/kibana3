@@ -31,11 +31,10 @@ import {
   mockNarrowDateRange,
 } from '../../../network/components/kpi_network/mock';
 import {
-  mockGlobalState,
-  apolloClientObservable,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
   createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
 } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -43,6 +42,7 @@ import {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
@@ -56,16 +56,10 @@ jest.mock('../charts/barchart', () => {
 });
 
 describe('Stat Items Component', () => {
-  const mockTheme = { eui: { euiColorMediumShade: '#ece' } };
+  const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   describe.each([
     [

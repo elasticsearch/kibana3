@@ -21,10 +21,6 @@ cp "src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
 echo "# Appended by src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
 echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
 
-if [[ "$BUILD_TS_REFS_CACHE_ENABLE" != "true" ]]; then
-  export BUILD_TS_REFS_CACHE_ENABLE=false
-fi
-
 ###
 ### install dependencies
 ###
@@ -40,12 +36,20 @@ if [[ "$BUILD_TS_REFS_CACHE_CAPTURE" == "true" ]]; then
   cd "$KIBANA_DIR"
 fi
 
-if [[ "$DISABLE_BOOTSTRAP_VALIDATIONS" != "true" ]]; then
-  source "$KIBANA_DIR/src/dev/ci_setup/bootstrap_validations.sh"
-fi
-
 ###
 ### Download es snapshots
 ###
 echo " -- downloading es snapshot"
 node scripts/es snapshot --download-only;
+
+###
+### verify no git modifications caused by bootstrap
+###
+if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
+  GIT_CHANGES="$(git ls-files --modified)"
+  if [ "$GIT_CHANGES" ]; then
+    echo -e "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
+    echo -e "$GIT_CHANGES\n"
+    exit 1
+  fi
+fi

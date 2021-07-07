@@ -12,7 +12,6 @@ import type { KibanaFeature } from '../../../../../features/common';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import type { ElasticsearchRole } from './model';
 import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
 const roleGrantsSubFeaturePrivileges = (
@@ -65,9 +64,10 @@ export function definePutRolesRoutes({
       try {
         const {
           body: rawRoles,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
-          Record<string, ElasticsearchRole>
-        >({ name: request.params.name }, { ignore: [404] });
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole(
+          { name: request.params.name },
+          { ignore: [404] }
+        );
 
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
@@ -79,6 +79,7 @@ export function definePutRolesRoutes({
           getFeatures(),
           context.core.elasticsearch.client.asCurrentUser.security.putRole({
             name: request.params.name,
+            // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
             body,
           }),
         ]);

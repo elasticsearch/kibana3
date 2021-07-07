@@ -22,7 +22,7 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerts/public';
+import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -32,11 +32,14 @@ import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 
-import type { ActionTypeModel, AlertTypeModel } from './types';
-import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
-import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
-import type { AlertAddProps } from './application/sections/alert_form/alert_add';
-import type { AlertEditProps } from './application/sections/alert_form/alert_edit';
+import type {
+  ActionTypeModel,
+  AlertAddProps,
+  AlertEditProps,
+  AlertTypeModel,
+  ConnectorAddFlyoutProps,
+  ConnectorEditFlyoutProps,
+} from './types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -68,7 +71,7 @@ interface PluginsSetup {
 interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  alerts?: AlertingStart;
+  alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
@@ -95,12 +98,12 @@ export class Plugin
     const alertTypeRegistry = this.alertTypeRegistry;
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-      defaultMessage: 'Alerts and Actions',
+      defaultMessage: 'Rules and Connectors',
     });
     const featureDescription = i18n.translate(
       'xpack.triggersActionsUI.managementSection.displayDescription',
       {
-        defaultMessage: 'Detect conditions using alerts, and take actions using connectors.',
+        defaultMessage: 'Detect conditions using rules, and take actions using connectors.',
       }
     );
 
@@ -143,7 +146,7 @@ export class Plugin
           ...coreStart,
           data: pluginsStart.data,
           charts: pluginsStart.charts,
-          alerts: pluginsStart.alerts,
+          alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,
           element: params.element,
           storage: new Storage(window.localStorage),

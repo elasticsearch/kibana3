@@ -19,6 +19,10 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
+import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
+
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../containers/cti/event_enrichment');
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -28,10 +32,11 @@ describe('EventDetails', () => {
     data: mockDetailItemData,
     id: mockDetailItemDataId,
     isAlert: false,
-    onViewSelected: jest.fn(),
+    onEventViewSelected: jest.fn(),
+    onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    view: EventsViewType.summaryView,
+    eventView: EventsViewType.summaryView,
   };
 
   const alertsProps = {
@@ -43,6 +48,7 @@ describe('EventDetails', () => {
   let wrapper: ReactWrapper;
   let alertsWrapper: ReactWrapper;
   beforeAll(async () => {
+    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({});
     wrapper = mount(
       <TestProviders>
         <EventDetails {...defaultProps} />
@@ -76,13 +82,14 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+    ['Summary', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
+        const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
           alertsWrapper
             .find('[data-test-subj="eventDetails"]')
             .find('[role="tablist"]')
-            .containsMatchingElement(<span>{tab}</span>)
+            .containsMatchingElement(<span>{expectedCopy}</span>)
         ).toBeTruthy();
       });
     });

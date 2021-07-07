@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from 'kibana/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import type { AgentStatus, Agent, EsAssetReference } from '../types';
-import { getAgent, listAgents } from './agents';
-import { agentPolicyService } from './agent_policy';
+
+import type { AgentStatus, Agent } from '../types';
+
+import type { getAgentById, getAgentsByKuery } from './agents';
+import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
+import type { getInstallation } from './epm/packages';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
@@ -31,10 +34,7 @@ export interface ESIndexPatternService {
  */
 
 export interface PackageService {
-  getInstalledEsAssetReferences(
-    savedObjectsClient: SavedObjectsClientContract,
-    pkgName: string
-  ): Promise<EsAssetReference[]>;
+  getInstallation: typeof getInstallation;
 }
 
 /**
@@ -44,27 +44,22 @@ export interface AgentService {
   /**
    * Get an Agent by id
    */
-  getAgent: typeof getAgent;
+  getAgent: typeof getAgentById;
   /**
    * Authenticate an agent with access toekn
    */
   authenticateAgentWithAccessToken(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     request: KibanaRequest
   ): Promise<Agent>;
   /**
    * Return the status by the Agent's id
    */
-  getAgentStatusById(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentId: string
-  ): Promise<AgentStatus>;
+  getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
   /**
    * List agents
    */
-  listAgents: typeof listAgents;
+  listAgents: typeof getAgentsByKuery;
 }
 
 export interface AgentPolicyServiceInterface {
@@ -72,6 +67,7 @@ export interface AgentPolicyServiceInterface {
   list: typeof agentPolicyService['list'];
   getDefaultAgentPolicyId: typeof agentPolicyService['getDefaultAgentPolicyId'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
+  getByIds: typeof agentPolicyService['getByIDs'];
 }
 
 // Saved object services
@@ -83,3 +79,9 @@ export { settingsService };
 // Plugin services
 export { appContextService } from './app_context';
 export { licenseService } from './license';
+
+// Artifacts services
+export * from './artifacts';
+
+// Policy preconfiguration functions
+export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';

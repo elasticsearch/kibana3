@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -35,6 +35,7 @@ describe('BoostItemContent', () => {
     const boost = {
       factor: 2,
       type: 'value' as BoostType,
+      value: [''],
     };
 
     const wrapper = shallow(<BoostItemContent boost={boost} index={3} name="foo" />);

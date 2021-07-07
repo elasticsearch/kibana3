@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, isValidHex } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
@@ -19,6 +20,12 @@ interface Props {
   size?: 's' | 'm' | 'l' | 'xl';
   className?: string;
   announceSpaceName?: boolean;
+  /**
+   * This property is passed to the underlying `EuiAvatar` component. If enabled, the SpaceAvatar will have a grayed out appearance. For
+   * example, this can be useful when rendering a list of spaces for a specific feature, if the feature is disabled in one of those spaces.
+   * Default: false.
+   */
+  isDisabled?: boolean;
 }
 
 export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
@@ -27,6 +34,14 @@ export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
   const spaceName = space.name ? space.name.trim() : '';
 
   const spaceColor = getSpaceColor(space);
+
+  const spaceInitials = getSpaceInitials(space);
+
+  const spaceImageUrl = getSpaceImageUrl(space);
+
+  const avatarConfig: Partial<EuiAvatarProps> = spaceImageUrl
+    ? { imageUrl: spaceImageUrl }
+    : { initials: spaceInitials, initialsLength: MAX_SPACE_INITIALS };
 
   return (
     <EuiAvatar
@@ -39,10 +54,8 @@ export const SpaceAvatarInternal: FC<Props> = (props: Props) => {
         'aria-hidden': true,
       })}
       size={size || 'm'}
-      initialsLength={MAX_SPACE_INITIALS}
-      initials={getSpaceInitials(space)}
       color={isValidHex(spaceColor) ? spaceColor : ''}
-      imageUrl={getSpaceImageUrl(space)}
+      {...avatarConfig}
       {...rest}
     />
   );

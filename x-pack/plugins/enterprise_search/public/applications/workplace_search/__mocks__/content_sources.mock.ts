@@ -21,9 +21,10 @@ export const contentSources = [
     name: 'source',
     documentCount: '123',
     isFederatedSource: false,
-    errorReason: 0,
+    errorReason: null,
     allowsReauth: true,
     boost: 1,
+    activities: [],
   },
   {
     id: '124',
@@ -35,9 +36,10 @@ export const contentSources = [
     name: 'Jira',
     documentCount: '34234',
     isFederatedSource: false,
-    errorReason: 0,
+    errorReason: null,
     allowsReauth: true,
     boost: 0.5,
+    activities: [],
   },
 ];
 
@@ -303,6 +305,10 @@ export const exampleResult = {
     urlField: 'myLink',
     color: '#e3e3e3',
     descriptionField: 'about',
+    typeField: 'otherType',
+    mediaTypeField: 'otherMediaType',
+    createdByField: 'otherCreatedBy',
+    updatedByField: 'otherUpdatedBy',
     detailFields: [
       { fieldName: 'cats', label: 'Felines' },
       { fieldName: 'dogs', label: 'Canines' },

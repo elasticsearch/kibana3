@@ -6,12 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { setupEnvironment } from '../../helpers/setup_environment';
-import { getDefaultHotPhasePolicy } from '../constants';
+import { TestBed } from '@kbn/test/jest';
+import { setupEnvironment } from '../../helpers';
+import { initTestBed } from '../init_test_bed';
 
 describe('<EditPolicy /> request flyout', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: TestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -24,10 +24,10 @@ describe('<EditPolicy /> request flyout', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await initTestBed();
     });
 
     const { component } = testBed;
@@ -51,7 +51,7 @@ describe('<EditPolicy /> request flyout', () => {
               actions: {
                 rollover: {
                   max_age: '30d',
-                  max_size: '50gb',
+                  max_primary_shard_size: '50gb',
                 },
               },
             },

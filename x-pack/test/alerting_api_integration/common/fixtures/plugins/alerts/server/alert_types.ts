@@ -16,7 +16,7 @@ import {
   AlertInstanceContext,
   AlertTypeState,
   AlertTypeParams,
-} from '../../../../../../../plugins/alerts/server';
+} from '../../../../../../../plugins/alerting/server';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',
@@ -81,6 +81,7 @@ function getAlwaysFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
       params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
@@ -103,10 +104,11 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     tags,
     createdBy,
     updatedBy,
+    rule,
   } = alertExecutorOptions;
   let group: string | null = 'default';
   let subgroup: string | null = null;
-  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
+  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy, ...rule };
 
   if (params.groupsToScheduleActionsInSeries) {
     const index = state.groupInSeriesIndex || 0;
@@ -132,7 +134,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     }
   }
 
-  await services.scopedClusterClient.index({
+  await services.scopedClusterClient.asCurrentUser.index({
     index: params.index,
     refresh: 'wait_for',
     body: {
@@ -166,6 +168,7 @@ function getCumulativeFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor(alertExecutorOptions) {
       const { services, state } = alertExecutorOptions;
       const group = 'default';
@@ -211,8 +214,9 @@ function getNeverFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor({ services, params, state }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -251,8 +255,9 @@ function getFailingAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor({ services, params, state }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -269,7 +274,6 @@ function getFailingAlertType() {
 }
 
 function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
-  const clusterClient = core.elasticsearch.legacy.client;
   const paramsSchema = schema.object({
     callClusterAuthorizationIndex: schema.string(),
     savedObjectsClientType: schema.string(),
@@ -290,6 +294,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
     defaultActionGroupId: 'default',
     producer: 'alertsFixture',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     validate: {
       params: paramsSchema,
     },
@@ -298,7 +303,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
       let callClusterSuccess = false;
       let callClusterError;
       try {
-        await services.callCluster('index', {
+        await services.scopedClusterClient.asCurrentUser.index({
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -310,11 +315,11 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
         callClusterError = e;
       }
       // Call scoped cluster
-      const scopedClusterClient = services.getLegacyScopedClusterClient(clusterClient);
+      const scopedClusterClient = services.scopedClusterClient;
       let callScopedClusterSuccess = false;
       let callScopedClusterError;
       try {
-        await scopedClusterClient.callAsCurrentUser('index', {
+        await scopedClusterClient.asCurrentUser.index({
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -338,7 +343,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
         savedObjectsClientError = e;
       }
       // Save the result
-      await services.callCluster('index', {
+      await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -376,6 +381,7 @@ function getValidationAlertType() {
     ],
     producer: 'alertsFixture',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     defaultActionGroupId: 'default',
     validate: {
       params: paramsSchema,
@@ -404,6 +410,7 @@ function getPatternFiringAlertType() {
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor(alertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
       const pattern = params.pattern;
@@ -417,7 +424,7 @@ function getPatternFiringAlertType() {
       }
 
       if (params.reference) {
-        await services.scopedClusterClient.index({
+        await services.scopedClusterClient.asCurrentUser.index({
           index: ES_TEST_INDEX_NAME,
           refresh: 'wait_for',
           body: {
@@ -459,7 +466,7 @@ function getPatternFiringAlertType() {
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
-  { alerts }: Pick<FixtureSetupDeps, 'alerts'>
+  { alerting }: Pick<FixtureSetupDeps, 'alerting'>
 ) {
   const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
@@ -468,6 +475,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {},
   };
   const goldNoopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
@@ -477,6 +485,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'gold',
+    isExportable: true,
     async executor() {},
   };
   const onlyContextVariablesAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
@@ -486,6 +495,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     actionVariables: {
       context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
     },
@@ -501,6 +511,7 @@ export function defineAlertTypes(
       state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {},
   };
   const throwAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
@@ -515,6 +526,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {
       throw new Error('this alert is intended to fail');
     },
@@ -531,22 +543,23 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {
       await new Promise((resolve) => setTimeout(resolve, 5000));
     },
   };
 
-  alerts.registerType(getAlwaysFiringAlertType());
-  alerts.registerType(getCumulativeFiringAlertType());
-  alerts.registerType(getNeverFiringAlertType());
-  alerts.registerType(getFailingAlertType());
-  alerts.registerType(getValidationAlertType());
-  alerts.registerType(getAuthorizationAlertType(core));
-  alerts.registerType(noopAlertType);
-  alerts.registerType(onlyContextVariablesAlertType);
-  alerts.registerType(onlyStateVariablesAlertType);
-  alerts.registerType(getPatternFiringAlertType());
-  alerts.registerType(throwAlertType);
-  alerts.registerType(longRunningAlertType);
-  alerts.registerType(goldNoopAlertType);
+  alerting.registerType(getAlwaysFiringAlertType());
+  alerting.registerType(getCumulativeFiringAlertType());
+  alerting.registerType(getNeverFiringAlertType());
+  alerting.registerType(getFailingAlertType());
+  alerting.registerType(getValidationAlertType());
+  alerting.registerType(getAuthorizationAlertType(core));
+  alerting.registerType(noopAlertType);
+  alerting.registerType(onlyContextVariablesAlertType);
+  alerting.registerType(onlyStateVariablesAlertType);
+  alerting.registerType(getPatternFiringAlertType());
+  alerting.registerType(throwAlertType);
+  alerting.registerType(longRunningAlertType);
+  alerting.registerType(goldNoopAlertType);
 }

@@ -46,15 +46,14 @@ export function getRumPageLoadTransactionsProjection({
         ? [
             {
               wildcard: {
-                'url.full': {
-                  value: `*${urlQuery}*`,
-                },
+                'url.full': `*${urlQuery}*`,
               },
             },
           ]
         : []),
       ...getEsFilter(uiFilters),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {
@@ -92,14 +91,13 @@ export function getRumErrorsProjection({
         ? [
             {
               wildcard: {
-                'url.full': {
-                  value: `*${urlQuery}*`,
-                },
+                'url.full': `*${urlQuery}*`,
               },
             },
           ]
         : []),
     ],
+    must_not: [...getEsFilter(uiFilters, true)],
   };
 
   return {

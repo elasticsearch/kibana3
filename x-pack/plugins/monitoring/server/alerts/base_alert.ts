@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, LegacyCallAPIOptions } from 'kibana/server';
+import { Logger, ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
   AlertType,
@@ -13,8 +13,8 @@ import {
   AlertInstance,
   AlertsClient,
   AlertServices,
-} from '../../../alerts/server';
-import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+} from '../../../alerting/server';
+import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -32,9 +32,8 @@ import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
-import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { parseDuration } from '../../../alerts/common/parse_duration';
+import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
 type ExecutedState =
@@ -55,12 +54,6 @@ interface AlertOptions {
   fetchClustersRange?: number;
   accessorKey?: string;
 }
-
-type CallCluster = (
-  endpoint: string,
-  clientParams?: Record<string, unknown> | undefined,
-  options?: LegacyCallAPIOptions | undefined
-) => Promise<any>;
 
 const defaultAlertOptions = (): AlertOptions => {
   return {
@@ -103,6 +96,7 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: false,
       executor: (
         options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
           state: ExecutedState;
@@ -123,7 +117,7 @@ export class BaseAlert {
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<Alert<AlertTypeParams>> {
+  ): Promise<SanitizedAlert<AlertTypeParams>> {
     const existingAlertData = await alertsClient.find({
       options: {
         search: this.alertOptions.id,
@@ -233,29 +227,15 @@ export class BaseAlert {
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
-    const useCallCluster =
-      Globals.app.monitoringCluster?.callAsInternalUser || services.callCluster;
-    const callCluster = async (
-      endpoint: string,
-      clientParams?: Record<string, unknown>,
-      options?: LegacyCallAPIOptions
-    ) => {
-      return await mbSafeQuery(async () => useCallCluster(endpoint, clientParams, options));
-    };
-    const availableCcs = Globals.app.config.ui.ccs.enabled
-      ? await fetchAvailableCcs(callCluster)
-      : [];
-    const clusters = await this.fetchClusters(
-      callCluster,
-      params as CommonAlertParams,
-      availableCcs
-    );
-    const data = await this.fetchData(params, callCluster, clusters, availableCcs);
+    const esClient = services.scopedClusterClient.asCurrentUser;
+    const availableCcs = Globals.app.config.ui.ccs.enabled ? await fetchAvailableCcs(esClient) : [];
+    const clusters = await this.fetchClusters(esClient, params as CommonAlertParams, availableCcs);
+    const data = await this.fetchData(params, esClient, clusters, availableCcs);
     return await this.processData(data, clusters, services, state);
   }
 
   protected async fetchClusters(
-    callCluster: CallCluster,
+    esClient: ElasticsearchClient,
     params: CommonAlertParams,
     ccs?: string[]
   ) {
@@ -264,7 +244,7 @@ export class BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
     }
     if (!params.limit) {
-      return await fetchClusters(callCluster, esIndexPattern);
+      return await fetchClusters(esClient, esIndexPattern);
     }
     const limit = parseDuration(params.limit);
     const rangeFilter = this.alertOptions.fetchClustersRange
@@ -275,12 +255,12 @@ export class BaseAlert {
           },
         }
       : undefined;
-    return await fetchClusters(callCluster, esIndexPattern, rangeFilter);
+    return await fetchClusters(esClient, esIndexPattern, rangeFilter);
   }
 
   protected async fetchData(
     params: CommonAlertParams | unknown,
-    callCluster: CallCluster,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<Array<AlertData & unknown>> {
@@ -294,46 +274,49 @@ export class BaseAlert {
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
+    // for each cluster filter the nodes that belong to this cluster
     for (const cluster of clusters) {
       const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
       if (!nodes.length) {
         continue;
       }
 
-      const firingNodeUuids = nodes
-        .filter((node) => node.shouldFire)
-        .map((node) => node.meta.nodeId || node.meta.instanceId)
-        .join(',');
-      const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
-      const instance = services.alertInstanceFactory(instanceId);
-      const newAlertStates: AlertNodeState[] = [];
       const key = this.alertOptions.accessorKey;
-      for (const node of nodes) {
-        if (!node.shouldFire) {
-          continue;
-        }
-        const { meta } = node;
-        const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
-        if (key) {
-          nodeState[key] = meta[key];
-        }
-        nodeState.nodeId = meta.nodeId || node.nodeId! || meta.instanceId;
-        // TODO: make these functions more generic, so it's node/item agnostic
-        nodeState.nodeName = meta.itemLabel || meta.nodeName || node.nodeName || nodeState.nodeId;
-        nodeState.itemLabel = meta.itemLabel;
-        nodeState.meta = meta;
-        nodeState.ui.triggeredMS = currentUTC;
-        nodeState.ui.isFiring = true;
-        nodeState.ui.severity = node.severity;
-        nodeState.ui.message = this.getUiMessage(nodeState, node);
-        newAlertStates.push(nodeState);
-      }
 
-      const alertInstanceState = { alertStates: newAlertStates };
-      instance.replaceState(alertInstanceState);
-      if (newAlertStates.length) {
-        this.executeActions(instance, alertInstanceState, null, cluster);
-        state.lastExecutedAction = currentUTC;
+      // for each node, update the alert's state with node state
+      for (const node of nodes) {
+        const newAlertStates: AlertNodeState[] = [];
+        // quick fix for now so that non node level alerts will use the cluster id
+        const instance = services.alertInstanceFactory(
+          node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid
+        );
+
+        if (node.shouldFire) {
+          const { meta } = node;
+          // create a default alert state for this node and add data from node.meta and other data
+          const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
+          if (key) {
+            nodeState[key] = meta[key];
+          }
+          nodeState.nodeId = meta.nodeId || node.nodeId! || meta.instanceId;
+          // TODO: make these functions more generic, so it's node/item agnostic
+          nodeState.nodeName = meta.itemLabel || meta.nodeName || node.nodeName || nodeState.nodeId;
+          nodeState.itemLabel = meta.itemLabel;
+          nodeState.meta = meta;
+          nodeState.ui.triggeredMS = currentUTC;
+          nodeState.ui.isFiring = true;
+          nodeState.ui.severity = node.severity;
+          nodeState.ui.message = this.getUiMessage(nodeState, node);
+          // store the state of each node in array.
+          newAlertStates.push(nodeState);
+        }
+        const alertInstanceState = { alertStates: newAlertStates };
+        // update the alert's state with the new node states
+        instance.replaceState(alertInstanceState);
+        if (newAlertStates.length) {
+          this.executeActions(instance, alertInstanceState, null, cluster);
+          state.lastExecutedAction = currentUTC;
+        }
       }
     }
 

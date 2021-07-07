@@ -23,7 +23,13 @@ import {
   SUPER_FINE_ZOOM_DELTA,
 } from '../../common/constants';
 
-import { convertRegularRespToGeoJson, hitsToGeoJson } from '../../common/elasticsearch_util';
+import {
+  createExtentFilter,
+  convertRegularRespToGeoJson,
+  hitsToGeoJson,
+  isTotalHitsGreaterThan,
+  TotalHits,
+} from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
@@ -67,6 +73,7 @@ export async function getGridTile({
       MAX_ZOOM
     );
     requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = tileBounds;
+    requestBody.track_total_hits = false;
 
     const response = await context
       .search!.search(
@@ -78,6 +85,7 @@ export async function getGridTile({
         },
         {
           sessionId: searchSessionId,
+          legacyHitsTotal: false,
           abortSignal,
         }
       )
@@ -130,6 +138,7 @@ export async function getTile({
 
     const searchOptions = {
       sessionId: searchSessionId,
+      legacyHitsTotal: false,
       abortSignal,
     };
 
@@ -141,6 +150,7 @@ export async function getTile({
             body: {
               size: 0,
               query: requestBody.query,
+              track_total_hits: requestBody.size + 1,
             },
           },
         },
@@ -148,7 +158,12 @@ export async function getTile({
       )
       .toPromise();
 
-    if (countResponse.rawResponse.hits.total > requestBody.size) {
+    if (
+      isTotalHitsGreaterThan(
+        (countResponse.rawResponse.hits.total as unknown) as TotalHits,
+        requestBody.size
+      )
+    ) {
       // Generate "too many features"-bounds
       const bboxResponse = await context
         .search!.search(
@@ -165,6 +180,7 @@ export async function getTile({
                     },
                   },
                 },
+                track_total_hits: false,
               },
             },
           },
@@ -179,6 +195,7 @@ export async function getTile({
             [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
           },
           geometry: esBboxToGeoJsonPolygon(
+            // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
             bboxResponse.rawResponse.aggregations.data_bounds.bounds,
             tileToESBbox(x, y, z)
           ),
@@ -190,7 +207,10 @@ export async function getTile({
           {
             params: {
               index,
-              body: requestBody,
+              body: {
+                ...requestBody,
+                track_total_hits: false,
+              },
             },
           },
           searchOptions
@@ -199,6 +219,7 @@ export async function getTile({
 
       // Todo: pass in epochMillies-fields
       const featureCollection = hitsToGeoJson(
+        // @ts-expect-error hitsToGeoJson should be refactored to accept estypes.SearchHit
         documentsResponse.rawResponse.hits.hits,
         (hit: Record<string, unknown>) => {
           return flattenHit(geometryFieldName, hit);
@@ -234,21 +255,14 @@ export async function getTile({
 }
 
 function getTileSpatialFilter(geometryFieldName: string, tileBounds: ESBounds): unknown {
-  return {
-    geo_shape: {
-      [geometryFieldName]: {
-        shape: {
-          type: 'envelope',
-          // upper left and lower right points of the shape to represent a bounding rectangle in the format [[minLon, maxLat], [maxLon, minLat]]
-          coordinates: [
-            [tileBounds.top_left.lon, tileBounds.top_left.lat],
-            [tileBounds.bottom_right.lon, tileBounds.bottom_right.lat],
-          ],
-        },
-        relation: 'INTERSECTS',
-      },
-    },
+  const tileExtent = {
+    minLon: tileBounds.top_left.lon,
+    minLat: tileBounds.bottom_right.lat,
+    maxLon: tileBounds.bottom_right.lon,
+    maxLat: tileBounds.top_left.lat,
   };
+  const tileExtentFilter = createExtentFilter(tileExtent, [geometryFieldName]);
+  return tileExtentFilter.query;
 }
 
 function esBboxToGeoJsonPolygon(esBounds: ESBounds, tileBounds: ESBounds): Polygon {

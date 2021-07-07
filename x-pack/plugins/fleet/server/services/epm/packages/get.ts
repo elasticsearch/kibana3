@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+
 import {
   isPackageLimited,
   installationStatuses,
@@ -17,15 +18,17 @@ import type {
   ArchivePackage,
   RegistryPackage,
   EpmPackageAdditions,
+  GetCategoriesRequest,
 } from '../../../../common/types';
-import { KibanaAssetType } from '../../../types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
+import { appContextService } from '../../';
 import * as Registry from '../registry';
-import { createInstallableFrom, isRequiredPackage } from './index';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
+
+import { createInstallableFrom, isUnremovablePackage } from './index';
 
 export { getFile, SearchParams } from '../registry';
 
@@ -33,7 +36,7 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getCategories(options: Registry.CategoriesParams) {
+export async function getCategories(options: GetCategoriesRequest['query']) {
   return Registry.fetchCategories(options);
 }
 
@@ -45,7 +48,7 @@ export async function getPackages(
   const { savedObjectsClient, experimental, category } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
-      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
+      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
   });
   // get the installed packages
@@ -98,6 +101,8 @@ export async function getPackageSavedObjects(
   });
 }
 
+export const getInstallations = getPackageSavedObjects;
+
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -109,9 +114,17 @@ export async function getPackageInfo(options: {
     Registry.fetchFindLatestPackage(pkgName),
   ]);
 
+  // If no package version is provided, use the installed version in the response
+  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
+
+  // If no installed version of the given package exists, default to the latest version of the package
+  if (!responsePkgVersion) {
+    responsePkgVersion = latestPackage.version;
+  }
+
   const getPackageRes = await getPackageFromSource({
     pkgName,
-    pkgVersion,
+    pkgVersion: responsePkgVersion,
     savedObjectsClient,
     installedPkg: savedObject?.attributes,
   });
@@ -122,7 +135,8 @@ export async function getPackageInfo(options: {
     latestVersion: latestPackage.version,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
-    removable: !isRequiredPackage(pkgName),
+    removable: !isUnremovablePackage(pkgName),
+    notice: Registry.getNoticePath(paths || []),
   };
   const updated = { ...packageInfo, ...additions };
 
@@ -179,10 +193,11 @@ export async function getPackageFromSource(options: {
   installedPkg?: Installation;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<PackageResponse> {
+  const logger = appContextService.getLogger();
   const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
   let res: GetPackageResponse;
-  // if the package is installed
 
+  // If the package is installed
   if (installedPkg && installedPkg.version === pkgVersion) {
     const { install_source: pkgInstallSource } = installedPkg;
     // check cache
@@ -191,6 +206,10 @@ export async function getPackageFromSource(options: {
       version: pkgVersion,
     });
 
+    if (res) {
+      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from cache`);
+    }
+
     if (!res && installedPkg.package_assets) {
       res = await getEsPackage(
         pkgName,
@@ -198,11 +217,13 @@ export async function getPackageFromSource(options: {
         installedPkg.package_assets,
         savedObjectsClient
       );
+      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
     }
     // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {
       try {
         res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from registry`);
         // TODO: add to cache and storage here?
       } catch (error) {
         // treating this is a 404 as no status code returned
@@ -212,6 +233,7 @@ export async function getPackageFromSource(options: {
   } else {
     // else package is not installed or installed and missing from cache and storage and installed from registry
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+    logger.debug(`retrieved uninstalled package ${pkgName}-${pkgVersion} from registry`);
   }
   if (!res) {
     throw new IngestManagerError(`package info for ${pkgName}-${pkgVersion} does not exist`);
@@ -248,12 +270,4 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
-}
-
-export async function getKibanaSavedObject(
-  savedObjectsClient: SavedObjectsClientContract,
-  type: KibanaAssetType,
-  id: string
-) {
-  return savedObjectsClient.get(type, id);
 }

@@ -6,6 +6,7 @@
  */
 
 import { safeLoad } from 'js-yaml';
+
 import type { InstallablePackage } from '../../../types';
 import { getAssetsData } from '../packages/assets';
 
@@ -14,6 +15,7 @@ export interface Field {
   name: string;
   type?: string;
   description?: string;
+  value?: string;
   format?: string;
   fields?: Fields;
   enabled?: boolean;
@@ -32,6 +34,10 @@ export interface Field {
   dynamic?: 'strict' | boolean;
   include_in_parent?: boolean;
   include_in_root?: boolean;
+
+  // Meta fields
+  metric_type?: string;
+  unit?: string;
 
   // Kibana specific
   analyzed?: boolean;

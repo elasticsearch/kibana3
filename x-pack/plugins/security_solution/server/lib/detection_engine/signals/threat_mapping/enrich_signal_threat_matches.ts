@@ -6,6 +6,7 @@
  */
 
 import { get, isObject } from 'lodash';
+import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
 import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
@@ -56,11 +57,18 @@ export const buildMatchedIndicator = ({
       throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
     }
     const atomic = get(matchedThreat?._source, query.value) as unknown;
-    const type = get(indicator, 'type') as unknown;
+    const event = get(matchedThreat?._source, 'event') as unknown;
 
     return {
       ...indicator,
-      matched: { atomic, field: query.field, id: query.id, index: query.index, type },
+      event,
+      matched: {
+        atomic,
+        field: query.field,
+        id: query.id,
+        index: query.index,
+        type: ENRICHMENT_TYPES.IndicatorMatchRule,
+      },
     };
   });
 
@@ -101,7 +109,7 @@ export const enrichSignalThreatMatches = async (
     return {
       ...signalHit,
       _source: {
-        ...signalHit._source,
+        ...signalHit._source!,
         threat: {
           ...threat,
           indicator: [...existingIndicators, ...matchedIndicators[i]],

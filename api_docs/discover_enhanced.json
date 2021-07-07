@@ -3,313 +3,7 @@
   "client": {
     "classes": [
       {
-        "id": "def-public.ExploreDataContextMenuAction",
-        "type": "Class",
-        "tags": [],
-        "label": "ExploreDataContextMenuAction",
-        "description": [
-          "\nThis is \"Explore underlying data\" action which appears in the context\nmenu of a dashboard panel."
-        ],
-        "signature": [
-          {
-            "pluginId": "discoverEnhanced",
-            "scope": "public",
-            "docId": "kibDiscoverEnhancedPluginApi",
-            "section": "def-public.ExploreDataContextMenuAction",
-            "text": "ExploreDataContextMenuAction"
-          },
-          " extends ",
-          "AbstractExploreDataAction",
-          "<EmbeddableQueryContext> implements ",
-          {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Action",
-            "text": "Action"
-          },
-          "<EmbeddableQueryContext>"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ExploreDataContextMenuAction.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L37"
-            },
-            "signature": [
-              "\"ACTION_EXPLORE_DATA\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ExploreDataContextMenuAction.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L39"
-            },
-            "signature": [
-              "\"ACTION_EXPLORE_DATA\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ExploreDataContextMenuAction.order",
-            "type": "number",
-            "label": "order",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L41"
-            },
-            "signature": [
-              "200"
-            ]
-          },
-          {
-            "id": "def-public.ExploreDataContextMenuAction.getUrl",
-            "type": "Function",
-            "children": [
-              {
-                "type": "Object",
-                "label": "context",
-                "isRequired": true,
-                "signature": [
-                  "EmbeddableQueryContext"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-                  "lineNumber": 43,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L43"
-                }
-              }
-            ],
-            "signature": [
-              "(context: EmbeddableQueryContext) => Promise<",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.KibanaURL",
-                "text": "KibanaURL"
-              },
-              ">"
-            ],
-            "description": [],
-            "label": "getUrl",
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L43"
-            },
-            "tags": [],
-            "returnComment": []
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts#L34"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ExploreDataChartAction",
-        "type": "Class",
-        "tags": [],
-        "label": "ExploreDataChartAction",
-        "description": [
-          "\nThis is \"Explore underlying data\" action which appears in popup context\nmenu when user clicks a value in visualization or brushes a time range."
-        ],
-        "signature": [
-          {
-            "pluginId": "discoverEnhanced",
-            "scope": "public",
-            "docId": "kibDiscoverEnhancedPluginApi",
-            "section": "def-public.ExploreDataChartAction",
-            "text": "ExploreDataChartAction"
-          },
-          " extends ",
-          "AbstractExploreDataAction",
-          "<",
-          "ExploreDataChartActionContext",
-          "> implements ",
-          {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Action",
-            "text": "Action"
-          },
-          "<",
-          "ExploreDataChartActionContext"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ExploreDataChartAction.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L35"
-            },
-            "signature": [
-              "\"ACTION_EXPLORE_DATA_CHART\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ExploreDataChartAction.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L37"
-            },
-            "signature": [
-              "\"ACTION_EXPLORE_DATA_CHART\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ExploreDataChartAction.order",
-            "type": "number",
-            "label": "order",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L39"
-            },
-            "signature": [
-              "200"
-            ]
-          },
-          {
-            "id": "def-public.ExploreDataChartAction.isCompatible",
-            "type": "Function",
-            "label": "isCompatible",
-            "signature": [
-              "(context: ",
-              {
-                "pluginId": "discoverEnhanced",
-                "scope": "public",
-                "docId": "kibDiscoverEnhancedPluginApi",
-                "section": "def-public.ExploreDataChartActionContext",
-                "text": "ExploreDataChartActionContext"
-              },
-              ") => Promise<boolean>"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Object",
-                "label": "context",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "discoverEnhanced",
-                    "scope": "public",
-                    "docId": "kibDiscoverEnhancedPluginApi",
-                    "section": "def-public.ExploreDataChartActionContext",
-                    "text": "ExploreDataChartActionContext"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-                  "lineNumber": 41,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L41"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L41"
-            }
-          },
-          {
-            "id": "def-public.ExploreDataChartAction.getUrl",
-            "type": "Function",
-            "children": [
-              {
-                "type": "Object",
-                "label": "context",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "discoverEnhanced",
-                    "scope": "public",
-                    "docId": "kibDiscoverEnhancedPluginApi",
-                    "section": "def-public.ExploreDataChartActionContext",
-                    "text": "ExploreDataChartActionContext"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-                  "lineNumber": 47,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L47"
-                }
-              }
-            ],
-            "signature": [
-              "(context: ",
-              {
-                "pluginId": "discoverEnhanced",
-                "scope": "public",
-                "docId": "kibDiscoverEnhancedPluginApi",
-                "section": "def-public.ExploreDataChartActionContext",
-                "text": "ExploreDataChartActionContext"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.KibanaURL",
-                "text": "KibanaURL"
-              },
-              ">"
-            ],
-            "description": [],
-            "label": "getUrl",
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L46"
-            },
-            "tags": [],
-            "returnComment": []
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
-          "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts#L32"
-        },
-        "initialIsOpen": false
-      },
-      {
+        "parentPluginId": "discoverEnhanced",
         "id": "def-public.DiscoverEnhancedPlugin",
         "type": "Class",
         "tags": [],
@@ -349,18 +43,19 @@
           },
           ">"
         ],
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+          "lineNumber": 40
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedPlugin.config",
             "type": "Object",
+            "tags": [],
             "label": "config",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L43"
-            },
             "signature": [
               {
                 "pluginId": "discoverEnhanced",
@@ -369,21 +64,36 @@
                 "section": "def-common.Config",
                 "text": "Config"
               }
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
           },
           {
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedPlugin.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 45
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "context",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -394,26 +104,23 @@
                   },
                   "<object>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-                  "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L45"
-                }
+                  "lineNumber": 45
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L45"
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedPlugin.setup",
             "type": "Function",
+            "tags": [],
             "label": "setup",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -441,12 +148,19 @@
               },
               ") => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.setup.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -465,17 +179,20 @@
                   },
                   ", unknown>"
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-                  "lineNumber": 50,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L50"
-                }
+                  "lineNumber": 50
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.setup.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "{ uiActions, share }",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "discoverEnhanced",
@@ -485,26 +202,23 @@
                     "text": "DiscoverEnhancedSetupDependencies"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-                  "lineNumber": 51,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L51"
-                }
+                  "lineNumber": 51
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L49"
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedPlugin.start",
             "type": "Function",
+            "tags": [],
             "label": "start",
+            "description": [],
             "signature": [
               "(core: ",
               {
@@ -524,12 +238,19 @@
               },
               ") => void"
             ],
-            "description": [],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 71
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.start.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "core",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "core",
@@ -539,17 +260,20 @@
                     "text": "CoreStart"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-                  "lineNumber": 69,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L69"
-                }
+                  "lineNumber": 71
+                },
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.DiscoverEnhancedPlugin.start.$2",
                 "type": "Object",
+                "tags": [],
                 "label": "plugins",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "discoverEnhanced",
@@ -559,68 +283,352 @@
                     "text": "DiscoverEnhancedStartDependencies"
                   }
                 ],
-                "description": [],
                 "source": {
                   "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-                  "lineNumber": 69,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L69"
-                }
+                  "lineNumber": 71
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 69,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L69"
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedPlugin.stop",
             "type": "Function",
+            "tags": [],
             "label": "stop",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 71,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L71"
-            }
+              "lineNumber": 73
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverEnhanced",
+        "id": "def-public.ExploreDataChartAction",
+        "type": "Class",
+        "tags": [],
+        "label": "ExploreDataChartAction",
+        "description": [
+          "\nThis is \"Explore underlying data\" action which appears in popup context\nmenu when user clicks a value in visualization or brushes a time range."
+        ],
+        "signature": [
+          {
+            "pluginId": "discoverEnhanced",
+            "scope": "public",
+            "docId": "kibDiscoverEnhancedPluginApi",
+            "section": "def-public.ExploreDataChartAction",
+            "text": "ExploreDataChartAction"
+          },
+          " extends ",
+          "AbstractExploreDataAction",
+          "<",
+          "ExploreDataChartActionContext",
+          "> implements ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<",
+          "ExploreDataChartActionContext",
+          ">"
+        ],
         "source": {
-          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-          "lineNumber": 40,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L40"
+          "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+          "lineNumber": 32
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"ACTION_EXPLORE_DATA_CHART\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"ACTION_EXPLORE_DATA_CHART\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "200"
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.isCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "isCompatible",
+            "description": [],
+            "signature": [
+              "(context: ",
+              "ExploreDataChartActionContext",
+              ") => Promise<boolean>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.ExploreDataChartAction.isCompatible.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "ExploreDataChartActionContext"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                  "lineNumber": 41
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataChartAction.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "(context: ",
+              "ExploreDataChartActionContext",
+              ") => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+              "lineNumber": 46
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.ExploreDataChartAction.getLocation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "ExploreDataChartActionContext"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                  "lineNumber": 47
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverEnhanced",
+        "id": "def-public.ExploreDataContextMenuAction",
+        "type": "Class",
+        "tags": [],
+        "label": "ExploreDataContextMenuAction",
+        "description": [
+          "\nThis is \"Explore underlying data\" action which appears in the context\nmenu of a dashboard panel."
+        ],
+        "signature": [
+          {
+            "pluginId": "discoverEnhanced",
+            "scope": "public",
+            "docId": "kibDiscoverEnhancedPluginApi",
+            "section": "def-public.ExploreDataContextMenuAction",
+            "text": "ExploreDataContextMenuAction"
+          },
+          " extends ",
+          "AbstractExploreDataAction",
+          "<EmbeddableQueryContext> implements ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<EmbeddableQueryContext>"
+        ],
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataContextMenuAction.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"ACTION_EXPLORE_DATA\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataContextMenuAction.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"ACTION_EXPLORE_DATA\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataContextMenuAction.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "200"
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.ExploreDataContextMenuAction.getLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "getLocation",
+            "description": [],
+            "signature": [
+              "(context: EmbeddableQueryContext) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "discoverEnhanced",
+                "id": "def-public.ExploreDataContextMenuAction.getLocation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "EmbeddableQueryContext"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+                  "lineNumber": 44
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "discoverEnhanced",
         "id": "def-public.DiscoverEnhancedSetupDependencies",
         "type": "Interface",
+        "tags": [],
         "label": "DiscoverEnhancedSetupDependencies",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+          "lineNumber": 24
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedSetupDependencies.discover",
             "type": "Object",
+            "tags": [],
             "label": "discover",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L25"
-            },
             "signature": [
               {
                 "pluginId": "discover",
@@ -629,19 +637,20 @@
                 "section": "def-public.DiscoverSetup",
                 "text": "DiscoverSetup"
               }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverEnhancedSetupDependencies.embeddable",
-            "type": "Object",
-            "label": "embeddable",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L26"
+              "lineNumber": 25
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedSetupDependencies.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -650,34 +659,36 @@
                 "section": "def-public.EmbeddableSetup",
                 "text": "EmbeddableSetup"
               }
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedSetupDependencies.kibanaLegacy",
             "type": "Object",
+            "tags": [],
             "label": "kibanaLegacy",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L27"
-            },
             "signature": [
               "{} | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverEnhancedSetupDependencies.share",
-            "type": "CompoundType",
-            "label": "share",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 28,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L28"
+              "lineNumber": 27
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedSetupDependencies.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
             "signature": [
               {
                 "pluginId": "share",
@@ -687,57 +698,86 @@
                 "text": "SharePluginSetup"
               },
               " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverEnhancedSetupDependencies.uiActions",
-            "type": "Object",
-            "label": "uiActions",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 29,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L29"
+              "lineNumber": 28
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedSetupDependencies.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
             "signature": [
-              "Pick<",
+              "{ readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
               },
-              ", \"addTriggerAction\" | \"attachAction\" | \"detachAction\" | \"registerAction\" | \"registerTrigger\" | \"unregisterAction\">"
-            ]
+              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(definition: A) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<A>>; readonly registerTrigger: (trigger: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
+                "text": "Trigger"
+              },
+              ") => void; readonly unregisterAction: (actionId: string) => void; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-          "lineNumber": 24,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L24"
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "discoverEnhanced",
         "id": "def-public.DiscoverEnhancedStartDependencies",
         "type": "Interface",
+        "tags": [],
         "label": "DiscoverEnhancedStartDependencies",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+          "lineNumber": 32
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedStartDependencies.discover",
             "type": "Object",
+            "tags": [],
             "label": "discover",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L33"
-            },
             "signature": [
               {
                 "pluginId": "discover",
@@ -746,19 +786,20 @@
                 "section": "def-public.DiscoverStart",
                 "text": "DiscoverStart"
               }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverEnhancedStartDependencies.embeddable",
-            "type": "Object",
-            "label": "embeddable",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L34"
+              "lineNumber": 33
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedStartDependencies.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
             "signature": [
               {
                 "pluginId": "embeddable",
@@ -767,42 +808,38 @@
                 "section": "def-public.EmbeddableStart",
                 "text": "EmbeddableStart"
               }
-            ]
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedStartDependencies.kibanaLegacy",
             "type": "Object",
+            "tags": [],
             "label": "kibanaLegacy",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L35"
-            },
             "signature": [
               "{ dashboardConfig: ",
-              {
-                "pluginId": "kibanaLegacy",
-                "scope": "public",
-                "docId": "kibKibanaLegacyPluginApi",
-                "section": "def-public.DashboardConfig",
-                "text": "DashboardConfig"
-              },
+              "DashboardConfig",
               "; loadFontAwesome: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverEnhancedStartDependencies.share",
-            "type": "CompoundType",
-            "label": "share",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L36"
+              "lineNumber": 35
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedStartDependencies.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
             "signature": [
               {
                 "pluginId": "share",
@@ -812,21 +849,22 @@
                 "text": "SharePluginStart"
               },
               " | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.DiscoverEnhancedStartDependencies.uiActions",
-            "type": "Object",
-            "label": "uiActions",
-            "description": [],
+            ],
             "source": {
               "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L37"
+              "lineNumber": 36
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-public.DiscoverEnhancedStartDependencies.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
             "signature": [
-              "Pick<",
+              "{ readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -834,25 +872,85 @@
                 "section": "def-public.UiActionsService",
                 "text": "UiActionsService"
               },
-              ", ",
-              "MethodKeysOf",
+              "; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(definition: A) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
               "<",
+              "ActionContext",
+              "<A>>; readonly registerTrigger: (trigger: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
+                "section": "def-public.Trigger",
+                "text": "Trigger"
               },
-              ">>"
-            ]
+              ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(id: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+              "lineNumber": 37
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
-          "lineNumber": 32,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/public/plugin.ts#L32"
-        },
         "initialIsOpen": false
       }
     ],
@@ -873,33 +971,35 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "discoverEnhanced",
         "id": "def-common.Config",
         "type": "Interface",
+        "tags": [],
         "label": "Config",
         "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Config.actions",
-            "type": "Object",
-            "label": "actions",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/discover_enhanced/common/config.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/common/config.ts#L9"
-            },
-            "signature": [
-              "{ exploreDataInChart: { enabled: boolean; }; }"
-            ]
-          }
-        ],
         "source": {
           "path": "x-pack/plugins/discover_enhanced/common/config.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/discover_enhanced/common/config.ts#L8"
+          "lineNumber": 8
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discoverEnhanced",
+            "id": "def-common.Config.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ exploreDataInChart: { enabled: boolean; }; exploreDataInContextMenu: { enabled: boolean; }; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/discover_enhanced/common/config.ts",
+              "lineNumber": 9
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

@@ -11,6 +11,22 @@ export const SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.summa
   defaultMessage: 'Summary',
 });
 
+export const ALERT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.alertSummary', {
+  defaultMessage: 'Alert Summary',
+});
+
+export const THREAT_INTEL = i18n.translate('xpack.securitySolution.alertDetails.threatIntel', {
+  defaultMessage: 'Threat Intel',
+});
+
+export const THREAT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.threatSummary', {
+  defaultMessage: 'Threat Summary',
+});
+
+export const VIEW_CTI_DATA = i18n.translate('xpack.securitySolution.alertDetails.threatIntelCta', {
+  defaultMessage: 'View threat intel data',
+});
+
 export const INVESTIGATION_GUIDE = i18n.translate(
   'xpack.securitySolution.alertDetails.summary.investigationGuide',
   {
@@ -68,3 +84,7 @@ export const NESTED_COLUMN = (field: string) =>
     defaultMessage:
       'The {field} field is an object, and is broken down into nested fields which can be added as column',
   });
+
+export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
+  defaultMessage: 'Agent status',
+});

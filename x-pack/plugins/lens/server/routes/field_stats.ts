@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { errors } from '@elastic/elasticsearch';
+import { errors, estypes } from '@elastic/elasticsearch';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import { IFieldType } from 'src/plugins/data/common';
 import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
 
@@ -32,6 +31,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             fromDate: schema.string(),
             toDate: schema.string(),
             fieldName: schema.string(),
+            size: schema.maybe(schema.number()),
           },
           { unknowns: 'allow' }
         ),
@@ -39,7 +39,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, fieldName, dslQuery } = req.body;
+      const { fromDate, toDate, fieldName, dslQuery, size } = req.body;
 
       const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
@@ -79,7 +79,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           },
         };
 
-        const search = async (aggs: unknown) => {
+        const search = async (aggs: Record<string, estypes.AggregationsAggregationContainer>) => {
           const { body: result } = await requestClient.search({
             index: indexPattern.title,
             track_total_hits: true,
@@ -92,6 +92,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           });
           return result;
         };
+
+        if (field.type.includes('range')) {
+          return res.ok({ body: {} });
+        }
 
         if (field.type === 'histogram') {
           return res.ok({
@@ -108,7 +112,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
         }
 
         return res.ok({
-          body: await getStringSamples(search, field),
+          body: await getStringSamples(search, field, size),
         });
       } catch (e) {
         if (e instanceof SavedObjectNotFound) {
@@ -131,7 +135,9 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 }
 
 export async function getNumberHistogram(
-  aggSearchWithBody: (body: unknown) => Promise<unknown>,
+  aggSearchWithBody: (
+    aggs: Record<string, estypes.AggregationsAggregationContainer>
+  ) => Promise<unknown>,
   field: IFieldType,
   useTopHits = true
 ): Promise<FieldStatsResponse> {
@@ -175,7 +181,10 @@ export async function getNumberHistogram(
   const terms =
     'top_values' in minMaxResult.aggregations!.sample
       ? minMaxResult.aggregations!.sample.top_values
-      : { buckets: [] };
+      : {
+          buckets: [] as Array<{ doc_count: number; key: string | number }>,
+        };
+
   const topValuesBuckets = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
@@ -237,8 +246,9 @@ export async function getNumberHistogram(
 }
 
 export async function getStringSamples(
-  aggSearchWithBody: (body: unknown) => unknown,
-  field: IFieldType
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
+  field: IFieldType,
+  size = 10
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
 
@@ -250,7 +260,7 @@ export async function getStringSamples(
         top_values: {
           terms: {
             ...fieldRef,
-            size: 10,
+            size,
           },
         },
       },
@@ -276,7 +286,7 @@ export async function getStringSamples(
 
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
-  aggSearchWithBody: (body: unknown) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
   field: IFieldType,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {
@@ -323,7 +333,7 @@ function getFieldRef(field: IFieldType) {
   return field.scripted
     ? {
         script: {
-          lang: field.lang as string,
+          lang: field.lang!,
           source: field.script as string,
         },
       }

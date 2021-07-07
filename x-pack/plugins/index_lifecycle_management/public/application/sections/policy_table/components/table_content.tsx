@@ -205,6 +205,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       onClick: () => {
         setConfirmModal(renderAddPolicyToTemplateConfirmModal(policy));
       },
+      'data-test-subj': 'addPolicyToTemplate',
     });
     items.push({
       name: deletePolicyLabel,
@@ -214,6 +215,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       onClick: () => {
         setConfirmModal(renderDeleteConfirmModal(policy));
       },
+      'data-test-subj': 'deletePolicy',
     });
     const panelTree = {
       id: 0,
@@ -319,7 +321,11 @@ export const TableContent: React.FunctionComponent<Props> = ({
 
   const rows = sortedPolicies.map((policy) => {
     const { name } = policy;
-    return <EuiTableRow key={`${name}-row`}>{renderRowCells(policy)}</EuiTableRow>;
+    return (
+      <EuiTableRow data-test-subj="policyTableRow" key={`${name}-row`}>
+        {renderRowCells(policy)}
+      </EuiTableRow>
+    );
   });
 
   const renderAddPolicyToTemplateConfirmModal = (policy: PolicyFromES): ReactElement => {

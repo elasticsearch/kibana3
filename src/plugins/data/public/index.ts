@@ -23,7 +23,6 @@ import {
   disableFilter,
   FILTERS,
   FilterStateStore,
-  getDisplayValueFromFilter,
   getPhraseFilterField,
   getPhraseFilterValue,
   isExistsFilter,
@@ -40,8 +39,10 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
+import { FilterItem } from './ui/filter_bar';
 
 import {
+  getDisplayValueFromFilter,
   generateFilters,
   onlyDisabledFiltersChanged,
   changeTimeFilter,
@@ -54,6 +55,7 @@ import {
 // Filter helpers namespace:
 export const esFilters = {
   FilterLabel,
+  FilterItem,
 
   FILTERS,
   FilterStateStore,
@@ -92,7 +94,7 @@ export const esFilters = {
   extractTimeRange,
 };
 
-export {
+export type {
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -158,6 +160,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 import { DateNanosFormat, DateFormat } from './field_formats';
@@ -188,6 +191,7 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export {
@@ -264,6 +268,7 @@ export {
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
@@ -272,9 +277,8 @@ export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
  * Autocomplete query suggestions:
  */
 
-export {
+export type {
   QuerySuggestion,
-  QuerySuggestionTypes,
   QuerySuggestionGetFn,
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
@@ -282,6 +286,7 @@ export {
   AutocompleteStart,
 } from './autocomplete';
 
+export { QuerySuggestionTypes } from './autocomplete';
 /*
  * Search:
  */
@@ -301,7 +306,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  Ipv4Address,
+  IpAddress,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -309,33 +314,30 @@ import {
   toAbsoluteDates,
   boundsDescendingRaw,
   getNumberHistogramIntervalByDatatableColumn,
-  // expressions utils
-  getRequestInspectorStats,
+  getDateHistogramMetaDataByDatatableColumn,
   getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
 } from '../common';
 
-export {
+export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
+
+export type {
   // aggs
   AggConfigSerialized,
-  AggGroupLabels,
   AggGroupName,
-  AggGroupNames,
   AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,
   AggConfigOptions,
-  BUCKET_TYPES,
   EsaggsExpressionFunctionDefinition,
   IAggConfig,
   IAggConfigs,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  METRIC_TYPES,
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
@@ -349,40 +351,48 @@ export {
 
 export type { AggConfigs, AggConfig } from '../common';
 
-export {
+export type {
   // search
   ES_SEARCH_STRATEGY,
   EsQuerySortValue,
-  extractSearchSourceReferences,
-  getEsPreference,
-  getSearchParamsFromRequest,
   IEsSearchRequest,
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  injectSearchSourceReferences,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
-  parseSearchSourceJSON,
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
   SearchSourceFields,
-  SortDirection,
-  SearchSessionState,
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
   // errors
+  IEsError,
   SearchError,
   SearchTimeoutError,
   TimeoutErrorMode,
   PainlessError,
+  Reason,
+  WaitUntilNextSessionCompletesOptions,
+} from './search';
+
+export {
+  parseSearchSourceJSON,
+  injectSearchSourceReferences,
+  extractSearchSourceReferences,
+  getEsPreference,
+  getSearchParamsFromRequest,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  isEsError,
+  SearchSessionState,
+  SortDirection,
 } from './search';
 
 export type {
@@ -403,7 +413,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    Ipv4Address,
+    IpAddress,
     isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
@@ -419,8 +429,8 @@ export const search = {
     toAbsoluteDates,
     boundsDescendingRaw,
     getNumberHistogramIntervalByDatatableColumn,
+    getDateHistogramMetaDataByDatatableColumn,
   },
-  getRequestInspectorStats,
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
@@ -430,40 +440,44 @@ export const search = {
  * UI components
  */
 
-export {
-  SearchBar,
+export type {
   SearchBarProps,
   StatefulSearchBarProps,
   IndexPatternSelectProps,
-  QueryStringInput,
   QueryStringInputProps,
 } from './ui';
+
+export { QueryStringInput, SearchBar } from './ui';
 
 /**
  * Types to be shared externally
  * @public
  */
-export { Filter, Query, RefreshInterval, TimeRange } from '../common';
+export type { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
-  QueryState,
   getDefaultQuery,
   FilterManager,
+  TimeHistory,
+} from './query';
+
+export type {
+  QueryState,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
   InputTimeRange,
-  TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  AutoRefreshDoneFn,
 } from './query';
 
-export { AggsStart } from './search/aggs';
+export type { AggsStart } from './search/aggs';
 
 export {
   getTime,
@@ -487,7 +501,7 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new DataPublicPlugin(initializerContext);
 }
 
-export {
+export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
@@ -496,4 +510,4 @@ export {
 } from './types';
 
 // Export plugin after all other imports
-export { DataPublicPlugin as Plugin };
+export type { DataPublicPlugin as DataPlugin };

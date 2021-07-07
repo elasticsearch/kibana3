@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
 
   // FLAKY: https://github.com/elastic/kibana/issues/86948
+  // FLAKY: https://github.com/elastic/kibana/issues/98247
   describe.skip('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
@@ -126,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(onDashboardLandingPage).to.equal(false);
       });
 
-      it.skip('title match is case insensitive', async function () {
+      it('title match is case insensitive', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';

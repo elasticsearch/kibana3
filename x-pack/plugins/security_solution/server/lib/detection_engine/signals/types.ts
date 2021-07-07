@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { DslQuery, Filter } from 'src/plugins/data/common';
 import moment, { Moment } from 'moment';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
@@ -16,20 +18,21 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
-} from '../../../../../alerts/server';
-import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
+} from '../../../../../alerting/server';
+import { BaseSearchResponse, SearchHit, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
   RuleAlertAction,
   SearchTypes,
+  EqlSequence,
 } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes } from '../types';
 import { ListClient } from '../../../../../lists/server';
-import { Logger } from '../../../../../../../src/core/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
+import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
+import { RuleParams } from '../schemas/rule_schemas';
+import { GenericBulkCreateResponse } from './bulk_create_factory';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -51,7 +54,7 @@ export interface SignalsStatusParams {
 
 export interface ThresholdResult {
   terms?: Array<{
-    field?: string;
+    field: string;
     value: string;
   }>;
   cardinality?: Array<{
@@ -59,6 +62,7 @@ export interface ThresholdResult {
     value: number;
   }>;
   count: number;
+  from: string;
 }
 
 export interface ThresholdSignalHistoryRecord {
@@ -79,14 +83,25 @@ export interface RuleRangeTuple {
   maxSignals: number;
 }
 
+/**
+ * SignalSource is being used as both a type for documents that match detection engine queries as well as
+ * for queries that could be on top of signals. In cases where it is matched against detection engine queries,
+ * '@timestamp' might not be there since it is not required and we have timestamp override capabilities. Also
+ * the signal addition object, "signal?: {" will not be there unless it's a conflicting field when we are running
+ * queries on events.
+ *
+ * For cases where we are running queries against signals (signals on signals) "@timestamp" should always be there
+ * and the "signal?: {" sub-object should always be there.
+ */
 export interface SignalSource {
   [key: string]: SearchTypes;
-  // TODO: SignalSource is being used as the type for documents matching detection engine queries, but they may not
-  // actually have @timestamp if a timestamp override is used
-  '@timestamp': string;
+  '@timestamp'?: string;
   signal?: {
-    // parent is deprecated: new signals should populate parents instead
-    // both are optional until all signals with parent are gone and we can safely remove it
+    /**
+     * "parent" is deprecated: new signals should populate "parents" instead. Both are optional
+     * until all signals with parent are gone and we can safely remove it.
+     * @deprecated Use parents instead
+     */
     parent?: Ancestor;
     parents?: Ancestor[];
     ancestors: Ancestor[];
@@ -97,7 +112,7 @@ export interface SignalSource {
     rule: {
       id: string;
     };
-    // signal.depth doesn't exist on pre-7.10 signals
+    /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
     depth?: number;
     original_time?: string;
     threshold_result?: ThresholdResult;
@@ -149,16 +164,15 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
-export type EventSearchResponse = SearchResponse<EventSource>;
-export type SignalSearchResponse = SearchResponse<SignalSource>;
-export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
+export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
+export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
-export type BaseSignalHit = BaseHit<SignalSource>;
+export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
 export type RuleExecutorOptions = AlertExecutorOptions<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext
@@ -169,7 +183,7 @@ export type RuleExecutorOptions = AlertExecutorOptions<
 export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
 ): obj is AlertType<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -179,7 +193,7 @@ export const isAlertExecutor = (
 };
 
 export type SignalRuleAlertTypeDefinition = AlertType<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -199,7 +213,9 @@ export interface Signal {
     version: number;
   };
   rule: RulesSchema;
-  // DEPRECATED: use parents instead of parent
+  /**
+   * @deprecated Use "parents" instead of "parent"
+   */
   parent?: Ancestor;
   parents: Ancestor[];
   ancestors: Ancestor[];
@@ -222,7 +238,7 @@ export interface SignalHit {
   [key: string]: SearchTypes;
 }
 
-export interface AlertAttributes {
+export interface AlertAttributes<T extends RuleParams = RuleParams> {
   actions: RuleAlertAction[];
   enabled: boolean;
   name: string;
@@ -234,10 +250,7 @@ export interface AlertAttributes {
     interval: string;
   };
   throttle: string;
-}
-
-export interface RuleAlertAttributes extends AlertAttributes {
-  params: RuleTypeParams;
+  params: T;
 }
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
@@ -256,13 +269,21 @@ export interface QueryFilter {
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
+export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
+
+export type SimpleHit = BaseHit<{ '@timestamp': string }>;
+
+export type WrapHits = (hits: Array<estypes.SearchHit<SignalSource>>) => SimpleHit[];
+
+export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
+
 export interface SearchAfterAndBulkCreateParams {
-  tuples: Array<{
+  tuple: {
     to: moment.Moment;
     from: moment.Moment;
     maxSignals: number;
-  }>;
-  ruleParams: RuleTypeParams;
+  };
+  ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
@@ -271,31 +292,24 @@ export interface SearchAfterAndBulkCreateParams {
   id: string;
   inputIndexPattern: string[];
   signalsIndex: string;
-  name: string;
-  actions: RuleAlertAction[];
-  createdAt: string;
-  createdBy: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
   pageSize: number;
   filter: unknown;
-  refresh: RefreshTypes;
-  tags: string[];
-  throttle: string;
   buildRuleMessage: BuildRuleMessage;
   enrichment?: SignalsEnrichment;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
+  warning: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
-  createdSignals: SignalHit[];
+  createdSignals: unknown[];
   errors: string[];
+  warningMessages: string[];
   totalToFromTuples?: Array<{
     to: Moment | undefined;
     from: Moment | undefined;

@@ -6,17 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern, IFieldType } from '../../index_patterns';
 import { Filter } from '../filters';
+import { IndexPatternBase } from './types';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
  * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
  * change.
  */
-export function filterMatchesIndex(filter: Filter, indexPattern?: IIndexPattern | null) {
+export function filterMatchesIndex(filter: Filter, indexPattern?: IndexPatternBase | null) {
   if (!filter.meta?.key || !indexPattern) {
     return true;
   }
-  return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
+
+  // Fixes https://github.com/elastic/kibana/issues/89878
+  // Custom filters may refer multiple fields. Validate the index id only.
+  if (filter.meta?.type === 'custom') {
+    return filter.meta.index === indexPattern.id;
+  }
+
+  return indexPattern.fields.some((field) => field.name === filter.meta.key);
 }

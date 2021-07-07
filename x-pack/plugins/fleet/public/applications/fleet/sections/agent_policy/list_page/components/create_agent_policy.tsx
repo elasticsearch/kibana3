@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useState } from 'react';
+import type { StyledComponent } from 'styled-components';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -20,15 +23,21 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
-  EuiFlyoutProps,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { dataTypes } from '../../../../../../../common';
-import { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 
-const FlyoutWithHigherZIndex = styled(EuiFlyout)`
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
+const FlyoutWithHigherZIndex: StyledComponent<
+  typeof EuiFlyout,
+  {},
+  { children?: ReactNode }
+> = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 
@@ -38,6 +47,7 @@ interface Props extends EuiFlyoutProps {
 
 export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   onClose,
+  as,
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();

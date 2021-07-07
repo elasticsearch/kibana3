@@ -58,6 +58,7 @@ const ViewAlertsFlexItem = styled(EuiFlexItem)`
 interface AlertsHistogramPanelProps
   extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery' | 'deleteQuery'> {
   chartHeight?: number;
+  combinedQueries?: string;
   defaultStackByOption?: AlertsHistogramOption;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
@@ -86,9 +87,26 @@ const DEFAULT_STACK_BY = 'signal.rule.name';
 const getDefaultStackByOption = (): AlertsHistogramOption =>
   alertsHistogramOptions.find(({ text }) => text === DEFAULT_STACK_BY) ?? alertsHistogramOptions[0];
 
+export const parseCombinedQueries = (query?: string) => {
+  try {
+    return query != null && !isEmpty(query) ? JSON.parse(query) : {};
+  } catch {
+    return {};
+  }
+};
+
+export const buildCombinedQueries = (query?: string) => {
+  try {
+    return isEmpty(query) ? [] : [parseCombinedQueries(query)];
+  } catch {
+    return [];
+  }
+};
+
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
     chartHeight,
+    combinedQueries,
     defaultStackByOption = getDefaultStackByOption(),
     deleteQuery,
     filters,
@@ -111,6 +129,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [isInspectDisabled, setIsInspectDisabled] = useState(false);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalAlertsObj, setTotalAlertsObj] = useState<AlertsTotal>(defaultTotalAlertsObj);
     const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsHistogramOption>(
@@ -123,13 +142,18 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       response,
       request,
       refetch,
-    } = useQueryAlerts<{}, AlertsAggregation>(
-      getAlertsHistogramQuery(selectedStackByOption.value, from, to, []),
-      signalIndexName
-    );
+    } = useQueryAlerts<{}, AlertsAggregation>({
+      query: getAlertsHistogramQuery(
+        selectedStackByOption.value,
+        from,
+        to,
+        buildCombinedQueries(combinedQueries)
+      ),
+      indexName: signalIndexName,
+    });
     const kibana = useKibana();
     const { navigateToApp } = kibana.services.application;
-    const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.detections);
+    const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
 
     const totalAlerts = useMemo(
       () =>
@@ -152,7 +176,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const goToDetectionEngine = useCallback(
       (ev) => {
         ev.preventDefault();
-        navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+        navigateToApp(APP_ID, {
+          deepLinkId: SecurityPageName.alerts,
           path: getDetectionEngineUrl(urlSearch),
         });
       },
@@ -223,16 +248,21 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     useEffect(() => {
       try {
-        const converted = esQuery.buildEsQuery(
-          undefined,
-          query != null ? [query] : [],
-          filters?.filter((f) => f.meta.disabled === false) ?? [],
-          {
-            ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
-            dateFormatTZ: undefined,
-          }
-        );
-
+        let converted = null;
+        if (combinedQueries != null) {
+          converted = parseCombinedQueries(combinedQueries);
+        } else {
+          converted = esQuery.buildEsQuery(
+            undefined,
+            query != null ? [query] : [],
+            filters?.filter((f) => f.meta.disabled === false) ?? [],
+            {
+              ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              dateFormatTZ: undefined,
+            }
+          );
+        }
+        setIsInspectDisabled(false);
         setAlertsQuery(
           getAlertsHistogramQuery(
             selectedStackByOption.value,
@@ -242,10 +272,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           )
         );
       } catch (e) {
+        setIsInspectDisabled(true);
         setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption.value, from, to, []));
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedStackByOption.value, from, to, query, filters]);
+    }, [selectedStackByOption.value, from, to, query, filters, combinedQueries]);
 
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {
@@ -270,12 +301,13 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <StyledEuiPanel height={panelHeight}>
+        <StyledEuiPanel height={panelHeight} hasBorder>
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}
             titleSize={onlyField == null ? 'm' : 's'}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
+            isInspectDisabled={isInspectDisabled}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>

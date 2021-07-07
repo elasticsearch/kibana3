@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await clickInChart(5, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+      await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
 
       await retry.try(async () => {
         await testSubjects.click('applyFiltersPopoverButton');
@@ -86,6 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasIpFilter).to.be(true);
     });
 
+    // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
+    // setting set in kibana.yml to work (not enabled by default)
     it('should be able to drill down to discover', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
@@ -134,7 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter('geo.dest', 'is', 'LS');
 
       await dashboardAddPanel.clickCreateNewLink();
-      await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
       expect(hasGeoDestFilter).to.be(false);
@@ -200,7 +201,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
 
       await dashboardAddPanel.clickCreateNewLink();
-      await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.goToTimeRange();
 
@@ -223,10 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // remove the x dimension to trigger the validation error
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
-      await PageObjects.lens.saveAndReturn();
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddable-lens-failure');
+      await PageObjects.lens.expectSaveAndReturnButtonDisabled();
     });
   });
 }

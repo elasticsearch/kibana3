@@ -7,11 +7,11 @@
 
 import { CoreSetup } from 'src/core/server';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { AlertType } from '../../../../../../../plugins/alerts/server';
+import { AlertType } from '../../../../../../../plugins/alerting/server';
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
-  { alerts }: Pick<FixtureSetupDeps, 'alerts'>
+  { alerting }: Pick<FixtureSetupDeps, 'alerting'>
 ) {
   const noopRestrictedAlertType: AlertType<{}, {}, {}, {}, 'default', 'restrictedRecovered'> = {
     id: 'test.restricted-noop',
@@ -20,6 +20,7 @@ export function defineAlertTypes(
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     recoveryActionGroup: { id: 'restrictedRecovered', name: 'Restricted Recovery' },
     async executor() {},
   };
@@ -30,8 +31,9 @@ export function defineAlertTypes(
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {},
   };
-  alerts.registerType(noopRestrictedAlertType);
-  alerts.registerType(noopUnrestrictedAlertType);
+  alerting.registerType(noopRestrictedAlertType);
+  alerting.registerType(noopUnrestrictedAlertType);
 }

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPattern, IFieldType } from '../..';
+import { IndexPatternFieldBase, IndexPatternBase } from '../..';
+
 import {
   Filter,
   FILTERS,
@@ -19,20 +20,22 @@ import {
 } from '.';
 
 export function buildFilter(
-  indexPattern: IIndexPattern,
-  field: IFieldType,
+  indexPattern: IndexPatternBase,
+  field: IndexPatternFieldBase,
   type: FILTERS,
   negate: boolean,
   disabled: boolean,
   params: any,
   alias: string | null,
-  store: FilterStateStore
+  store?: FilterStateStore
 ): Filter {
   const filter = buildBaseFilter(indexPattern, field, type, params);
   filter.meta.alias = alias;
   filter.meta.negate = negate;
   filter.meta.disabled = disabled;
-  filter.$state = { store };
+  if (store) {
+    filter.$state = { store };
+  }
   return filter;
 }
 
@@ -57,8 +60,8 @@ export function buildCustomFilter(
 }
 
 function buildBaseFilter(
-  indexPattern: IIndexPattern,
-  field: IFieldType,
+  indexPattern: IndexPatternBase,
+  field: IndexPatternFieldBase,
   type: FILTERS,
   params: any
 ): Filter {
@@ -70,6 +73,8 @@ function buildBaseFilter(
     case 'range':
       const newParams = { gte: params.from, lt: params.to };
       return buildRangeFilter(field, newParams, indexPattern);
+    case 'range_from_value':
+      return buildRangeFilter(field, params, indexPattern);
     case 'exists':
       return buildExistsFilter(field, indexPattern);
     default:

@@ -13,7 +13,7 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
   ActionGroupIdsOf,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import {
   createMetricThresholdExecutor,
@@ -100,6 +100,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor: createMetricThresholdExecutor(libs),
     actionVariables: {
       context: [

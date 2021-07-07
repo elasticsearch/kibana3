@@ -22,12 +22,12 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
-import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import { Threshold, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import {
@@ -461,7 +461,9 @@ export const buildThresholdDescription = (label: string, threshold: Threshold): 
       <>
         {isEmpty(threshold.field[0])
           ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field[0]} >= ${threshold.value}`}
+          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
+              Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
+            } >= ${threshold.value}`}
       </>
     ),
   },

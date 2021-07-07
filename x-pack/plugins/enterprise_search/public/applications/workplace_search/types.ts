@@ -106,9 +106,10 @@ export interface ContentSourceDetails extends ContentSource {
   isFederatedSource: boolean;
   searchable: boolean;
   supportedByLicense: boolean;
-  errorReason: number;
+  errorReason: string | null;
   allowsReauth: boolean;
   boost: number;
+  activities: SourceActivity[];
 }
 
 interface DescriptionList {
@@ -203,6 +204,10 @@ export interface SearchResultConfig {
   titleField: string | null;
   subtitleField: string | null;
   descriptionField: string | null;
+  typeField: string | null;
+  mediaTypeField: string | null;
+  createdByField: string | null;
+  updatedByField: string | null;
   urlField: string | null;
   color: string;
   detailFields: DetailField[];

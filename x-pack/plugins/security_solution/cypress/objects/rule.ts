@@ -8,13 +8,15 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
 import { mockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
-import { CompleteTimeline, timeline } from './timeline';
+import { timeline, CompleteTimeline, indicatorMatchTimelineTemplate } from './timeline';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
 export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
 export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
+
+const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
 interface MitreAttackTechnique {
   name: string;
@@ -41,7 +43,7 @@ export interface CustomRule {
   customQuery?: string;
   name: string;
   description: string;
-  index?: string[];
+  index: string[];
   interval?: string;
   severity: string;
   riskScore: string;
@@ -71,12 +73,14 @@ export interface OverrideRule extends CustomRule {
 
 export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
-  indicatorMapping: string;
+  indicatorMappingField: string;
   indicatorIndexField: string;
+  type?: string;
+  atomic?: string;
 }
 
 export interface MachineLearningRule {
-  machineLearningJob: string;
+  machineLearningJobs: string[];
   anomalyScoreThreshold: string;
   name: string;
   description: string;
@@ -168,7 +172,43 @@ export const newRule: CustomRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  runsEvery,
+  lookBack,
+  timeline,
+  maxSignals: 100,
+};
+
+export const unmappedRule: CustomRule = {
+  customQuery: '*:*',
+  index: ['unmapped*'],
+  name: 'Rule with unmapped fields',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  runsEvery,
+  lookBack,
+  timeline,
+  maxSignals: 100,
+};
+
+export const unmappedCCSRule: CustomRule = {
+  customQuery: '*:*',
+  index: [`${ccsRemoteName}:unmapped*`],
+  name: 'Rule with unmapped fields',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -183,7 +223,7 @@ export const existingRule: CustomRule = {
   name: 'Rule 1',
   description: 'Description for Rule 1',
   index: ['auditbeat-*'],
-  interval: '10s',
+  interval: '100m',
   severity: 'High',
   riskScore: '19',
   tags: ['rule1'],
@@ -207,7 +247,7 @@ export const newOverrideRule: OverrideRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -229,7 +269,7 @@ export const newThresholdRule: ThresholdRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -242,7 +282,7 @@ export const newThresholdRule: ThresholdRule = {
 };
 
 export const machineLearningRule: MachineLearningRule = {
-  machineLearningJob: 'linux_anomalous_network_service',
+  machineLearningJobs: ['linux_anomalous_network_service', 'linux_anomalous_network_activity_ecs'],
   anomalyScoreThreshold: '20',
   name: 'New ML Rule Test',
   description: 'The new ML rule description.',
@@ -265,7 +305,7 @@ export const eqlRule: CustomRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -286,7 +326,7 @@ export const eqlSequenceRule: CustomRule = {
   severity: 'High',
   riskScore: '17',
   tags: ['test', 'newRule'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
@@ -299,22 +339,26 @@ export const eqlSequenceRule: CustomRule = {
 export const newThreatIndicatorRule: ThreatIndicatorRule = {
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
-  index: ['threat-data-*'],
+  index: ['suspicious-*'],
   severity: 'Critical',
   riskScore: '20',
   tags: ['test', 'threat'],
-  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  referenceUrls: ['http://example.com/', 'https://example.com/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
   note: '# test markdown',
   runsEvery,
   lookBack,
-  indicatorIndexPattern: ['threat-indicator-*'],
-  indicatorMapping: 'agent.id',
-  indicatorIndexField: 'agent.threat',
-  timeline,
+  indicatorIndexPattern: ['filebeat-*'],
+  indicatorMappingField: 'myhash.mysha256',
+  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  type: 'file',
+  atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+  timeline: indicatorMatchTimelineTemplate,
   maxSignals: 100,
 };
+
+export const duplicatedRuleName = `${newThreatIndicatorRule.name} [Duplicate]`;
 
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
 
@@ -328,5 +372,5 @@ export const editedRule = {
 export const expectedExportedRule = (ruleResponse: Cypress.Response) => {
   const jsonrule = ruleResponse.body;
 
-  return `{"author":[],"actions":[],"created_at":"${jsonrule.created_at}","updated_at":"${jsonrule.updated_at}","created_by":"elastic","description":"${jsonrule.description}","enabled":false,"false_positives":[],"from":"now-17520h","id":"${jsonrule.id}","immutable":false,"index":["exceptions-*"],"interval":"10s","rule_id":"rule_testing","language":"kuery","output_index":".siem-signals-default","max_signals":100,"risk_score":${jsonrule.risk_score},"risk_score_mapping":[],"name":"${jsonrule.name}","query":"${jsonrule.query}","references":[],"severity":"${jsonrule.severity}","severity_mapping":[],"updated_by":"elastic","tags":[],"to":"now","type":"query","threat":[],"throttle":"no_actions","version":1,"exceptions_list":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
+  return `{"id":"${jsonrule.id}","updated_at":"${jsonrule.updated_at}","updated_by":"elastic","created_at":"${jsonrule.created_at}","created_by":"elastic","name":"${jsonrule.name}","tags":[],"interval":"100m","enabled":false,"description":"${jsonrule.description}","risk_score":${jsonrule.risk_score},"severity":"${jsonrule.severity}","output_index":".siem-signals-default","author":[],"false_positives":[],"from":"now-17520h","rule_id":"rule_testing","max_signals":100,"risk_score_mapping":[],"severity_mapping":[],"threat":[],"to":"now","references":[],"version":1,"exceptions_list":[],"immutable":false,"type":"query","language":"kuery","index":["exceptions-*"],"query":"${jsonrule.query}","throttle":"no_actions","actions":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
 };

@@ -72,16 +72,21 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         refresh_token: refreshToken,
         authentication: authenticationInfo,
       } = (
-        await this.options.client.asInternalUser.security.getToken<{
-          access_token: string;
-          refresh_token: string;
-          authentication: AuthenticationInfo;
-        }>({ body: { grant_type: 'password', username, password } })
+        await this.options.client.asInternalUser.security.getToken({
+          body: {
+            grant_type: 'password',
+            username,
+            password,
+          },
+        })
       ).body;
 
       this.logger.debug('Get token API request to Elasticsearch successful');
       return AuthenticationResult.succeeded(
-        this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+        this.authenticationInfoToAuthenticatedUser(
+          // @ts-expect-error @elastic/elasticsearch metadata defined as Record<string, any>;
+          authenticationInfo as AuthenticationInfo
+        ),
         {
           authHeaders: {
             authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),

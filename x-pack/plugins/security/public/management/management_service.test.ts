@@ -40,6 +40,7 @@ describe('ManagementService', () => {
             security: mockSection,
           } as DefinedSections,
         },
+        locator: {} as any,
       };
 
       const service = new ManagementService();
@@ -68,7 +69,7 @@ describe('ManagementService', () => {
         id: 'api_keys',
         mount: expect.any(Function),
         order: 30,
-        title: 'API Keys',
+        title: 'API keys',
       });
       expect(mockSection.registerApp).toHaveBeenCalledWith({
         id: 'role_mappings',
@@ -101,6 +102,7 @@ describe('ManagementService', () => {
             security: mockSection,
           } as DefinedSections,
         },
+        locator: {} as any,
       };
 
       service.setup({

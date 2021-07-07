@@ -9,11 +9,12 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import { Direction } from '../../../graphql/types';
 
 import { BasicTableProps, PaginatedTable } from './index';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { Direction } from '../../../../common/search_strategy';
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
@@ -21,7 +22,7 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiColorEmptyShade: '#ece',
     euiSizeL: '10px',
@@ -32,7 +33,7 @@ const mockTheme = {
       m: '10px',
     },
   },
-};
+});
 
 describe('Paginated Table Component', () => {
   let loadPage: jest.Mock<number>;

@@ -95,6 +95,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
@@ -113,9 +114,15 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
-export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
+export {
+  IFieldFormatsRegistry,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+} from '../common';
 
 /*
  * Index patterns:
@@ -168,20 +175,18 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
-  Ipv4Address,
+  IpAddress,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
-  // expressions utils
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
   calcAutoIntervalLessThan,
 } from '../common';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   // aggs
@@ -218,6 +223,7 @@ export {
 } from '../common';
 
 export {
+  IScopedSearchClient,
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
@@ -235,6 +241,9 @@ export {
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
+  AsyncSearchResponse,
+  AsyncSearchStatusResponse,
+  NoSearchIdInSessionError,
 } from './search';
 
 // Search namespace
@@ -245,7 +254,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    Ipv4Address,
+    IpAddress,
     isNumberType,
     isStringType,
     isType,
@@ -260,8 +269,6 @@ export const search = {
     toAbsoluteDates,
     calcAutoIntervalLessThan,
   },
-  getRequestInspectorStats,
-  getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
 };
@@ -301,6 +308,7 @@ export {
 };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
     autocomplete: true,
     search: true,

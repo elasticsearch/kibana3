@@ -12,22 +12,23 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiConfirmModal,
+  EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../../shared/loading';
 import { TruncatedContent } from '../../../../shared/truncate';
-import { AppLogic } from '../../../app_logic';
+import noSharedSourcesIcon from '../../../assets/share_circle.svg';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { CANCEL_BUTTON } from '../../../constants';
+import { NAV, CANCEL_BUTTON } from '../../../constants';
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
 import { GroupUsersTable } from './group_users_table';
@@ -122,11 +123,7 @@ export const GroupOverview: React.FC = () => {
     confirmDeleteModalVisible,
   } = useValues(GroupLogic);
 
-  const { isFederatedAuth } = useValues(AppLogic);
-
-  if (dataLoading) return <Loading />;
-
-  const truncatedName = (
+  const truncatedName = name && (
     <TruncatedContent tooltipType="title" content={name} length={MAX_NAME_LENGTH} />
   );
 
@@ -145,6 +142,12 @@ export const GroupOverview: React.FC = () => {
       values: { name },
     }
   );
+  const GROUP_SOURCES_TITLE = i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupSourcesTitle',
+    {
+      defaultMessage: 'Group content sources',
+    }
+  );
   const GROUP_SOURCES_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupSourcesDescription',
     {
@@ -153,15 +156,15 @@ export const GroupOverview: React.FC = () => {
     }
   );
 
-  const hasContentSources = contentSources.length > 0;
-  const hasUsers = users.length > 0;
+  const hasContentSources = contentSources?.length > 0;
+  const hasUsers = users?.length > 0;
 
   const manageSourcesButton = (
     <EuiButton color="primary" onClick={showSharedSourcesModal}>
       {MANAGE_SOURCES_BUTTON_TEXT}
     </EuiButton>
   );
-  const manageUsersButton = !isFederatedAuth && (
+  const manageUsersButton = (
     <EuiButton color="primary" onClick={showManageUsersModal}>
       {MANAGE_USERS_BUTTON_TEXT}
     </EuiButton>
@@ -170,16 +173,30 @@ export const GroupOverview: React.FC = () => {
 
   const sourcesSection = (
     <ContentSection
-      title="Group content sources"
-      description={hasContentSources ? GROUP_SOURCES_DESCRIPTION : EMPTY_SOURCES_DESCRIPTION}
+      title={GROUP_SOURCES_TITLE}
+      description={GROUP_SOURCES_DESCRIPTION}
       action={manageSourcesButton}
       data-test-subj="GroupContentSourcesSection"
     >
-      {hasContentSources && sourcesTable}
+      {sourcesTable}
     </ContentSection>
   );
 
-  const usersSection = !isFederatedAuth && (
+  const sourcesEmptyState = (
+    <>
+      <EuiPanel paddingSize="none" color="subdued">
+        <EuiEmptyPrompt
+          iconType={noSharedSourcesIcon}
+          title={<h2>{GROUP_SOURCES_TITLE}</h2>}
+          body={<p>{EMPTY_SOURCES_DESCRIPTION}</p>}
+          actions={manageSourcesButton}
+        />
+      </EuiPanel>
+      <EuiSpacer />
+    </>
+  );
+
+  const usersSection = (
     <ContentSection
       title="Group users"
       description={hasUsers ? GROUP_USERS_DESCRIPTION : EMPTY_USERS_DESCRIPTION}
@@ -249,13 +266,16 @@ export const GroupOverview: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader title={truncatedName} />
-      <EuiSpacer />
-      {sourcesSection}
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS, name || '...']}
+      pageViewTelemetry="group_overview"
+      pageHeader={{ pageTitle: truncatedName }}
+      isLoading={dataLoading}
+    >
+      {hasContentSources ? sourcesSection : sourcesEmptyState}
       {usersSection}
       {nameSection}
       {canDeleteGroup && deleteSection}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

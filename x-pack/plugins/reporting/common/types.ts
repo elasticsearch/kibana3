@@ -40,16 +40,17 @@ export interface LayoutParams {
 export interface ReportDocumentHead {
   _id: string;
   _index: string;
-  _seq_no: unknown;
-  _primary_term: unknown;
+  _seq_no: number;
+  _primary_term: number;
 }
 
 export interface TaskRunResult {
   content_type: string | null;
   content: string | null;
-  csv_contains_formulas?: boolean;
   size: number;
+  csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
+  needs_sorting?: boolean;
   warnings?: string[];
 }
 
@@ -64,9 +65,11 @@ export interface ReportSource {
     objectType: string;
     title: string;
     layout?: LayoutParams;
+    isDeprecated?: boolean;
   };
   meta: { objectType: string; layout?: string };
   browser_type: string;
+  migration_version: string;
   max_attempts: number;
   timeout: number;
 
@@ -76,7 +79,7 @@ export interface ReportSource {
   started_at?: string;
   completed_at?: string;
   created_at: string;
-  process_expiration?: string;
+  process_expiration?: string | null; // must be set to null to clear the expiration
 }
 
 /*
@@ -126,6 +129,7 @@ export interface ReportApiJSON {
     layout?: LayoutParams;
     title: string;
     browserTimezone?: string;
+    isDeprecated?: boolean;
   };
   meta: {
     layout?: string;
@@ -162,3 +166,9 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
+
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
+export interface IlmPolicyStatusResponse {
+  status: IlmPolicyMigrationStatus;
+}

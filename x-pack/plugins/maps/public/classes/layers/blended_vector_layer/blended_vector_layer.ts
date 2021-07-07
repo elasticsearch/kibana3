@@ -34,6 +34,7 @@ import {
   DynamicStylePropertyOptions,
   StylePropertyOptions,
   LayerDescriptor,
+  Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStylePropertiesDescriptor,
@@ -44,10 +45,6 @@ import { ESSearchSource } from '../../sources/es_search_source/es_search_source'
 import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
-
-interface CountData {
-  isSyncClustered: boolean;
-}
 
 function getAggType(
   dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>
@@ -215,7 +212,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
     if (countDataRequest) {
-      const requestData = countDataRequest.getData() as CountData;
+      const requestData = countDataRequest.getData() as { isSyncClustered: boolean };
       if (requestData && requestData.isSyncClustered) {
         isClustered = true;
       }
@@ -293,15 +290,20 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
     );
+    const source = this.getSource();
     const canSkipFetch = await canSkipSourceUpdate({
-      source: this.getSource(),
+      source,
       prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
+      extentAware: source.isFilterByMapBounds(),
+      getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+        return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
+      },
     });
 
     let activeSource;
@@ -319,17 +321,11 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       let isSyncClustered;
       try {
         syncContext.startLoading(dataRequestId, requestToken, searchFilters);
-        const abortController = new AbortController();
-        syncContext.registerCancelCallback(requestToken, () => abortController.abort());
-        const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
-        const resp = await searchSource.fetch({
-          abortSignal: abortController.signal,
-          sessionId: syncContext.dataFilters.searchSessionId,
-        });
-        const maxResultWindow = await this._documentSource.getMaxResultWindow();
-        isSyncClustered = resp.hits.total > maxResultWindow;
-        const countData = { isSyncClustered } as CountData;
-        syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
+        isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
+          searchFilters,
+          syncContext.registerCancelCallback.bind(null, requestToken)
+        ));
+        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);

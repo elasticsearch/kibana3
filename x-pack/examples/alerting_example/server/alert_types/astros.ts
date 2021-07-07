@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import { AlertType } from '../../../../plugins/alerts/server';
+import { AlertType } from '../../../../plugins/alerting/server';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -51,6 +51,7 @@ export const alertType: AlertType<
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   defaultActionGroupId: 'default',
   recoveryActionGroup: {
     id: 'hasLandedBackOnEarth',

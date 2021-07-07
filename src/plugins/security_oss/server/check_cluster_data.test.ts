@@ -31,15 +31,15 @@ describe('checkClusterForUserData', () => {
         body: [
           {
             index: '.kibana',
-            'docs.count': 500,
+            'docs.count': '500',
           },
           {
             index: 'kibana_sample_ecommerce_data',
-            'docs.count': 20,
+            'docs.count': '20',
           },
           {
             index: '.somethingElse',
-            'docs.count': 20,
+            'docs.count': '20',
           },
         ],
       })
@@ -59,11 +59,11 @@ describe('checkClusterForUserData', () => {
         body: [
           {
             index: '.kibana',
-            'docs.count': 500,
+            'docs.count': '500',
           },
           {
             index: 'some_real_index',
-            'docs.count': 20,
+            'docs.count': '20',
           },
         ],
       })
@@ -89,7 +89,7 @@ describe('checkClusterForUserData', () => {
           body: [
             {
               index: '.kibana',
-              'docs.count': 500,
+              'docs.count': '500',
             },
           ],
         })
@@ -99,7 +99,7 @@ describe('checkClusterForUserData', () => {
           body: [
             {
               index: 'some_real_index',
-              'docs.count': 20,
+              'docs.count': '20',
             },
           ],
         })

@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { range } from 'lodash';
-import { AlertType } from '../../../../plugins/alerts/server';
+import { AlertType } from '../../../../plugins/alerting/server';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
@@ -53,6 +53,7 @@ export const alertType: AlertType<
   ],
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },

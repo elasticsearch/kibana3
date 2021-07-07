@@ -15,9 +15,10 @@ export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
-      'oss',
-      'no-oss',
       'skip-archives',
+      'skip-initialize',
+      'skip-generic-folders',
+      'skip-platform-folders',
       'skip-os-packages',
       'rpm',
       'deb',
@@ -45,7 +46,6 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
-      oss: null,
       'version-qualifier': '',
     },
     unknown: (flag) => {
@@ -91,9 +91,10 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
-    buildOssDist: flags.oss !== false,
-    buildDefaultDist: !flags.oss,
+    initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
+    createGenericFolders: !Boolean(flags['skip-generic-folders']),
+    createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),

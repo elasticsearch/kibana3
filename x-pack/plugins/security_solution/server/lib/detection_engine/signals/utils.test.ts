@@ -9,13 +9,12 @@ import moment from 'moment';
 import sinon from 'sinon';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
 // @ts-expect-error
 moment.suppressDeprecationWarnings = true;
@@ -40,6 +39,8 @@ import {
   createTotalHitsFromSearchResult,
   lastValidDate,
   calculateThresholdSignalUuid,
+  buildChunkedOrFilter,
+  getValidDateFromDoc,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -54,6 +55,7 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
   repeatedSearchResultsWithSortId,
   sampleDocSearchResultsNoSortId,
+  sampleDocNoSortId,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
 
@@ -69,7 +71,7 @@ const ruleStatusServiceMock = {
   find: jest.fn(),
   goingToRun: jest.fn(),
   error: jest.fn(),
-  warning: jest.fn(),
+  partialFailure: jest.fn(),
 };
 
 describe('utils', () => {
@@ -112,34 +114,6 @@ describe('utils', () => {
     test('it throws given an invalid duration', () => {
       const duration = parseInterval('junk');
       expect(duration).toBeNull();
-    });
-  });
-
-  describe('parseScheduleDates', () => {
-    test('it returns a moment when given an ISO string', () => {
-      const result = parseScheduleDates('2020-01-01T00:00:00.000Z');
-      expect(result).not.toBeNull();
-      expect(result).toEqual(moment('2020-01-01T00:00:00.000Z'));
-    });
-
-    test('it returns a moment when given `now`', () => {
-      const result = parseScheduleDates('now');
-
-      expect(result).not.toBeNull();
-      expect(moment.isMoment(result)).toBeTruthy();
-    });
-
-    test('it returns a moment when given `now-x`', () => {
-      const result = parseScheduleDates('now-6m');
-
-      expect(result).not.toBeNull();
-      expect(moment.isMoment(result)).toBeTruthy();
-    });
-
-    test('it returns null when given a string that is not an ISO string, `now` or `now-x`', () => {
-      const result = parseScheduleDates('invalid');
-
-      expect(result).toBeNull();
     });
   });
 
@@ -662,8 +636,8 @@ describe('utils', () => {
           return;
         }
         expect(moment(item.to).diff(moment(item.from), 's')).toEqual(13);
-        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(-10);
-        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(-10);
+        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(10);
+        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
     });
@@ -1108,6 +1082,8 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
+        warningMessages: [],
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1126,6 +1102,8 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
+        warning: false,
+        warningMessages: [],
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1133,6 +1111,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
+      // @ts-expect-error not full interface
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
@@ -1144,6 +1123,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
+      // @ts-expect-error not full interface
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
@@ -1156,7 +1136,9 @@ describe('utils', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
       searchResult._shards.failures = [
+        // @ts-expect-error not full interface
         { reason: { reason: 'Not a sort failure' } },
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
@@ -1180,7 +1162,9 @@ describe('utils', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
       searchResult._shards.failures = [
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [event.ingested] in order to sort on' } },
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
@@ -1286,7 +1270,7 @@ describe('utils', () => {
     test('It returns timestampOverride date time if set', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
+      searchResult.hits.hits[0]._source!.different_timestamp = new Date(override).toISOString();
       const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
@@ -1308,6 +1292,123 @@ describe('utils', () => {
     });
   });
 
+  describe('getValidDateFromDoc', () => {
+    test('It returns undefined if the search result contains a null timestamp', () => {
+      const doc = sampleDocNoSortId();
+      (doc._source['@timestamp'] as unknown) = null;
+      if (doc.fields != null) {
+        (doc.fields['@timestamp'] as unknown) = null;
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains a undefined timestamp', () => {
+      const doc = sampleDocNoSortId();
+      (doc._source['@timestamp'] as unknown) = undefined;
+      if (doc.fields != null) {
+        (doc.fields['@timestamp'] as unknown) = undefined;
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns undefined if the search result contains an invalid string value', () => {
+      const doc = sampleDocNoSortId();
+      (doc._source['@timestamp'] as unknown) = 'invalid value';
+      if (doc.fields != null) {
+        (doc.fields['@timestamp'] as unknown) = ['invalid value'];
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date).toEqual(undefined);
+    });
+
+    test('It returns normal date time if set', () => {
+      const doc = sampleDocNoSortId();
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
+    });
+
+    test('It returns date time from field if set there', () => {
+      const timestamp = '2020-10-07T19:27:19.136Z';
+      let doc = sampleDocNoSortId();
+      if (doc == null) {
+        throw new TypeError('Test requires one element');
+      }
+      doc = {
+        ...doc,
+        fields: {
+          '@timestamp': [timestamp],
+        },
+      };
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(timestamp);
+    });
+
+    test('It returns timestampOverride date time if set', () => {
+      const override = '2020-10-07T19:20:28.049Z';
+      const doc = sampleDocNoSortId();
+      doc._source.different_timestamp = new Date(override).toISOString();
+      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+
+    test('It returns timestampOverride date time from fields if set on it', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      let doc = sampleDocNoSortId();
+      if (doc == null) {
+        throw new TypeError('Test requires one element');
+      }
+      doc = {
+        ...doc,
+        fields: {
+          different_timestamp: [override],
+        },
+      };
+      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch when it has it in _source and fields', () => {
+      const doc = sampleDocNoSortId();
+      const testDateString = '2021-06-25T15:53:56.590Z';
+      const testDate = `${new Date(testDateString).valueOf()}`;
+      doc._source['@timestamp'] = testDate;
+      if (doc.fields != null) {
+        doc.fields['@timestamp'] = [testDate];
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(testDateString);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch when it has it in _source and fields is nonexistent', () => {
+      const doc = sampleDocNoSortId();
+      const testDateString = '2021-06-25T15:53:56.590Z';
+      const testDate = `${new Date(testDateString).valueOf()}`;
+      doc._source['@timestamp'] = testDate;
+      doc.fields = undefined;
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(testDateString);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch in an override field', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      const testDate = `${new Date(override).valueOf()}`;
+      let doc = sampleDocNoSortId();
+      if (doc == null) {
+        throw new TypeError('Test requires one element');
+      }
+      doc = {
+        ...doc,
+        fields: {
+          different_timestamp: [testDate],
+        },
+      };
+      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
+  });
+
   describe('createSearchAfterReturnType', () => {
     test('createSearchAfterReturnType will return full object when nothing is passed', () => {
       const searchAfterReturnType = createSearchAfterReturnType();
@@ -1319,6 +1420,8 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
+        warningMessages: [],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1332,6 +1435,8 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
+        warningMessages: ['test warning'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
@@ -1341,6 +1446,8 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
+        warningMessages: ['test warning'],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1359,6 +1466,8 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
+        warningMessages: [],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1375,6 +1484,8 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
+        warningMessages: [],
       };
       expect(merged).toEqual(expected);
     });
@@ -1429,6 +1540,7 @@ describe('utils', () => {
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
           success: true,
+          warningMessages: ['warning1'],
         }),
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
@@ -1438,6 +1550,8 @@ describe('utils', () => {
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
           success: true,
+          warningMessages: ['warning2'],
+          warning: true,
         }),
       ]);
       const expected: SearchAfterAndBulkCreateReturnType = {
@@ -1448,6 +1562,8 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
+        warning: true,
+        warningMessages: ['warning1', 'warning2'],
       };
       expect(merged).toEqual(expected);
     });
@@ -1480,6 +1596,28 @@ describe('utils', () => {
       const startedAt = new Date('2019-11-18T13:32:00Z');
       const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, ['host.ip'], '1.2.3.4');
       expect(signalUuid).toEqual('ee8870dc-45ff-5e6c-a2f9-80886651ce03');
+    });
+  });
+
+  describe('buildChunkedOrFilter', () => {
+    test('should return undefined if no values are provided', () => {
+      const filter = buildChunkedOrFilter('field.name', []);
+      expect(filter).toEqual(undefined);
+    });
+
+    test('should return a filter with a single value', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1']);
+      expect(filter).toEqual('field.name: ("id-1")');
+    });
+
+    test('should return a filter with a multiple values', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2']);
+      expect(filter).toEqual('field.name: ("id-1" OR "id-2")');
+    });
+
+    test('should return a filter with a multiple values chunked', () => {
+      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
+      expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
     });
   });
 });

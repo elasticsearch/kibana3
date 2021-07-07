@@ -12,17 +12,18 @@ import { mount } from 'enzyme';
 import { ExceptionItem } from './';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
+import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../lib/kibana');
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiColorDanger: '#ece',
     euiColorLightestShade: '#ece',
     euiColorPrimary: '#ece',
-    euiFontWeightSemiBold: 'bold',
+    euiFontWeightSemiBold: 1,
   },
-};
+});
 
 describe('ExceptionItem', () => {
   it('it renders ExceptionDetails and ExceptionEntries', () => {
@@ -42,6 +43,31 @@ describe('ExceptionItem', () => {
 
     expect(wrapper.find('ExceptionDetails')).toHaveLength(1);
     expect(wrapper.find('ExceptionEntries')).toHaveLength(1);
+  });
+
+  it('it renders ExceptionDetails with Name and Modified info when showName and showModified are true ', () => {
+    const exceptionItem = getExceptionListItemSchemaMock();
+
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <ExceptionItem
+          loadingItemIds={[]}
+          commentsAccordionId={'accordion--comments'}
+          onDeleteException={jest.fn()}
+          onEditException={jest.fn()}
+          exceptionItem={exceptionItem}
+          showModified={true}
+          showName={true}
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('ExceptionDetails').props()).toEqual(
+      expect.objectContaining({
+        showModified: true,
+        showName: true,
+      })
+    );
   });
 
   it('it invokes "onEditException" when edit button clicked', () => {

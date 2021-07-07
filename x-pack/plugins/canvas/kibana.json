@@ -10,13 +10,16 @@
       "charts",
       "data",
       "embeddable",
+      "expressionRevealImage",
       "expressions",
       "features",
       "inspector",
+      "presentationUtil",
       "uiActions"
     ],
     "optionalPlugins": [
       "home",
+      "reporting",
       "usageCollection"
     ],
     "requiredBundles": [
@@ -27,7 +30,6 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "reporting",
       "savedObjects",
       "visualizations"
     ]

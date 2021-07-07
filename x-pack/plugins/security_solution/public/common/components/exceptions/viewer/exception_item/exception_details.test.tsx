@@ -13,12 +13,13 @@ import moment from 'moment-timezone';
 import { ExceptionDetails } from './exception_details';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
+import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiColorLightestShade: '#ece',
   },
-};
+});
 
 describe('ExceptionDetails', () => {
   beforeEach(() => {
@@ -219,5 +220,33 @@ describe('ExceptionDetails', () => {
 
     expect(wrapper.find('EuiDescriptionListTitle').at(3).text()).toEqual('Description');
     expect(wrapper.find('EuiDescriptionListDescription').at(3).text()).toEqual('some description');
+  });
+
+  test('it renders with Name and Modified info when showName and showModified props are true', () => {
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.comments = [];
+
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <ExceptionDetails
+          showComments={false}
+          onCommentsClick={jest.fn()}
+          exceptionItem={exceptionItem}
+          showName={true}
+          showModified={true}
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('EuiDescriptionListTitle').at(0).text()).toEqual('Name');
+    expect(wrapper.find('EuiDescriptionListDescription').at(0).text()).toEqual('some name');
+
+    expect(wrapper.find('EuiDescriptionListTitle').at(4).text()).toEqual('Date modified');
+    expect(wrapper.find('EuiDescriptionListDescription').at(4).text()).toEqual(
+      'April 20th 2020 @ 15:25:31'
+    );
+
+    expect(wrapper.find('EuiDescriptionListTitle').at(5).text()).toEqual('Modified by');
+    expect(wrapper.find('EuiDescriptionListDescription').at(5).text()).toEqual('some user');
   });
 });

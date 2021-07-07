@@ -29,7 +29,6 @@ import { renderEndzoneTooltip } from '../../../charts/public';
 
 import { getThemeService, getUISettings } from '../services';
 import { VisConfig } from '../types';
-import { fillEmptyValue } from '../utils/get_series_name_fn';
 
 declare global {
   interface Window {
@@ -134,7 +133,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   };
 
   const headerValueFormatter: TickFormatter<any> | undefined = xAxis.ticks?.formatter
-    ? (value) => fillEmptyValue(xAxis.ticks?.formatter?.(value)) ?? ''
+    ? (value) => xAxis.ticks?.formatter?.(value) ?? ''
     : undefined;
   const headerFormatter =
     isTimeChart && xDomain && adjustedXDomain
@@ -148,13 +147,15 @@ export const XYSettings: FC<XYSettingsProps> = ({
       : headerValueFormatter &&
         (tooltip.detailedTooltip ? undefined : ({ value }: any) => headerValueFormatter(value));
 
+  const boundary = document.getElementById('app-fixed-viewport') ?? undefined;
   const tooltipProps: TooltipProps = tooltip.detailedTooltip
     ? {
         ...tooltip,
+        boundary,
         customTooltip: tooltip.detailedTooltip(headerFormatter),
         headerFormatter: undefined,
       }
-    : { ...tooltip, headerFormatter };
+    : { ...tooltip, boundary, headerFormatter };
 
   return (
     <Settings

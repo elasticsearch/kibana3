@@ -1,3 +1,66 @@
+# Define the workspace base name and a managed directory by bazel
+# that will hold the node_modules called @npm
 workspace(
-    name = "kibana",
+  name = "kibana",
+  managed_directories = {"@npm": ["node_modules"]},
+)
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# Fetch Node.js rules
+http_archive(
+  name = "build_bazel_rules_nodejs",
+  sha256 = "0fa2d443571c9e02fcb7363a74ae591bdcce2dd76af8677a95965edf329d778a",
+  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.6.0/rules_nodejs-3.6.0.tar.gz"],
+)
+
+# Now that we have the rules let's import from them to complete the work
+load("@build_bazel_rules_nodejs//:index.bzl", "check_rules_nodejs_version", "node_repositories", "yarn_install")
+
+# Assure we have at least a given rules_nodejs version
+check_rules_nodejs_version(minimum_version_string = "3.6.0")
+
+# Setup the Node.js toolchain for the architectures we want to support
+#
+# NOTE: darwin-arm64 is not being installed because bazel is not yet available on that architecture.
+# The PR for it was merged and should be available in the next release of bazel and bazelisk. As soon as they have it
+# we can update that rule.
+node_repositories(
+  node_repositories = {
+    "14.17.2-darwin_amd64": ("node-v14.17.2-darwin-x64.tar.gz", "node-v14.17.2-darwin-x64", "e45db91fc2136202868a5eb7c6d08b0a2b75394fafdf8538f650fa945b7dee16"),
+    "14.17.2-linux_arm64": ("node-v14.17.2-linux-arm64.tar.xz", "node-v14.17.2-linux-arm64", "3aff08c49b8c0c3443e7a9ea9bfe607867d79e6e5ccf204a5c8f13fb92a48abd"),
+    "14.17.2-linux_s390x": ("node-v14.17.2-linux-s390x.tar.xz", "node-v14.17.2-linux-s390x", "76f955856626a3e596b438855fdfe438937623dc71af9a25a8466409be470877"),
+    "14.17.2-linux_amd64": ("node-v14.17.2-linux-x64.tar.xz", "node-v14.17.2-linux-x64", "6cf9db7349407c177b36205feec949729d0ee9db485e19b10b0b1ffca65a3a46"),
+    "14.17.2-windows_amd64": ("node-v14.17.2-win-x64.zip", "node-v14.17.2-win-x64", "0e27897578752865fa61546d75b20f7cd62957726caab3c03f82c57a4aef5636"),
+  },
+  node_version = "14.17.2",
+  node_urls = [
+    "https://nodejs.org/dist/v{version}/{filename}",
+  ],
+  yarn_repositories = {
+    "1.21.1": ("yarn-v1.21.1.tar.gz", "yarn-v1.21.1", "d1d9f4a0f16f5ed484e814afeb98f39b82d4728c6c8beaafb5abc99c02db6674"),
+  },
+  yarn_version = "1.21.1",
+  yarn_urls = [
+    "https://github.com/yarnpkg/yarn/releases/download/v{version}/{filename}",
+  ],
+  package_json = ["//:package.json"],
+)
+
+# Run yarn_install rule to take care of dependencies
+#
+# NOTE: FORCE_COLOR env var forces colors on non tty mode
+yarn_install(
+  name = "npm",
+  package_json = "//:package.json",
+  yarn_lock = "//:yarn.lock",
+  data = [
+    "//:.yarnrc",
+    "//:preinstall_check.js",
+    "//:node_modules/.yarn-integrity",
+  ],
+  exports_directories_only = True,
+  symlink_node_modules = True,
+  quiet = False,
+  frozen_lockfile = False,
 )

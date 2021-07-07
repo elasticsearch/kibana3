@@ -5,47 +5,51 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "newsfeed",
         "id": "def-public.FetchResult",
         "type": "Interface",
+        "tags": [],
         "label": "FetchResult",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/newsfeed/public/types.ts",
+          "lineNumber": 49
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.FetchResult.kibanaVersion",
             "type": "string",
+            "tags": [],
             "label": "kibanaVersion",
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L46"
-            }
+              "lineNumber": 50
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.FetchResult.hasNew",
             "type": "boolean",
+            "tags": [],
             "label": "hasNew",
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L47"
-            }
+              "lineNumber": 51
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.FetchResult.feedItems",
             "type": "Array",
+            "tags": [],
             "label": "feedItems",
             "description": [],
-            "source": {
-              "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L48"
-            },
             "signature": [
               {
                 "pluginId": "newsfeed",
@@ -55,203 +59,234 @@
                 "text": "NewsfeedItem"
               },
               "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.FetchResult.error",
-            "type": "CompoundType",
-            "label": "error",
-            "description": [],
+            ],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L49"
+              "lineNumber": 52
             },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "newsfeed",
+            "id": "def-public.FetchResult.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
             "signature": [
               "Error | null"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 53
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/newsfeed/public/types.ts",
-          "lineNumber": 45,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L45"
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "newsfeed",
         "id": "def-public.NewsfeedItem",
         "type": "Interface",
+        "tags": [],
         "label": "NewsfeedItem",
         "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/newsfeed/public/types.ts",
+          "lineNumber": 38
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.NewsfeedItem.title",
             "type": "string",
+            "tags": [],
             "label": "title",
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L35"
-            }
+              "lineNumber": 39
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.NewsfeedItem.description",
             "type": "string",
+            "tags": [],
             "label": "description",
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L36"
-            }
+              "lineNumber": 40
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.NewsfeedItem.linkText",
             "type": "CompoundType",
+            "tags": [],
             "label": "linkText",
             "description": [],
-            "source": {
-              "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L37"
-            },
             "signature": [
               "string | null"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.NewsfeedItem.linkUrl",
             "type": "string",
+            "tags": [],
             "label": "linkUrl",
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L38"
-            }
+              "lineNumber": 42
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.NewsfeedItem.badge",
             "type": "CompoundType",
+            "tags": [],
             "label": "badge",
             "description": [],
-            "source": {
-              "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L39"
-            },
             "signature": [
               "string | null"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.NewsfeedItem.publishOn",
             "type": "Object",
+            "tags": [],
             "label": "publishOn",
             "description": [],
-            "source": {
-              "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L40"
-            },
             "signature": [
               "moment.Moment"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.NewsfeedItem.expireOn",
             "type": "Object",
+            "tags": [],
             "label": "expireOn",
             "description": [],
-            "source": {
-              "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L41"
-            },
             "signature": [
               "moment.Moment"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/newsfeed/public/types.ts",
+              "lineNumber": 45
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "newsfeed",
             "id": "def-public.NewsfeedItem.hash",
             "type": "string",
+            "tags": [],
             "label": "hash",
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L42"
-            }
+              "lineNumber": 46
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/newsfeed/public/types.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L34"
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [
       {
+        "parentPluginId": "newsfeed",
         "id": "def-public.NewsfeedApiEndpoint",
         "type": "Enum",
-        "label": "NewsfeedApiEndpoint",
         "tags": [],
+        "label": "NewsfeedApiEndpoint",
         "description": [],
         "source": {
           "path": "src/plugins/newsfeed/public/lib/api.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/lib/api.ts#L25"
+          "lineNumber": 17
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "newsfeed",
       "id": "def-public.NewsfeedPublicPluginSetup",
       "type": "Type",
-      "label": "NewsfeedPublicPluginSetup",
       "tags": [],
+      "label": "NewsfeedPublicPluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/newsfeed/public/plugin.tsx",
-        "lineNumber": 20,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/plugin.tsx#L20"
-      },
       "signature": [
         "{}"
       ],
+      "source": {
+        "path": "src/plugins/newsfeed/public/plugin.tsx",
+        "lineNumber": 20
+      },
+      "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "newsfeed",
       "id": "def-public.NewsfeedPublicPluginStart",
       "type": "Type",
-      "label": "NewsfeedPublicPluginStart",
       "tags": [],
+      "label": "NewsfeedPublicPluginStart",
       "description": [],
+      "signature": [
+        "{ createNewsFeed$: (endpoint: ",
+        {
+          "pluginId": "newsfeed",
+          "scope": "public",
+          "docId": "kibNewsfeedPluginApi",
+          "section": "def-public.NewsfeedApiEndpoint",
+          "text": "NewsfeedApiEndpoint"
+        },
+        ") => ",
+        "Observable",
+        "<void | ",
+        {
+          "pluginId": "newsfeed",
+          "scope": "public",
+          "docId": "kibNewsfeedPluginApi",
+          "section": "def-public.FetchResult",
+          "text": "FetchResult"
+        },
+        " | null>; }"
+      ],
       "source": {
         "path": "src/plugins/newsfeed/public/plugin.tsx",
-        "lineNumber": 21,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/plugin.tsx#L21"
+        "lineNumber": 21
       },
-      "signature": [
-        "{ createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => Rx.Observable<void | FetchResult | null>; }"
-      ],
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

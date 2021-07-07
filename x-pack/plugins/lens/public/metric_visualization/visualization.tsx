@@ -55,6 +55,7 @@ export const metricVisualization: Visualization<MetricState> = {
       groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
         defaultMessage: 'Tabular and single value',
       }),
+      sortPriority: 1,
     },
   ],
 
@@ -84,10 +85,10 @@ export const metricVisualization: Visualization<MetricState> = {
 
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(addNewLayer, state) {
     return (
       state || {
-        layerId: frame.addNewLayer(),
+        layerId: addNewLayer(),
         accessor: undefined,
       }
     );

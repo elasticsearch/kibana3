@@ -20,13 +20,14 @@ import {
   createGlobalNoMiddlewareStore,
 } from '../../../test_utils';
 
-const mockTheme = {
+import { TrustedAppsList } from '.';
+import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
   eui: {
     euiColorLightestShade: '#ece',
   },
-};
-
-import { TrustedAppsList } from '.';
+});
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -91,7 +92,9 @@ describe('TrustedAppsList', () => {
         createListLoadedResourceState({ pageSize: 20 }, now)
       )
     );
-    store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
+    store.dispatch(
+      createUserChangedUrlAction('/administration/trusted_apps', '?page_index=2&page_size=50')
+    );
 
     expect(renderList(store).container).toMatchSnapshot();
   });

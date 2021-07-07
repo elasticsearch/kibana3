@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs/operators';
 import { loader, ExpressionLoader } from './loader';
 import { Observable } from 'rxjs';
@@ -42,6 +43,11 @@ jest.mock('./services', () => {
     help: '',
   };
   service.registerFunction(testFn);
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  for (const func of require('../common/test_helpers/expression_functions').functionTestSpecs) {
+    service.registerFunction(func);
+  }
 
   const moduleMock = {
     __execution: undefined,
@@ -106,8 +112,29 @@ describe('ExpressionLoader', () => {
 
   it('emits on $data when data is available', async () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', { variables: { foo: 123 } });
-    const response = await expressionLoader.data$.pipe(first()).toPromise();
-    expect(response).toBe(123);
+    const { result } = await expressionLoader.data$.pipe(first()).toPromise();
+    expect(result).toBe(123);
+  });
+
+  it('ignores partial results by default', async () => {
+    const expressionLoader = new ExpressionLoader(element, 'var foo', {
+      variables: { foo: of(1, 2) },
+    });
+    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+
+    expect(partial).toBe(false);
+    expect(result).toBe(2);
+  });
+
+  it('emits partial results if enabled', async () => {
+    const expressionLoader = new ExpressionLoader(element, 'var foo', {
+      variables: { foo: of(1, 2) },
+      partial: true,
+    });
+    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+
+    expect(partial).toBe(true);
+    expect(result).toBe(1);
   });
 
   it('emits on loading$ on initial load and on updates', async () => {
@@ -144,7 +171,7 @@ describe('ExpressionLoader', () => {
   });
 
   it('cancels the previous request when the expression is updated', () => {
-    const expressionLoader = new ExpressionLoader(element, 'var foo', {});
+    const expressionLoader = new ExpressionLoader(element, 'sleep 10', {});
     const execution = __getLastExecution();
     jest.spyOn(execution, 'cancel');
 

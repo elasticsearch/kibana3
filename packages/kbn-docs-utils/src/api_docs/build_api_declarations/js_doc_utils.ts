@@ -54,16 +54,7 @@ export function getJSDocParamComment(node: Node | JSDoc[], name: string): TextWi
   return [];
 }
 
-export function getJSDocTagNames(node: Node | JSDoc[]): string[] {
-  return getJSDocTags(node).reduce((tags, tag) => {
-    if (tag.getTagName() !== 'param' && tag.getTagName() !== 'returns') {
-      tags.push(tag.getTagName());
-    }
-    return tags;
-  }, [] as string[]);
-}
-
-function getJSDocTags(node: Node | JSDoc[]): JSDocTag[] {
+export function getJSDocTags(node: Node | JSDoc[]): JSDocTag[] {
   const jsDocs = node instanceof Array ? node : getJSDocs(node);
   if (!jsDocs) return [];
 

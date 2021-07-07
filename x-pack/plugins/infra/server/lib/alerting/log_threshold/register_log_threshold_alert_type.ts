@@ -13,7 +13,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   ActionGroupIdsOf,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
@@ -107,6 +107,7 @@ export async function registerLogThresholdAlertType(
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor: createLogThresholdExecutor(libs),
     actionVariables: {
       context: [

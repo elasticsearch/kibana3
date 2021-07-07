@@ -4,23 +4,13 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "bfetch",
         "id": "def-public.split",
         "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "delimiter",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/public/streaming/split.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/public/streaming/split.ts#L25"
-            }
-          }
+        "tags": [],
+        "label": "split",
+        "description": [
+          "\nReceives observable that emits strings, and returns a new observable\nthat also returns strings separated by delimiter.\n\nInput stream:\n\n    asdf.f -> df..aaa. -> dfsdf\n\nOutput stream, assuming \".\" is used as delimiter:\n\n    asdf -> fdf -> aaa -> dfsdf\n"
         ],
         "signature": [
           "(delimiter?: string) => (in$: ",
@@ -29,16 +19,30 @@
           "Observable",
           "<string>"
         ],
-        "description": [
-          "\nReceives observable that emits strings, and returns a new observable\nthat also returns strings separated by delimiter.\n\nInput stream:\n\n    asdf.f -> df..aaa. -> dfsdf\n\nOutput stream, assuming \".\" is used as delimiter:\n\n    asdf -> fdf -> aaa -> dfsdf\n"
-        ],
-        "label": "split",
         "source": {
           "path": "src/plugins/bfetch/public/streaming/split.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/public/streaming/split.ts#L25"
+          "lineNumber": 25
         },
-        "tags": [],
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-public.split.$1",
+            "type": "string",
+            "tags": [],
+            "label": "delimiter",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/public/streaming/split.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -47,75 +51,86 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "bfetch",
         "id": "def-public.BatchedFunc",
         "type": "Type",
-        "label": "BatchedFunc",
         "tags": [],
+        "label": "BatchedFunc",
         "description": [],
+        "signature": [
+          "(payload: Payload, signal?: AbortSignal | undefined) => Promise<Result>"
+        ],
         "source": {
           "path": "src/plugins/bfetch/public/batching/types.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/public/batching/types.ts#L17"
+          "lineNumber": 17
         },
-        "signature": [
-          "(payload: Payload, signal: AbortSignal | undefined) => Promise<Result>"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "start": {
+      "parentPluginId": "bfetch",
       "id": "def-public.BfetchPublicContract",
       "type": "Interface",
+      "tags": [],
       "label": "BfetchPublicContract",
       "description": [],
-      "tags": [],
+      "source": {
+        "path": "src/plugins/bfetch/public/plugin.ts",
+        "lineNumber": 23
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "bfetch",
           "id": "def-public.BfetchPublicContract.fetchStreaming",
           "type": "Function",
+          "tags": [],
           "label": "fetchStreaming",
           "description": [],
-          "source": {
-            "path": "src/plugins/bfetch/public/plugin.ts",
-            "lineNumber": 25,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/public/plugin.ts#L25"
-          },
           "signature": [
             "(params: ",
-            {
-              "pluginId": "bfetch",
-              "scope": "public",
-              "docId": "kibBfetchPluginApi",
-              "section": "def-public.FetchStreamingParams",
-              "text": "FetchStreamingParams"
-            },
+            "FetchStreamingParams",
             ") => { xhr: XMLHttpRequest; stream: ",
             "Observable",
             "<string>; }"
+          ],
+          "source": {
+            "path": "src/plugins/bfetch/public/plugin.ts",
+            "lineNumber": 24
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-public.params",
+              "type": "Object",
+              "tags": [],
+              "label": "params",
+              "description": [],
+              "signature": [
+                "FetchStreamingParams"
+              ],
+              "source": {
+                "path": "src/plugins/bfetch/public/plugin.ts",
+                "lineNumber": 24
+              },
+              "deprecated": false
+            }
           ]
         },
         {
-          "tags": [],
+          "parentPluginId": "bfetch",
           "id": "def-public.BfetchPublicContract.batchedFunction",
           "type": "Function",
+          "tags": [],
           "label": "batchedFunction",
           "description": [],
-          "source": {
-            "path": "src/plugins/bfetch/public/plugin.ts",
-            "lineNumber": 26,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/public/plugin.ts#L26"
-          },
           "signature": [
             "<Payload, Result extends object>(params: ",
-            {
-              "pluginId": "bfetch",
-              "scope": "public",
-              "docId": "kibBfetchPluginApi",
-              "section": "def-public.StreamingBatchedFunctionParams",
-              "text": "StreamingBatchedFunctionParams"
-            },
+            "StreamingBatchedFunctionParams",
             "<Payload, Result>) => ",
             {
               "pluginId": "bfetch",
@@ -125,14 +140,34 @@
               "text": "BatchedFunc"
             },
             "<Payload, Result>"
+          ],
+          "source": {
+            "path": "src/plugins/bfetch/public/plugin.ts",
+            "lineNumber": 25
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-public.params",
+              "type": "Object",
+              "tags": [],
+              "label": "params",
+              "description": [],
+              "signature": [
+                "StreamingBatchedFunctionParams",
+                "<Payload, Result>"
+              ],
+              "source": {
+                "path": "src/plugins/bfetch/public/plugin.ts",
+                "lineNumber": 26
+              },
+              "deprecated": false
+            }
           ]
         }
       ],
-      "source": {
-        "path": "src/plugins/bfetch/public/plugin.ts",
-        "lineNumber": 24,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/public/plugin.ts#L24"
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -142,9 +177,12 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "bfetch",
         "id": "def-server.BatchProcessingRouteParams",
         "type": "Interface",
+        "tags": [],
         "label": "BatchProcessingRouteParams",
+        "description": [],
         "signature": [
           {
             "pluginId": "bfetch",
@@ -155,50 +193,62 @@
           },
           "<BatchItemData, BatchItemResult>"
         ],
-        "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/bfetch/server/plugin.ts",
+          "lineNumber": 41
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "bfetch",
             "id": "def-server.BatchProcessingRouteParams.onBatchItem",
             "type": "Function",
+            "tags": [],
             "label": "onBatchItem",
             "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/server/plugin.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/server/plugin.ts#L40"
-            },
             "signature": [
               "(data: BatchItemData) => Promise<BatchItemResult>"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/server/plugin.ts",
+              "lineNumber": 42
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "bfetch",
+                "id": "def-server.data",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "BatchItemData"
+                ],
+                "source": {
+                  "path": "src/plugins/bfetch/server/plugin.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false
+              }
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/bfetch/server/plugin.ts",
-          "lineNumber": 39,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/server/plugin.ts#L39"
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "bfetch",
         "id": "def-server.StreamingRequestHandler",
         "type": "Type",
+        "tags": [],
         "label": "StreamingRequestHandler",
-        "tags": [
-          "public"
-        ],
         "description": [
           "\nRequest handler modified to allow to return an observable.\n\nSee {@link BfetchServerSetup.createStreamingRequestHandler} for usage example."
         ],
-        "source": {
-          "path": "src/plugins/bfetch/server/types.ts",
-          "lineNumber": 18,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/server/types.ts#L18"
-        },
         "signature": [
           "(context: ",
           {
@@ -222,30 +272,35 @@
           "Observable",
           "<Response>>"
         ],
+        "source": {
+          "path": "src/plugins/bfetch/server/types.ts",
+          "lineNumber": 18
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "bfetch",
       "id": "def-server.BfetchServerSetup",
       "type": "Interface",
+      "tags": [],
       "label": "BfetchServerSetup",
       "description": [],
-      "tags": [
-        "public"
-      ],
+      "source": {
+        "path": "src/plugins/bfetch/server/plugin.ts",
+        "lineNumber": 46
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "bfetch",
           "id": "def-server.BfetchServerSetup.addBatchProcessingRoute",
           "type": "Function",
+          "tags": [],
           "label": "addBatchProcessingRoute",
           "description": [],
-          "source": {
-            "path": "src/plugins/bfetch/server/plugin.ts",
-            "lineNumber": 45,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/server/plugin.ts#L45"
-          },
           "signature": [
             "<BatchItemData extends object, BatchItemResult extends object>(path: string, handler: (request: ",
             {
@@ -264,19 +319,68 @@
               "text": "BatchProcessingRouteParams"
             },
             "<BatchItemData, BatchItemResult>) => void"
+          ],
+          "source": {
+            "path": "src/plugins/bfetch/server/plugin.ts",
+            "lineNumber": 47
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.path",
+              "type": "string",
+              "tags": [],
+              "label": "path",
+              "description": [],
+              "source": {
+                "path": "src/plugins/bfetch/server/plugin.ts",
+                "lineNumber": 48
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.handler",
+              "type": "Function",
+              "tags": [],
+              "label": "handler",
+              "description": [],
+              "signature": [
+                "(request: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>) => ",
+                {
+                  "pluginId": "bfetch",
+                  "scope": "server",
+                  "docId": "kibBfetchPluginApi",
+                  "section": "def-server.BatchProcessingRouteParams",
+                  "text": "BatchProcessingRouteParams"
+                },
+                "<BatchItemData, BatchItemResult>"
+              ],
+              "source": {
+                "path": "src/plugins/bfetch/server/plugin.ts",
+                "lineNumber": 49
+              },
+              "deprecated": false
+            }
           ]
         },
         {
-          "tags": [],
+          "parentPluginId": "bfetch",
           "id": "def-server.BfetchServerSetup.addStreamingResponseRoute",
           "type": "Function",
+          "tags": [],
           "label": "addStreamingResponseRoute",
           "description": [],
-          "source": {
-            "path": "src/plugins/bfetch/server/plugin.ts",
-            "lineNumber": 49,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/server/plugin.ts#L49"
-          },
           "signature": [
             "<Payload, Response>(path: string, params: (request: ",
             {
@@ -295,23 +399,70 @@
               "text": "StreamingResponseHandler"
             },
             "<Payload, Response>) => void"
+          ],
+          "source": {
+            "path": "src/plugins/bfetch/server/plugin.ts",
+            "lineNumber": 51
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.path",
+              "type": "string",
+              "tags": [],
+              "label": "path",
+              "description": [],
+              "source": {
+                "path": "src/plugins/bfetch/server/plugin.ts",
+                "lineNumber": 52
+              },
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.params",
+              "type": "Function",
+              "tags": [],
+              "label": "params",
+              "description": [],
+              "signature": [
+                "(request: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>) => ",
+                {
+                  "pluginId": "bfetch",
+                  "scope": "common",
+                  "docId": "kibBfetchPluginApi",
+                  "section": "def-common.StreamingResponseHandler",
+                  "text": "StreamingResponseHandler"
+                },
+                "<Payload, Response>"
+              ],
+              "source": {
+                "path": "src/plugins/bfetch/server/plugin.ts",
+                "lineNumber": 53
+              },
+              "deprecated": false
+            }
           ]
         },
         {
-          "tags": [
-            "example"
-          ],
+          "parentPluginId": "bfetch",
           "id": "def-server.BfetchServerSetup.createStreamingRequestHandler",
           "type": "Function",
+          "tags": [],
           "label": "createStreamingRequestHandler",
           "description": [
             "\nCreate a streaming request handler to be able to use an Observable to return chunked content to the client.\nThis is meant to be used with the `fetchStreaming` API of the `bfetch` client-side plugin.\n"
           ],
-          "source": {
-            "path": "src/plugins/bfetch/server/plugin.ts",
-            "lineNumber": 81,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/server/plugin.ts#L81"
-          },
           "signature": [
             "<Response, P, Q, B, Context extends ",
             {
@@ -352,30 +503,245 @@
               "docId": "kibCoreHttpPluginApi",
               "section": "def-server.RequestHandler",
               "text": "RequestHandler"
+            },
+            "<P, Q, B, Context, Method, { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+            "Stream",
+            " | undefined>(options: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.CustomHttpResponseOptions",
+              "text": "CustomHttpResponseOptions"
+            },
+            "<T>) => ",
+            "KibanaResponse",
+            "<T>; badRequest: (options?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ErrorHttpResponseOptions",
+              "text": "ErrorHttpResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ResponseError",
+              "text": "ResponseError"
+            },
+            ">; unauthorized: (options?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ErrorHttpResponseOptions",
+              "text": "ErrorHttpResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ResponseError",
+              "text": "ResponseError"
+            },
+            ">; forbidden: (options?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ErrorHttpResponseOptions",
+              "text": "ErrorHttpResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ResponseError",
+              "text": "ResponseError"
+            },
+            ">; notFound: (options?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ErrorHttpResponseOptions",
+              "text": "ErrorHttpResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ResponseError",
+              "text": "ResponseError"
+            },
+            ">; conflict: (options?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ErrorHttpResponseOptions",
+              "text": "ErrorHttpResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ResponseError",
+              "text": "ResponseError"
+            },
+            ">; customError: (options: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.CustomHttpResponseOptions",
+              "text": "CustomHttpResponseOptions"
+            },
+            "<",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ResponseError",
+              "text": "ResponseError"
+            },
+            ">) => ",
+            "KibanaResponse",
+            "<",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.ResponseError",
+              "text": "ResponseError"
+            },
+            ">; redirected: (options: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.RedirectResponseOptions",
+              "text": "RedirectResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<string | Record<string, any> | Buffer | ",
+            "Stream",
+            ">; ok: (options?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.HttpResponseOptions",
+              "text": "HttpResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<string | Record<string, any> | Buffer | ",
+            "Stream",
+            ">; accepted: (options?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.HttpResponseOptions",
+              "text": "HttpResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<string | Record<string, any> | Buffer | ",
+            "Stream",
+            ">; noContent: (options?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.HttpResponseOptions",
+              "text": "HttpResponseOptions"
+            },
+            ") => ",
+            "KibanaResponse",
+            "<undefined>; }>"
+          ],
+          "source": {
+            "path": "src/plugins/bfetch/server/plugin.ts",
+            "lineNumber": 83
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "bfetch",
+              "id": "def-server.streamHandler",
+              "type": "Function",
+              "tags": [],
+              "label": "streamHandler",
+              "description": [],
+              "signature": [
+                "(context: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCorePluginApi",
+                  "section": "def-server.RequestHandlerContext",
+                  "text": "RequestHandlerContext"
+                },
+                ", request: ",
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<P, Q, B, Method>) => ",
+                "Observable",
+                "<Response> | Promise<",
+                "Observable",
+                "<Response>>"
+              ],
+              "source": {
+                "path": "src/plugins/bfetch/server/plugin.ts",
+                "lineNumber": 91
+              },
+              "deprecated": false
             }
           ]
         }
       ],
-      "source": {
-        "path": "src/plugins/bfetch/server/plugin.ts",
-        "lineNumber": 44,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/server/plugin.ts#L44"
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "bfetch",
       "id": "def-server.BfetchServerStart",
       "type": "Interface",
+      "tags": [],
       "label": "BfetchServerStart",
       "description": [],
-      "tags": [],
-      "children": [],
       "source": {
         "path": "src/plugins/bfetch/server/plugin.ts",
-        "lineNumber": 94,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/server/plugin.ts#L94"
+        "lineNumber": 96
       },
+      "deprecated": false,
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -383,6 +749,7 @@
   "common": {
     "classes": [
       {
+        "parentPluginId": "bfetch",
         "id": "def-common.ItemBuffer",
         "type": "Class",
         "tags": [],
@@ -400,20 +767,35 @@
           },
           "<Item>"
         ],
+        "source": {
+          "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+          "lineNumber": 29
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "bfetch",
             "id": "def-common.ItemBuffer.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+              "lineNumber": 32
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "bfetch",
+                "id": "def-common.ItemBuffer.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "params",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "bfetch",
@@ -424,117 +806,114 @@
                   },
                   "<Item>"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-                  "lineNumber": 32,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L32"
-                }
+                  "lineNumber": 32
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L32"
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "bfetch",
             "id": "def-common.ItemBuffer.length",
             "type": "number",
-            "label": "length",
             "tags": [],
+            "label": "length",
             "description": [
               "\nGet current buffer size."
             ],
             "source": {
               "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L37"
-            }
+              "lineNumber": 37
+            },
+            "deprecated": false
           },
           {
+            "parentPluginId": "bfetch",
             "id": "def-common.ItemBuffer.write",
             "type": "Function",
+            "tags": [],
             "label": "write",
-            "signature": [
-              "(item: Item) => void"
-            ],
             "description": [
               "\nAdd item to the buffer."
             ],
+            "signature": [
+              "(item: Item) => void"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+              "lineNumber": 44
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "bfetch",
+                "id": "def-common.ItemBuffer.write.$1",
                 "type": "Uncategorized",
+                "tags": [],
                 "label": "item",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Item"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-                  "lineNumber": 44,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L44"
-                }
+                  "lineNumber": 44
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L44"
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "bfetch",
             "id": "def-common.ItemBuffer.clear",
             "type": "Function",
+            "tags": [],
             "label": "clear",
-            "signature": [
-              "() => void"
-            ],
             "description": [
               "\nRemove all items from the buffer."
             ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-              "lineNumber": 58,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L58"
-            }
-          },
-          {
-            "id": "def-common.ItemBuffer.flush",
-            "type": "Function",
-            "label": "flush",
             "signature": [
               "() => void"
             ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+              "lineNumber": 58
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.ItemBuffer.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
             "description": [
               "\nCall `.onflush` method and clear buffer."
             ],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
+            "signature": [
+              "() => void"
+            ],
             "source": {
               "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-              "lineNumber": 65,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L65"
-            }
+              "lineNumber": 65
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L29"
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "bfetch",
         "id": "def-common.TimedItemBuffer",
         "type": "Class",
         "tags": [],
@@ -558,20 +937,35 @@
           },
           "<Item>"
         ],
+        "source": {
+          "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
+          "lineNumber": 19
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "bfetch",
             "id": "def-common.TimedItemBuffer.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "bfetch",
+                "id": "def-common.TimedItemBuffer.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "params",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "bfetch",
@@ -582,206 +976,100 @@
                   },
                   "<Item>"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-                  "lineNumber": 22,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L22"
-                }
+                  "lineNumber": 22
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L22"
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "bfetch",
             "id": "def-common.TimedItemBuffer.write",
             "type": "Function",
+            "tags": [],
             "label": "write",
+            "description": [],
             "signature": [
               "(item: Item) => void"
             ],
-            "description": [],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "bfetch",
+                "id": "def-common.TimedItemBuffer.write.$1",
                 "type": "Uncategorized",
+                "tags": [],
                 "label": "item",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "Item"
                 ],
-                "description": [],
                 "source": {
                   "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-                  "lineNumber": 26,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L26"
-                }
+                  "lineNumber": 26
+                },
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L26"
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "bfetch",
             "id": "def-common.TimedItemBuffer.clear",
             "type": "Function",
+            "tags": [],
             "label": "clear",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L34"
-            }
+              "lineNumber": 34
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "bfetch",
             "id": "def-common.TimedItemBuffer.flush",
             "type": "Function",
+            "tags": [],
             "label": "flush",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L39"
-            }
+              "lineNumber": 39
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L19"
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [
       {
-        "id": "def-common.normalizeError",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Any",
-            "label": "err",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/util/normalize_error.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/util/normalize_error.ts#L11"
-            }
-          }
-        ],
-        "signature": [
-          "<E extends ",
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.ErrorLike",
-            "text": "ErrorLike"
-          },
-          " = ",
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.ErrorLike",
-            "text": "ErrorLike"
-          },
-          ">(err: any) => E"
-        ],
-        "description": [],
-        "label": "normalizeError",
-        "source": {
-          "path": "src/plugins/bfetch/common/util/normalize_error.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/util/normalize_error.ts#L11"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.removeLeadingSlash",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "text",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/util/remove_leading_slash.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/util/remove_leading_slash.ts#L9"
-            }
-          }
-        ],
-        "signature": [
-          "(text: string) => string"
-        ],
-        "description": [],
-        "label": "removeLeadingSlash",
-        "source": {
-          "path": "src/plugins/bfetch/common/util/remove_leading_slash.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/util/remove_leading_slash.ts#L9"
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
+        "parentPluginId": "bfetch",
         "id": "def-common.createBatchedFunction",
         "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "params",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "bfetch",
-                "scope": "common",
-                "docId": "kibBfetchPluginApi",
-                "section": "def-common.BatchedFunctionParams",
-                "text": "BatchedFunctionParams"
-              },
-              "<Func, BatchEntry>"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/create_batched_function.ts#L22"
-            }
-          }
-        ],
+        "tags": [],
+        "label": "createBatchedFunction",
+        "description": [],
         "signature": [
           "<Func extends Fn, BatchEntry>(params: ",
           {
@@ -801,82 +1089,451 @@
           },
           "<BatchEntry>]"
         ],
-        "description": [],
-        "label": "createBatchedFunction",
         "source": {
           "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/create_batched_function.ts#L21"
+          "lineNumber": 21
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.createBatchedFunction.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "bfetch",
+                "scope": "common",
+                "docId": "kibBfetchPluginApi",
+                "section": "def-common.BatchedFunctionParams",
+                "text": "BatchedFunctionParams"
+              },
+              "<Func, BatchEntry>"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.normalizeError",
+        "type": "Function",
         "tags": [],
+        "label": "normalizeError",
+        "description": [],
+        "signature": [
+          "<E extends ",
+          {
+            "pluginId": "bfetch",
+            "scope": "common",
+            "docId": "kibBfetchPluginApi",
+            "section": "def-common.ErrorLike",
+            "text": "ErrorLike"
+          },
+          " = ",
+          {
+            "pluginId": "bfetch",
+            "scope": "common",
+            "docId": "kibBfetchPluginApi",
+            "section": "def-common.ErrorLike",
+            "text": "ErrorLike"
+          },
+          ">(err: any) => E"
+        ],
+        "source": {
+          "path": "src/plugins/bfetch/common/util/normalize_error.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.normalizeError.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/util/normalize_error.ts",
+              "lineNumber": 11
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.removeLeadingSlash",
+        "type": "Function",
+        "tags": [],
+        "label": "removeLeadingSlash",
+        "description": [],
+        "signature": [
+          "(text: string) => string"
+        ],
+        "source": {
+          "path": "src/plugins/bfetch/common/util/remove_leading_slash.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.removeLeadingSlash.$1",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/util/remove_leading_slash.ts",
+              "lineNumber": 9
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
-        "id": "def-common.StreamingResponseHandler",
+        "parentPluginId": "bfetch",
+        "id": "def-common.BatchedFunctionParams",
         "type": "Interface",
-        "label": "StreamingResponseHandler",
+        "tags": [],
+        "label": "BatchedFunctionParams",
+        "description": [],
         "signature": [
           {
             "pluginId": "bfetch",
             "scope": "common",
             "docId": "kibBfetchPluginApi",
-            "section": "def-common.StreamingResponseHandler",
-            "text": "StreamingResponseHandler"
+            "section": "def-common.BatchedFunctionParams",
+            "text": "BatchedFunctionParams"
           },
-          "<Payload, Response>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "id": "def-common.StreamingResponseHandler.getResponseStream",
-            "type": "Function",
-            "label": "getResponseStream",
-            "signature": [
-              "(payload: Payload) => ",
-              "Observable",
-              "<Response>"
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "Uncategorized",
-                "label": "payload",
-                "isRequired": true,
-                "signature": [
-                  "Payload"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/bfetch/common/streaming/types.ts",
-                  "lineNumber": 12,
-                  "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/streaming/types.ts#L12"
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/streaming/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/streaming/types.ts#L12"
-            }
-          }
+          "<Func, BatchEntry>"
         ],
         "source": {
-          "path": "src/plugins/bfetch/common/streaming/types.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/streaming/types.ts#L11"
+          "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
+          "lineNumber": 14
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchedFunctionParams.onCall",
+            "type": "Function",
+            "tags": [],
+            "label": "onCall",
+            "description": [],
+            "signature": [
+              "(...args: Parameters<Func>) => [ReturnType<Func>, BatchEntry]"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "bfetch",
+                "id": "def-common.args",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Func extends (...args: infer P) => any ? P : never"
+                ],
+                "source": {
+                  "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
+                  "lineNumber": 15
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchedFunctionParams.onBatch",
+            "type": "Function",
+            "tags": [],
+            "label": "onBatch",
+            "description": [],
+            "signature": [
+              "(items: BatchEntry[]) => void"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "bfetch",
+                "id": "def-common.items",
+                "type": "Array",
+                "tags": [],
+                "label": "items",
+                "description": [],
+                "signature": [
+                  "BatchEntry[]"
+                ],
+                "source": {
+                  "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
+                  "lineNumber": 16
+                },
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchedFunctionParams.flushOnMaxItems",
+            "type": "number",
+            "tags": [],
+            "label": "flushOnMaxItems",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchedFunctionParams.maxItemAge",
+            "type": "number",
+            "tags": [],
+            "label": "maxItemAge",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "bfetch",
+        "id": "def-common.BatchItemWrapper",
+        "type": "Interface",
+        "tags": [],
+        "label": "BatchItemWrapper",
+        "description": [],
+        "source": {
+          "path": "src/plugins/bfetch/common/batch.ts",
+          "lineNumber": 23
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchItemWrapper.compressed",
+            "type": "boolean",
+            "tags": [],
+            "label": "compressed",
+            "description": [],
+            "source": {
+              "path": "src/plugins/bfetch/common/batch.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchItemWrapper.payload",
+            "type": "string",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "source": {
+              "path": "src/plugins/bfetch/common/batch.ts",
+              "lineNumber": 25
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.BatchRequestData",
+        "type": "Interface",
+        "tags": [],
+        "label": "BatchRequestData",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "bfetch",
+            "scope": "common",
+            "docId": "kibBfetchPluginApi",
+            "section": "def-common.BatchRequestData",
+            "text": "BatchRequestData"
+          },
+          "<Item>"
+        ],
+        "source": {
+          "path": "src/plugins/bfetch/common/batch.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchRequestData.batch",
+            "type": "Array",
+            "tags": [],
+            "label": "batch",
+            "description": [],
+            "signature": [
+              "Item[]"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/batch.ts",
+              "lineNumber": 14
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.BatchResponseItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "BatchResponseItem",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "bfetch",
+            "scope": "common",
+            "docId": "kibBfetchPluginApi",
+            "section": "def-common.BatchResponseItem",
+            "text": "BatchResponseItem"
+          },
+          "<Result, Error>"
+        ],
+        "source": {
+          "path": "src/plugins/bfetch/common/batch.ts",
+          "lineNumber": 17
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchResponseItem.id",
+            "type": "number",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "src/plugins/bfetch/common/batch.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchResponseItem.result",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "Result | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/batch.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BatchResponseItem.error",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/batch.ts",
+              "lineNumber": 20
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.ErrorLike",
+        "type": "Interface",
+        "tags": [],
+        "label": "ErrorLike",
+        "description": [],
+        "source": {
+          "path": "src/plugins/bfetch/common/batch.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.ErrorLike.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "source": {
+              "path": "src/plugins/bfetch/common/batch.ts",
+              "lineNumber": 10
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "bfetch",
         "id": "def-common.ItemBufferParams",
         "type": "Interface",
+        "tags": [],
         "label": "ItemBufferParams",
+        "description": [],
         "signature": [
           {
             "pluginId": "bfetch",
@@ -887,55 +1544,141 @@
           },
           "<Item>"
         ],
-        "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "bfetch",
             "id": "def-common.ItemBufferParams.flushOnMaxItems",
             "type": "number",
+            "tags": [],
             "label": "flushOnMaxItems",
             "description": [
               "\nFlushes buffer automatically if number of items in the buffer reaches\nthis number. Omit it or set to `Infinity` to never flush on max buffer\nsize automatically."
             ],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L15"
-            },
             "signature": [
               "number | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "bfetch",
             "id": "def-common.ItemBufferParams.onFlush",
             "type": "Function",
+            "tags": [],
             "label": "onFlush",
             "description": [
               "\nCallback that is called every time buffer is flushed. It receives a single\nargument which is a list of all buffered items. If `.flush()` is called\nwhen buffer is empty, `.onflush` is called with empty array."
             ],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L22"
-            },
             "signature": [
               "(items: Item[]) => void"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "bfetch",
+                "id": "def-common.items",
+                "type": "Array",
+                "tags": [],
+                "label": "items",
+                "description": [],
+                "signature": [
+                  "Item[]"
+                ],
+                "source": {
+                  "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
+                  "lineNumber": 22
+                },
+                "deprecated": false
+              }
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/bfetch/common/buffer/item_buffer.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/item_buffer.ts#L9"
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "bfetch",
+        "id": "def-common.StreamingResponseHandler",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamingResponseHandler",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "bfetch",
+            "scope": "common",
+            "docId": "kibBfetchPluginApi",
+            "section": "def-common.StreamingResponseHandler",
+            "text": "StreamingResponseHandler"
+          },
+          "<Payload, Response>"
+        ],
+        "source": {
+          "path": "src/plugins/bfetch/common/streaming/types.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.StreamingResponseHandler.getResponseStream",
+            "type": "Function",
+            "tags": [],
+            "label": "getResponseStream",
+            "description": [],
+            "signature": [
+              "(payload: Payload) => ",
+              "Observable",
+              "<Response>"
+            ],
+            "source": {
+              "path": "src/plugins/bfetch/common/streaming/types.ts",
+              "lineNumber": 12
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "bfetch",
+                "id": "def-common.StreamingResponseHandler.getResponseStream.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  "Payload"
+                ],
+                "source": {
+                  "path": "src/plugins/bfetch/common/streaming/types.ts",
+                  "lineNumber": 12
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "bfetch",
         "id": "def-common.TimedItemBufferParams",
         "type": "Interface",
+        "tags": [],
         "label": "TimedItemBufferParams",
+        "description": [],
         "signature": [
           {
             "pluginId": "bfetch",
@@ -954,256 +1697,54 @@
           },
           "<Item>"
         ],
-        "description": [],
-        "tags": [],
+        "source": {
+          "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "bfetch",
             "id": "def-common.TimedItemBufferParams.maxItemAge",
             "type": "number",
+            "tags": [],
             "label": "maxItemAge",
             "description": [
               "\nFlushes buffer when oldest item reaches age specified by this parameter,\nin milliseconds."
             ],
+            "signature": [
+              "number | undefined"
+            ],
             "source": {
               "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L16"
+              "lineNumber": 16
             },
-            "signature": [
-              "number | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/bfetch/common/buffer/timed_item_buffer.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/timed_item_buffer.ts#L11"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.BatchedFunctionParams",
-        "type": "Interface",
-        "label": "BatchedFunctionParams",
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.BatchedFunctionParams",
-            "text": "BatchedFunctionParams"
-          },
-          "<Func, BatchEntry>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.BatchedFunctionParams.onCall",
-            "type": "Function",
-            "label": "onCall",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/create_batched_function.ts#L15"
-            },
-            "signature": [
-              "(...args: Parameters<Func>) => [ReturnType<Func>, BatchEntry]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.BatchedFunctionParams.onBatch",
-            "type": "Function",
-            "label": "onBatch",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/create_batched_function.ts#L16"
-            },
-            "signature": [
-              "(items: BatchEntry[]) => void"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.BatchedFunctionParams.flushOnMaxItems",
-            "type": "number",
-            "label": "flushOnMaxItems",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/create_batched_function.ts#L17"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.BatchedFunctionParams.maxItemAge",
-            "type": "number",
-            "label": "maxItemAge",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/create_batched_function.ts#L18"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/bfetch/common/buffer/create_batched_function.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/buffer/create_batched_function.ts#L14"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.ErrorLike",
-        "type": "Interface",
-        "label": "ErrorLike",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.ErrorLike.message",
-            "type": "string",
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/batch.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/batch.ts#L10"
-            }
-          }
-        ],
-        "source": {
-          "path": "src/plugins/bfetch/common/batch.ts",
-          "lineNumber": 9,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/batch.ts#L9"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.BatchRequestData",
-        "type": "Interface",
-        "label": "BatchRequestData",
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.BatchRequestData",
-            "text": "BatchRequestData"
-          },
-          "<Item>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.BatchRequestData.batch",
-            "type": "Array",
-            "label": "batch",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/batch.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/batch.ts#L14"
-            },
-            "signature": [
-              "Item[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/bfetch/common/batch.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/batch.ts#L13"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.BatchResponseItem",
-        "type": "Interface",
-        "label": "BatchResponseItem",
-        "signature": [
-          {
-            "pluginId": "bfetch",
-            "scope": "common",
-            "docId": "kibBfetchPluginApi",
-            "section": "def-common.BatchResponseItem",
-            "text": "BatchResponseItem"
-          },
-          "<Result, Error>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.BatchResponseItem.id",
-            "type": "number",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/batch.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/batch.ts#L18"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.BatchResponseItem.result",
-            "type": "Uncategorized",
-            "label": "result",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/batch.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/batch.ts#L19"
-            },
-            "signature": [
-              "Result | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.BatchResponseItem.error",
-            "type": "Uncategorized",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "src/plugins/bfetch/common/batch.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/batch.ts#L20"
-            },
-            "signature": [
-              "Error | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/bfetch/common/batch.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/bfetch/common/batch.ts#L17"
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.DISABLE_BFETCH_COMPRESSION",
+        "type": "string",
+        "tags": [],
+        "label": "DISABLE_BFETCH_COMPRESSION",
+        "description": [],
+        "signature": [
+          "\"bfetch:disableCompression\""
+        ],
+        "source": {
+          "path": "src/plugins/bfetch/common/constants.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
