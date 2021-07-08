@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SVGProps } from 'react';
+import { LegacyRef, Ref, SVGProps } from 'react';
 import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
 import { ViewBoxParams } from '../../common/types';
 
@@ -26,18 +26,22 @@ export interface SaveModalDashboardProps {
 }
 
 export interface ShapeHocProps {
+  children?: JSX.Element | null;
+  shapeType?: SvgElementTypes;
   shapeAttributes?: ShapeAttributes;
   shapeContentAttributes?: ShapeContentAttributes;
   setViewBoxParams: (viewBoxParams?: ViewBoxParams) => void;
+  setShapeElementType?: (shapeElementType: SvgElementTypes) => void;
 }
 
-export interface ShapeProps {
+export interface ShapeProps<T extends SVGGraphicsElement> {
   shapeAttributes: Omit<ShapeAttributes, 'viewBox'> & {
     viewBox?: string;
   };
-  shapeContentAttributes: ShapeContentAttributes & SpecificShapeContentAttributes;
-  shapeType?: SvgElementTypes;
+  shapeContentAttributes: ShapeContentAttributes & SVGProps<T>;
+  shapeType: SvgElementTypes;
   textAttributes?: SvgTextAttributes;
+  children?: JSX.Element | null;
 }
 
 export enum SvgElementTypes {
@@ -64,36 +68,14 @@ export interface ShapeContentAttributes {
   vectorEffect?: SVGProps<SVGElement>['vectorEffect'];
   strokeMiterlimit?: SVGProps<SVGElement>['strokeMiterlimit'];
 }
-
-interface CircleParams {
-  r: SVGProps<SVGCircleElement>['r'];
-  cx: SVGProps<SVGCircleElement>['cx'];
-  cy: SVGProps<SVGCircleElement>['cy'];
-}
-
-interface RectParams {
-  x: SVGProps<SVGRectElement>['x'];
-  y: SVGProps<SVGRectElement>['y'];
-  width: SVGProps<SVGRectElement>['width'];
-  height: SVGProps<SVGRectElement>['height'];
-}
-
-interface PathParams {
-  d: SVGProps<SVGPathElement>['d'];
-  strokeLinecap?: SVGProps<SVGPathElement>['strokeLinecap'];
-}
-
-interface PolygonParams {
-  points: SVGProps<SVGPolygonElement>['points'];
-  strokeLinejoin?: SVGProps<SVGPolygonElement>['strokeLinejoin'];
-}
-
-type SpecificShapeContentAttributes = CircleParams | RectParams | PathParams | PolygonParams;
-
 export interface SvgConfig {
   shapeType?: SvgElementTypes;
   viewBox: ViewBoxParams;
-  shapeProps: SpecificShapeContentAttributes;
+  shapeProps:
+    | SVGProps<SVGCircleElement>
+    | SVGProps<SVGRectElement>
+    | SVGProps<SVGPolygonElement>
+    | SVGProps<SVGPathElement>;
   textAttributes?: SvgTextAttributes;
 }
 
