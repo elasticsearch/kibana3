@@ -47,11 +47,18 @@ function getShapeContentElement(type?: SvgElementTypes) {
   }
 }
 
-export function Shape({ shapeAttributes, shapeContentAttributes, shapeType }: ShapeProps) {
+export function Shape({
+  shapeAttributes,
+  shapeContentAttributes,
+  shapeType,
+  textAttributes,
+}: ShapeProps) {
   const SvgContentElement = getShapeContentElement(shapeType);
+  const SvgTextElement = textAttributes ? <text {...textAttributes} /> : null;
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...shapeAttributes}>
       <SvgContentElement {...shapeContentAttributes} />
+      {SvgTextElement}
     </svg>
   );
 }

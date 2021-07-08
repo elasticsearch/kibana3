@@ -37,6 +37,7 @@ export interface ShapeProps {
   };
   shapeContentAttributes: ShapeContentAttributes & SpecificShapeContentAttributes;
   shapeType?: SvgElementTypes;
+  textAttributes?: SvgTextAttributes;
 }
 
 export enum SvgElementTypes {
@@ -79,6 +80,7 @@ interface RectParams {
 
 interface PathParams {
   d: SVGProps<SVGPathElement>['d'];
+  strokeLinecap?: SVGProps<SVGPathElement>['strokeLinecap'];
 }
 
 interface PolygonParams {
@@ -92,4 +94,14 @@ export interface SvgConfig {
   shapeType?: SvgElementTypes;
   viewBox: ViewBoxParams;
   shapeProps: SpecificShapeContentAttributes;
+  textAttributes?: SvgTextAttributes;
+}
+
+export interface SvgTextAttributes {
+  x: SVGProps<SVGTextElement>['x'];
+  y: SVGProps<SVGTextElement>['y'];
+  textAnchor: SVGProps<SVGTextElement>['textAnchor'];
+  dominantBaseline?: SVGProps<SVGTextElement>['dominantBaseline'];
+  dx?: SVGProps<SVGTextElement>['dx'];
+  dy?: SVGProps<SVGTextElement>['dy'];
 }

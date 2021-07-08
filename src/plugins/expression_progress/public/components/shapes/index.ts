@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import gauge from '!!raw-loader!./gauge.svg';
-import horizontalBar from '!!raw-loader!./horizontal_bar.svg';
-import horizontalPill from '!!raw-loader!./horizontal_pill.svg';
-import semicircle from '!!raw-loader!./semicircle.svg';
-import unicorn from '!!raw-loader!./unicorn.svg';
-import verticalBar from '!!raw-loader!./vertical_bar.svg';
-import verticalPill from '!!raw-loader!./vertical_pill.svg';
-import wheel from '!!raw-loader!./wheel.svg';
+import { Gauge as gauge } from './gauge';
+import { HorizontalBar as horizontalBar } from './horizontal_bar';
+import { HorizontalPill as horizontalPill } from './horizontal_pill';
+import { Semicircle as semicircle } from './semicircle';
+import { Unicorn as unicorn } from './unicorn';
+import { VerticalBar as verticalBar } from './vertical_bar';
+import { VerticalPill as verticalPill } from './vertical_pill';
+import { Wheel as wheel } from './wheel';
 
 export const shapes = {
   gauge,
