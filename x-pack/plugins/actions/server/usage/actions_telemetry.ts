@@ -58,7 +58,7 @@ export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: 
   const aggs = searchResult.aggregations?.byActionTypeId.value?.types;
   return {
     countTotal: Object.keys(aggs).reduce(
-      (total: number, key: string) => parseInt(aggs[key], 0) + total,
+      (total: number, key: string) => parseInt(aggs[key], 10) + total,
       0
     ),
     countByType: Object.keys(aggs).reduce(
