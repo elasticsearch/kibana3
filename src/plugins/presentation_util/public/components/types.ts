@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LegacyRef, Ref, SVGProps } from 'react';
+import { SVGProps } from 'react';
 import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
 import { ViewBoxParams } from '../../common/types';
 
@@ -25,23 +25,9 @@ export interface SaveModalDashboardProps {
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
 
-export interface ShapeHocProps {
-  children?: JSX.Element | null;
-  shapeType?: SvgElementTypes;
+export interface ShapeProps {
   shapeAttributes?: ShapeAttributes;
-  shapeContentAttributes?: ShapeContentAttributes;
-  setViewBoxParams: (viewBoxParams?: ViewBoxParams) => void;
-  setShapeElementType?: (shapeElementType: SvgElementTypes) => void;
-}
-
-export interface ShapeProps<T extends SVGGraphicsElement> {
-  shapeAttributes: Omit<ShapeAttributes, 'viewBox'> & {
-    viewBox?: string;
-  };
-  shapeContentAttributes: ShapeContentAttributes & SVGProps<T>;
-  shapeType: SvgElementTypes;
-  textAttributes?: SvgTextAttributes;
-  children?: JSX.Element | null;
+  shapeContentAttributes?: ShapeContentAttributes & SpecificShapeContentAttributes;
 }
 
 export enum SvgElementTypes {
@@ -71,19 +57,30 @@ export interface ShapeContentAttributes {
 export interface SvgConfig {
   shapeType?: SvgElementTypes;
   viewBox: ViewBoxParams;
-  shapeProps:
-    | SVGProps<SVGCircleElement>
-    | SVGProps<SVGRectElement>
-    | SVGProps<SVGPolygonElement>
-    | SVGProps<SVGPathElement>;
-  textAttributes?: SvgTextAttributes;
+  shapeProps: ShapeContentAttributes & SpecificShapeContentAttributes;
 }
 
-export interface SvgTextAttributes {
-  x: SVGProps<SVGTextElement>['x'];
-  y: SVGProps<SVGTextElement>['y'];
-  textAnchor: SVGProps<SVGTextElement>['textAnchor'];
-  dominantBaseline?: SVGProps<SVGTextElement>['dominantBaseline'];
-  dx?: SVGProps<SVGTextElement>['dx'];
-  dy?: SVGProps<SVGTextElement>['dy'];
+interface CircleParams {
+  r: SVGProps<SVGCircleElement>['r'];
+  cx: SVGProps<SVGCircleElement>['cx'];
+  cy: SVGProps<SVGCircleElement>['cy'];
 }
+
+interface RectParams {
+  x: SVGProps<SVGRectElement>['x'];
+  y: SVGProps<SVGRectElement>['y'];
+  width: SVGProps<SVGRectElement>['width'];
+  height: SVGProps<SVGRectElement>['height'];
+}
+
+interface PathParams {
+  d: SVGProps<SVGPathElement>['d'];
+  strokeLinecap?: SVGProps<SVGPathElement>['strokeLinecap'];
+}
+
+interface PolygonParams {
+  points: SVGProps<SVGPolygonElement>['points'];
+  strokeLinejoin?: SVGProps<SVGPolygonElement>['strokeLinejoin'];
+}
+
+type SpecificShapeContentAttributes = CircleParams | RectParams | PathParams | PolygonParams;

@@ -41,8 +41,8 @@ export {
   LazyPopoverComponent,
   ClosePopoverFn,
   withSuspense,
+  createShape,
   getShapeContentElement,
-  getShapeComponent,
   ShapeType,
 } from './components';
 

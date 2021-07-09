@@ -6,74 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { viewBoxToString } from '../../common/lib';
-import { ShapeHocProps, ShapeProps, SvgConfig, SvgElementTypes } from './types';
+import { ShapeProps, SvgConfig, SvgElementTypes } from './types';
 
-export const ShapeHOC = (ShapeComponent: typeof Shape, svgParams: SvgConfig) =>
-  function ShapeWrapper({
-    shapeAttributes,
-    shapeContentAttributes,
-    setViewBoxParams,
-    setShapeElementType,
-    children,
-  }: ShapeHocProps) {
+export const getShapeComponent = (svgParams: SvgConfig) =>
+  function Shape({ shapeAttributes, shapeContentAttributes }: ShapeProps) {
     const { viewBox: initialViewBox, shapeProps, shapeType } = svgParams;
-    useEffect(() => {
-      setViewBoxParams(svgParams.viewBox);
-      setShapeElementType?.(svgParams.shapeType ?? SvgElementTypes.polygon);
-    }, [setViewBoxParams, setShapeElementType]);
 
     const viewBox = shapeAttributes?.viewBox
       ? viewBoxToString(shapeAttributes?.viewBox)
       : viewBoxToString(initialViewBox);
 
+    const SvgContentElement = getShapeContentElement(shapeType);
     return (
-      <ShapeComponent
-        shapeAttributes={{ ...(shapeAttributes || {}), viewBox }}
-        shapeContentAttributes={{ ...(shapeContentAttributes || {}), ...shapeProps }}
-        shapeType={shapeType ?? SvgElementTypes.polygon}
-      >
-        {children}
-      </ShapeComponent>
+      <svg xmlns="http://www.w3.org/2000/svg" {...{ ...(shapeAttributes || {}), viewBox }}>
+        <SvgContentElement {...{ ...(shapeContentAttributes || {}), ...shapeProps }} />
+      </svg>
     );
   };
 
-export function getShapeContentElement(type: SvgElementTypes) {
+export function getShapeContentElement(type?: SvgElementTypes) {
   switch (type) {
     case SvgElementTypes.circle:
-      return (props: ShapeProps<SVGCircleElement>['shapeContentAttributes']) => (
-        <circle {...props} />
-      );
+      return (props: SvgConfig['shapeProps']) => <circle {...props} />;
     case SvgElementTypes.rect:
-      return (props: ShapeProps<SVGRectElement>['shapeContentAttributes']) => <rect {...props} />;
+      return (props: SvgConfig['shapeProps']) => <rect {...props} />;
     case SvgElementTypes.path:
-      return (props: ShapeProps<SVGPathElement>['shapeContentAttributes']) => <path {...props} />;
-    case SvgElementTypes.polygon:
-      return (props: ShapeProps<SVGPolygonElement>['shapeContentAttributes']) => (
-        <polygon {...props} />
-      );
+      return (props: SvgConfig['shapeProps']) => <path {...props} />;
+    default:
+      return (props: SvgConfig['shapeProps']) => <polygon {...props} />;
   }
 }
 
-export function Shape({
-  shapeAttributes,
-  shapeContentAttributes,
-  shapeType,
-  textAttributes,
-  children,
-}: ShapeProps<any>) {
-  const SvgContentElement = getShapeContentElement(shapeType);
-  const SvgTextElement = textAttributes ? <text {...textAttributes} /> : null;
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" {...shapeAttributes}>
-      {SvgContentElement && <SvgContentElement {...shapeContentAttributes} />}
-      {SvgTextElement}
-      {children}
-    </svg>
-  );
-}
+export const createShape = (props: SvgConfig) => {
+  return {
+    Component: getShapeComponent(props),
+    data: props,
+  };
+};
 
-export const getShapeComponent = (props: SvgConfig) => ShapeHOC(Shape, props);
-
-export type ShapeType = ReturnType<typeof getShapeComponent>;
+export type ShapeType = ReturnType<typeof createShape>;
