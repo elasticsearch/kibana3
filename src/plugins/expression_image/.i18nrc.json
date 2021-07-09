@@ -1,7 +1,0 @@
-{
-  "prefix": "expressionImage",
-  "paths": {
-    "expressionImage": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}
