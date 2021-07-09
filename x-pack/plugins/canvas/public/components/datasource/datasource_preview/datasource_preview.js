@@ -19,10 +19,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  withSuspense,
-  LazyErrorComponent,
-} from '../../../../../../../src/plugins/presentation_util/public';
+import { withSuspense } from '../../../../../../../src/plugins/presentation_util/public';
+import { LazyErrorComponent } from '../../../../../../../src/plugins/expression_error/public';
 import { Datatable } from '../../datatable';
 
 const Error = withSuspense(LazyErrorComponent);
