@@ -5,5 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { lazy } from 'react';
 
-export * from './error_component';
+export const LazyErrorComponent = lazy(() => import('./error'));
+export const LazyDebugComponent = lazy(() => import('./debug'));
+
+export const LazyErrorRenderComponent = lazy(() => import('./error_component'));
+export const LazyDebugRenderComponent = lazy(() => import('./debug_component'));
