@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { debug } from './debug';
 import { image } from './image';
 import { markdown } from './markdown';
 import { metric } from './metric';
@@ -15,6 +14,6 @@ import { progress } from './progress';
 import { table } from './table';
 import { text } from './text';
 
-export const renderFunctions = [debug, image, markdown, metric, pie, plot, progress, table, text];
+export const renderFunctions = [image, markdown, metric, pie, plot, progress, table, text];
 
 export const renderFunctionFactories = [];
