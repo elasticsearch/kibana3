@@ -7,7 +7,6 @@
  */
 
 import React, { FC } from 'react';
-import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -21,11 +20,11 @@ export interface Props {
 
 const strings = {
   getDescription: () =>
-    i18n.translate('presentationUtil.errorComponent.description', {
+    i18n.translate('expressionError.errorComponent.description', {
       defaultMessage: 'Expression failed with the message:',
     }),
   getTitle: () =>
-    i18n.translate('presentationUtil.errorComponent.title', {
+    i18n.translate('expressionError.errorComponent.title', {
       defaultMessage: 'Whoops! Expression failed',
     }),
 };
@@ -46,8 +45,4 @@ export const Error: FC<Props> = ({ payload }) => {
       <ShowDebugging payload={payload} />
     </EuiCallOut>
   );
-};
-
-Error.propTypes = {
-  payload: PropTypes.object.isRequired,
 };

@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { withSuspense } from '../../../presentation_util/public';
 import { ErrorRendererConfig } from '../../common/types';
+import { LazyErrorRenderComponent } from '../components';
 
 const errorStrings = {
   getDisplayName: () =>
@@ -24,8 +25,7 @@ const errorStrings = {
     }),
 };
 
-const LazyErrorComponent = lazy(() => import('../components/error_component'));
-const ErrorComponent = withSuspense(LazyErrorComponent);
+const ErrorComponent = withSuspense(LazyErrorRenderComponent);
 
 export const errorRenderer = (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
   name: 'error',
