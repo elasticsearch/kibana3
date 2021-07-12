@@ -9,13 +9,13 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render } from '../../../../presentation_util/public/__stories__';
-import { progressRenderer } from '../progress_renderer';
+import { progressVisRenderer } from '../progressVis_renderer';
 import {
   elasticLogo,
   elasticOutline,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
 
-storiesOf('renderers/progress', module).add('default', () => {
+storiesOf('renderers/progressVis', module).add('default', () => {
   const config = {
     count: 42,
     image: elasticLogo,
@@ -24,5 +24,5 @@ storiesOf('renderers/progress', module).add('default', () => {
     emptyImage: elasticOutline,
   };
 
-  return <Render renderer={progressRenderer} config={config} width="400px" />;
+  return <Render renderer={progressVisRenderer} config={config} width="400px" />;
 });

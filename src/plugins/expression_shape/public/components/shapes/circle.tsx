@@ -15,7 +15,7 @@ export const Circle = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     r: '45',
     cx: '50',
     cy: '50',

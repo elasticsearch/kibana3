@@ -34,7 +34,7 @@ export type Output = Arguments & {
 };
 
 export type ExpressionProgressFunction = () => ExpressionFunctionDefinition<
-  'progress',
+  'progressVis',
   number,
   Arguments,
   ExpressionValueRender<Arguments>

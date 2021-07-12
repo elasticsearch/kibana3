@@ -14,7 +14,7 @@ export const Arrow = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '0,40 60,40 60,20 95,50 60,80 60,60 0,60',
   },
 });

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SVGProps } from 'react';
+import { Component, SVGProps } from 'react';
+import { CSSProperties } from 'styled-components';
 import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
 import { ViewBoxParams } from '../../common/types';
 
@@ -25,10 +26,11 @@ export interface SaveModalDashboardProps {
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
 
-export interface ShapeProps {
+export type ShapeProps = {
   shapeAttributes?: ShapeAttributes;
   shapeContentAttributes?: ShapeContentAttributes & SpecificShapeContentAttributes;
-}
+  textAttributes?: SvgTextAttributes;
+} & Component['props'] & { ref?: React.RefObject<any> };
 
 export enum SvgElementTypes {
   polygon,
@@ -57,8 +59,20 @@ export interface ShapeContentAttributes {
 export interface SvgConfig {
   shapeType?: SvgElementTypes;
   viewBox: ViewBoxParams;
-  shapeProps: ShapeContentAttributes & SpecificShapeContentAttributes;
+  shapeContentAttributes: ShapeContentAttributes &
+    SpecificShapeContentAttributes &
+    Component['props'] & { ref?: React.RefObject<any> };
+  textAttributes?: SvgTextAttributes;
 }
+
+export type SvgTextAttributes = Partial<Element> & {
+  x?: SVGProps<SVGTextElement>['x'];
+  y?: SVGProps<SVGTextElement>['y'];
+  textAnchor?: SVGProps<SVGTextElement>['textAnchor'];
+  dominantBaseline?: SVGProps<SVGTextElement>['dominantBaseline'];
+  dx?: SVGProps<SVGTextElement>['dx'];
+  dy?: SVGProps<SVGTextElement>['dy'];
+} & { style?: CSSProperties } & { ref?: React.RefObject<SVGTextElement> };
 
 interface CircleParams {
   r: SVGProps<SVGCircleElement>['r'];
@@ -79,7 +93,7 @@ interface PathParams {
 }
 
 interface PolygonParams {
-  points: SVGProps<SVGPolygonElement>['points'];
+  points?: SVGProps<SVGPolygonElement>['points'];
   strokeLinejoin?: SVGProps<SVGPolygonElement>['strokeLinejoin'];
 }
 

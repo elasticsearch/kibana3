@@ -13,17 +13,17 @@ import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../c
 import { ExpressionProgressFunction, Shape } from '../types';
 
 export const strings = {
-  help: i18n.translate('xpack.canvas.functions.progressHelpText', {
-    defaultMessage: 'Configures a progress element.',
+  help: i18n.translate('xpack.canvas.functions.progressVisHelpText', {
+    defaultMessage: 'Configures a progressVis element.',
   }),
   args: {
-    barColor: i18n.translate('xpack.canvas.functions.progress.args.barColorHelpText', {
+    barColor: i18n.translate('xpack.canvas.functions.progressVis.args.barColorHelpText', {
       defaultMessage: 'The color of the background bar.',
     }),
-    barWeight: i18n.translate('xpack.canvas.functions.progress.args.barWeightHelpText', {
+    barWeight: i18n.translate('xpack.canvas.functions.progressVis.args.barWeightHelpText', {
       defaultMessage: 'The thickness of the background bar.',
     }),
-    font: i18n.translate('xpack.canvas.functions.progress.args.fontHelpText', {
+    font: i18n.translate('xpack.canvas.functions.progressVis.args.fontHelpText', {
       defaultMessage:
         'The {CSS} font properties for the label. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
@@ -32,7 +32,7 @@ export const strings = {
         FONT_WEIGHT,
       },
     }),
-    label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
+    label: i18n.translate('xpack.canvas.functions.progressVis.args.labelHelpText', {
       defaultMessage:
         'To show or hide the label, use {BOOLEAN_TRUE} or {BOOLEAN_FALSE}. Alternatively, provide a string to display as a label.',
       values: {
@@ -40,10 +40,10 @@ export const strings = {
         BOOLEAN_FALSE,
       },
     }),
-    max: i18n.translate('xpack.canvas.functions.progress.args.maxHelpText', {
-      defaultMessage: 'The maximum value of the progress element.',
+    max: i18n.translate('xpack.canvas.functions.progressVis.args.maxHelpText', {
+      defaultMessage: 'The maximum value of the progressVis element.',
     }),
-    shape: i18n.translate('xpack.canvas.functions.progress.args.shapeHelpText', {
+    shape: i18n.translate('xpack.canvas.functions.progressVis.args.shapeHelpText', {
       defaultMessage: `Select {list}, or {end}.`,
       values: {
         list: Object.values(Shape)
@@ -53,11 +53,11 @@ export const strings = {
         end: `\`"${Object.values(Shape).slice(-1)[0]}"\``,
       },
     }),
-    valueColor: i18n.translate('xpack.canvas.functions.progress.args.valueColorHelpText', {
-      defaultMessage: 'The color of the progress bar.',
+    valueColor: i18n.translate('xpack.canvas.functions.progressVis.args.valueColorHelpText', {
+      defaultMessage: 'The color of the progressVis bar.',
     }),
-    valueWeight: i18n.translate('xpack.canvas.functions.progress.args.valueWeightHelpText', {
-      defaultMessage: 'The thickness of the progress bar.',
+    valueWeight: i18n.translate('xpack.canvas.functions.progressVis.args.valueWeightHelpText', {
+      defaultMessage: 'The thickness of the progressVis bar.',
     }),
   },
 };
@@ -65,7 +65,7 @@ export const strings = {
 export const errors = {
   invalidMaxValue: (max: number) =>
     new Error(
-      i18n.translate('xpack.canvas.functions.progress.invalidMaxValueErrorMessage', {
+      i18n.translate('xpack.canvas.functions.progressVis.invalidMaxValueErrorMessage', {
         defaultMessage: "Invalid {arg} value: '{max, number}'. '{arg}' must be greater than 0",
         values: {
           arg: 'max',
@@ -75,7 +75,7 @@ export const errors = {
     ),
   invalidValue: (value: number, max: number = 1) =>
     new Error(
-      i18n.translate('xpack.canvas.functions.progress.invalidValueErrorMessage', {
+      i18n.translate('xpack.canvas.functions.progressVis.invalidValueErrorMessage', {
         defaultMessage:
           "Invalid value: '{value, number}'. Value must be between 0 and {max, number}",
         values: {
@@ -86,11 +86,11 @@ export const errors = {
     ),
 };
 
-export const progressFunction: ExpressionProgressFunction = () => {
+export const progressVisFunction: ExpressionProgressFunction = () => {
   const { help, args: argHelp } = strings;
 
   return {
-    name: 'progress',
+    name: 'progressVis',
     aliases: [],
     type: 'render',
     inputTypes: ['number'],
@@ -161,7 +161,7 @@ export const progressFunction: ExpressionProgressFunction = () => {
 
       return {
         type: 'render',
-        as: 'progress',
+        as: 'progressVis',
         value: {
           value,
           ...args,

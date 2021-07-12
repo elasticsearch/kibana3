@@ -15,7 +15,7 @@ export const Triangle = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '50.000, 20.000 15.359, 80.000 84.641, 80.000',
   },
 });

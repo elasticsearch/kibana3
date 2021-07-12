@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { progress } from '../';
+import { progressVis } from '../';
 import { Render } from '../../__stories__/render';
-import { Shape } from '../../../functions/common/progress';
+import { Shape } from '../../../functions/common/progressVis';
 
-storiesOf('renderers/progress', module).add('default', () => {
+storiesOf('renderers/progressVis', module).add('default', () => {
   const config = {
     barColor: '#bc1234',
     barWeight: 20,
@@ -28,5 +28,5 @@ storiesOf('renderers/progress', module).add('default', () => {
     valueWeight: 15,
   };
 
-  return <Render renderer={progress} config={config} />;
+  return <Render renderer={progressVis} config={config} />;
 });

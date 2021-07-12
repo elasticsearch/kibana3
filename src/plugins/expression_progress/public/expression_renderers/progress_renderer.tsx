@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
@@ -17,17 +17,17 @@ const ProgressComponent = withSuspense(LazyProgressComponent);
 
 const strings = {
   getDisplayName: () =>
-    i18n.translate('expressionProgress.renderer.progress.displayName', {
+    i18n.translate('expressionProgress.renderer.progressVis.displayName', {
       defaultMessage: 'Progress',
     }),
   getHelpDescription: () =>
-    i18n.translate('expressionProgress.renderer.progress.helpDescription', {
-      defaultMessage: 'Render a basic progress',
+    i18n.translate('expressionProgress.renderer.progressVis.helpDescription', {
+      defaultMessage: 'Render a basic progressVis',
     }),
 };
 
-export const progressRenderer = (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
-  name: 'progress',
+export const progressVisRenderer = (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
+  name: 'progressVis',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,

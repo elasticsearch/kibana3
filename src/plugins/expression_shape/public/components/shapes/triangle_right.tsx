@@ -15,7 +15,7 @@ export const TriangleRight = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '0, 10 0, 100 90, 100',
   },
 });

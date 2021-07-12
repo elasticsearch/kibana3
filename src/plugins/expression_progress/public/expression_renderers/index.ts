@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { progressRenderer } from './progress_renderer';
+import { progressVisRenderer } from './progress_renderer';
 
-export const renderers = [progressRenderer];
+export const renderers = [progressVisRenderer];
 
-export { progressRenderer };
+export { progressVisRenderer };

@@ -15,7 +15,7 @@ export const Cross = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '30,0 70,0 70,30 100,30 100,70 70,70 70,100 30,100 30,70 0,70 0,30 30,30',
   },
 });

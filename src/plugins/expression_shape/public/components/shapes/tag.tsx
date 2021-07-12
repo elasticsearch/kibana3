@@ -15,7 +15,7 @@ export const Tag = createShape({
     width: 100,
     height: 60,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '0,0 75,0 90,30 75,60 0,60',
   },
 });

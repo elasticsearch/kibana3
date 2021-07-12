@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsServerStart, ExpressionsServerSetup } from '../../expressions/server';
-import { progressFunction } from '../common';
+import { progressVisFunction } from '../common';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;
@@ -25,7 +25,7 @@ export class ExpressionProgressPlugin
   implements
     Plugin<ExpressionProgressPluginSetup, ExpressionProgressPluginStart, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionProgressPluginSetup {
-    expressions.registerFunction(progressFunction);
+    expressions.registerFunction(progressVisFunction);
   }
 
   public start(core: CoreStart): ExpressionProgressPluginStart {}

@@ -15,7 +15,7 @@ export const Semicircle = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     d: 'M 5,50 h 90 A 45 45 180 1 0 5,50 Z',
   },
   shapeType: SvgElementTypes.path,

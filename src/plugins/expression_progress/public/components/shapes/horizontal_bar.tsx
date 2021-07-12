@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getShapeComponent, SvgElementTypes } from '../../../../presentation_util/public';
+import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
 
-export const HorizontalBar = getShapeComponent({
+export const HorizontalBar = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
@@ -15,7 +15,7 @@ export const HorizontalBar = getShapeComponent({
     height: 1,
   },
   shapeType: SvgElementTypes.path,
-  shapeProps: {
+  shapeContentAttributes: {
     d: 'M 0 1 L 200 1',
   },
   textAttributes: {

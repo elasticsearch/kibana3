@@ -15,7 +15,7 @@ export const SpeechBubble = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '0,0 100,0 100,70 40,70 20,85 25,70 0,70',
     strokeLinejoin: 'round',
   },

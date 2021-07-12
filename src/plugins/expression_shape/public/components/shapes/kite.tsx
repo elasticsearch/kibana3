@@ -15,7 +15,7 @@ export const Kite = createShape({
     width: 100,
     height: 150,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '50,10 10,50 50,140 90,50',
   },
 });

@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '../../../expressions';
 import { NodeDimensions, ProgressRendererConfig } from '../../common/types';
 import { shapes } from './shapes';
 import {
   getId,
-  SvgElementTypes,
-  ViewBoxParams,
   getShapeContentElement,
+  SvgTextAttributes,
 } from '../../../presentation_util/public';
 
 interface ProgressComponentProps extends ProgressRendererConfig {
@@ -42,32 +41,37 @@ function ProgressComponent({
     height: parentNode.offsetHeight,
   });
 
-  const [shapeViewBox, setShapeViewBox] = useState<ViewBoxParams>();
-  const [shapeElementType, setShapeElementType] = useState<SvgElementTypes>();
-  const barProgressRef = useRef<SVGGeometryElement>(null);
+  useEffect(() => {
+    setDimensions({
+      width: parentNode.offsetWidth,
+      height: parentNode.offsetHeight,
+    });
+    onLoaded();
+  }, [onLoaded, parentNode, parentNodeDimensions]);
+
+  const barProgressRef = useRef<
+    SVGCircleElement & SVGPathElement & SVGPolygonElement & SVGRectElement
+  >(null);
+  const textRef = useRef<SVGTextElement>(null);
 
   const Shape = shapes[shapeType];
-  const BarProgress = shapeElementType ? getShapeContentElement(shapeElementType) : null;
-
-  const shapeAttributes = {
-    className: 'canvasProgress',
-    id: getId('svg'),
-    ...(dimensions || {}),
-  };
+  const BarProgress = getShapeContentElement(Shape.data.shapeType);
 
   const shapeContentAttributes = {
     className: 'canvasProgress__background',
     fill: 'none',
     stroke: barColor,
     strokeWidth: `${barWeight}px`,
+    ref: barProgressRef,
   };
 
-  const length = barProgressRef.current ? barProgressRef.current.getTotalLength() : 0;
+  const length = barProgressRef.current ? barProgressRef.current.getTotalLength() : 1;
   const percent = value / max;
   const to = length * (1 - percent);
 
   const barProgressAttributes = {
-    classNames: 'canvasProgress_value',
+    ...Shape.data.shapeContentAttributes,
+    className: 'canvasProgress__value',
     fill: 'none',
     stroke: valueColor,
     strokeWidth: `${valueWeight}px`,
@@ -77,72 +81,72 @@ function ProgressComponent({
 
   const offset = Math.max(valueWeight, barWeight);
 
-  if (shapeViewBox) {
-    let { minX, minY, width, height } = shapeViewBox;
+  let { minX, minY, width, height } = Shape.data.viewBox;
 
-    if (shapeType !== 'horizontalBar') {
-      minX -= offset / 2;
-      width += offset;
-    }
-
-    if (shapeType === 'semicircle') {
-      minY -= offset / 2;
-      height += offset / 2;
-    } else if (shapeType !== 'verticalBar') {
-      minY -= offset / 2;
-      height += offset;
-    }
-
-    const text = shapeSvg.getElementsByTagName('text').item(0);
-
-    if (label && text) {
-      text.textContent = String(label);
-      text.setAttribute('className', 'canvasProgress__label');
-
-      if (shapeType === 'horizontalPill') {
-        text.setAttribute('x', String(parseInt(text.getAttribute('x')!, 10) + offset / 2));
-      }
-      if (shapeType === 'verticalPill') {
-        text.setAttribute('y', String(parseInt(text.getAttribute('y')!, 10) - offset / 2));
-      }
-
-      Object.assign(text.style, font.spec);
-      shapeSvg.appendChild(text);
-      parentNode.appendChild(shapeSvg);
-
-      const { width: labelWidth, height: labelHeight } = text.getBBox();
-
-      if (shapeType === 'horizontalBar' || shapeType === 'horizontalPill') {
-        text.setAttribute('x', String(parseInt(text.getAttribute('x')!, 10)));
-        width += labelWidth;
-      }
-      if (shapeType === 'verticalBar' || shapeType === 'verticalPill') {
-        if (labelWidth > width) {
-          minX = -labelWidth / 2;
-          width = labelWidth;
-        }
-        minY -= labelHeight;
-        height += labelHeight;
-      }
-    }
-
-    shapeSvg.setAttribute('viewBox', [minX, minY, width, height].join(' '));
+  if (shapeType !== 'horizontalBar') {
+    minX -= offset / 2;
+    width += offset;
   }
-  // handlers.onResize(() => {
-  //   shapeSvg.setAttribute('width', String(parentNode.offsetWidth));
-  //   shapeSvg.setAttribute('height', String(parentNode.offsetHeight));
-  // });
-  onLoaded();
+
+  if (shapeType === 'semicircle') {
+    minY -= offset / 2;
+    height += offset / 2;
+  } else if (shapeType !== 'verticalBar') {
+    minY -= offset / 2;
+    height += offset;
+  }
+
+  const textAttributes: SvgTextAttributes = {
+    x: 0,
+    y: 0,
+    className: 'canvasProgress__label',
+    style: font.spec as CSSProperties,
+    textContent: '',
+  };
+
+  if (label) {
+    textAttributes.textContent = String(label);
+    if (shapeType === 'horizontalPill') {
+      textAttributes.x = parseInt(String(Shape.data.textAttributes?.x)!, 10) + offset / 2;
+    }
+    if (shapeType === 'verticalPill') {
+      textAttributes.y = parseInt(String(Shape.data.textAttributes?.y)!, 10) - offset / 2;
+    }
+
+    const { width: labelWidth, height: labelHeight } = textRef.current
+      ? textRef.current.getBBox()
+      : { width: 0, height: 0 };
+
+    if (shapeType === 'horizontalBar' || shapeType === 'horizontalPill') {
+      textAttributes.x = parseInt(String(Shape.data.textAttributes?.x)!, 10);
+      width += labelWidth;
+    }
+    if (shapeType === 'verticalBar' || shapeType === 'verticalPill') {
+      if (labelWidth > width) {
+        minX = -labelWidth / 2;
+        width = labelWidth;
+      }
+      minY -= labelHeight;
+      height += labelHeight;
+    }
+  }
+
+  const shapeAttributes = {
+    className: 'canvasProgress',
+    id: getId('svg'),
+    ...(dimensions || {}),
+    viewBox: { minX, minY, width, height },
+  };
+
   return (
     <div className="shapeAligner">
-      <Shape
+      <Shape.Component
         shapeContentAttributes={shapeContentAttributes}
         shapeAttributes={shapeAttributes}
-        setViewBoxParams={setShapeViewBox}
-        setShapeElementType={setShapeElementType}
+        textAttributes={{ ...textAttributes, ref: textRef }}
       >
-        {BarProgress && <BarProgress {...barProgressAttributes} ref={barProgressRef as any} />}
-      </Shape>
+        {BarProgress && <BarProgress {...barProgressAttributes} ref={null} />}
+      </Shape.Component>
     </div>
   );
 }

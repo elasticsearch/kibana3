@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { getShapeComponent, SvgElementTypes } from '../../../../presentation_util/public';
+import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
 
-export const Gauge = getShapeComponent({
+export const Gauge = createShape({
   viewBox: {
     minX: 0,
     minY: 0,
     width: 120,
     height: 120,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     d: 'M 15 100 A 60 60 0 1 1 105 100',
   },
   shapeType: SvgElementTypes.path,

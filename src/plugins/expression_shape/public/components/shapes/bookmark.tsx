@@ -15,7 +15,7 @@ export const Bookmark = createShape({
     width: 60,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '0,0 60,0 60,95 30,75 0,95 0,0',
   },
 });

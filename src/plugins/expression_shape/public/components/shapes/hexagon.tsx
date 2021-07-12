@@ -15,7 +15,7 @@ export const Hexagon = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points:
       '70.000, 15.359 30.000, 15.359 10.000, 50.000 30.000, 84.641 70.000, 84.641 90.000, 50.000',
   },

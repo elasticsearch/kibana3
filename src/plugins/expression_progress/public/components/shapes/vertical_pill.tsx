@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getShapeComponent, SvgElementTypes } from '../../../../presentation_util/public';
+import { createShape, SvgElementTypes } from '../../../../presentation_util/public';
 
-export const VerticalPill = getShapeComponent({
+export const VerticalPill = createShape({
   viewBox: {
     minX: 0,
     minY: -8,
@@ -15,7 +15,7 @@ export const VerticalPill = getShapeComponent({
     height: 208,
   },
   shapeType: SvgElementTypes.path,
-  shapeProps: {
+  shapeContentAttributes: {
     d: 'M 1 200 L 1 0',
     strokeLinecap: 'round',
   },

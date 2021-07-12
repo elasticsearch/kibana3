@@ -15,7 +15,7 @@ export const Rhombus = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '50,10 10,50 50,90 90,50',
   },
 });

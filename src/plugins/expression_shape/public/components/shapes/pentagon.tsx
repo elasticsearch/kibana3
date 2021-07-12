@@ -15,7 +15,7 @@ export const Pentagon = createShape({
     width: 100,
     height: 100,
   },
-  shapeProps: {
+  shapeContentAttributes: {
     points: '50.0000, 14.0000 11.9577, 41.6393 26.4886, 86.3607 73.5114, 86.3607 88.0423, 41.6393',
   },
 });
