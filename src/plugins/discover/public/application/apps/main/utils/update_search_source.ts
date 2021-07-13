@@ -32,25 +32,24 @@ export function updateSearchSource(
   }
 ) {
   const { uiSettings, data } = services;
-  const usedSort = getSortForSearchSource(
-    sort,
-    indexPattern,
-    uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-  );
-  const usedSearchSource = persist ? searchSource : searchSource.getParent()!;
+  const parentSearchSource = persist ? searchSource : searchSource.getParent()!;
 
-  usedSearchSource
+  parentSearchSource
     .setField('index', indexPattern)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
 
   if (!persist) {
+    const usedSort = getSortForSearchSource(
+      sort,
+      indexPattern,
+      uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+    );
+    const size = uiSettings.get(SAMPLE_SIZE_SETTING);
     searchSource
       .setField('trackTotalHits', true)
-      .setField('size', uiSettings.get(SAMPLE_SIZE_SETTING))
+      .setField('size', size)
       .setField('sort', usedSort)
-      .setField('highlightAll', true)
-      .setField('version', true)
       // Even when searching rollups, we want to use the default strategy so that we get back a
       // document-like response.
       .setPreferredSearchStrategyId('default');
