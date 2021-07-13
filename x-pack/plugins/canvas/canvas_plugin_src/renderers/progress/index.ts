@@ -67,7 +67,6 @@ export const progress: RendererFactory<Arguments> = () => ({
       valueSvg.setAttribute('stroke-width', `${valueWeight}px`);
 
       const length = valueSvg.getTotalLength();
-      console.log(length);
       const to = length * (1 - percent);
       valueSvg.setAttribute('stroke-dasharray', String(length));
       valueSvg.setAttribute('stroke-dashoffset', String(Math.max(0, to)));

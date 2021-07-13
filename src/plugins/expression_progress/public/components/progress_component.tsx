@@ -16,6 +16,7 @@ import {
   getShapeContentElement,
   SvgTextAttributes,
 } from '../../../presentation_util/public';
+import { getTextAttributes, getViewBox } from './utils';
 
 interface ProgressComponentProps extends ProgressRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
@@ -81,61 +82,26 @@ function ProgressComponent({
 
   const offset = Math.max(valueWeight, barWeight);
 
-  let { minX, minY, width, height } = Shape.data.viewBox;
+  const viewBox = Shape.data.viewBox;
+  const defaultTextAttributes = Shape.data.textAttributes ?? {};
 
-  if (shapeType !== 'horizontalBar') {
-    minX -= offset / 2;
-    width += offset;
-  }
+  const { width: labelWidth, height: labelHeight } = textRef.current
+    ? textRef.current.getBBox()
+    : { width: 0, height: 0 };
 
-  if (shapeType === 'semicircle') {
-    minY -= offset / 2;
-    height += offset / 2;
-  } else if (shapeType !== 'verticalBar') {
-    minY -= offset / 2;
-    height += offset;
-  }
-
+  const updatedTextAttributes = getTextAttributes(shapeType, defaultTextAttributes, offset, label);
   const textAttributes: SvgTextAttributes = {
-    x: 0,
-    y: 0,
     className: 'canvasProgress__label',
     style: font.spec as CSSProperties,
-    textContent: '',
+    ...updatedTextAttributes,
   };
 
-  if (label) {
-    textAttributes.textContent = String(label);
-    if (shapeType === 'horizontalPill') {
-      textAttributes.x = parseInt(String(Shape.data.textAttributes?.x)!, 10) + offset / 2;
-    }
-    if (shapeType === 'verticalPill') {
-      textAttributes.y = parseInt(String(Shape.data.textAttributes?.y)!, 10) - offset / 2;
-    }
-
-    const { width: labelWidth, height: labelHeight } = textRef.current
-      ? textRef.current.getBBox()
-      : { width: 0, height: 0 };
-
-    if (shapeType === 'horizontalBar' || shapeType === 'horizontalPill') {
-      textAttributes.x = parseInt(String(Shape.data.textAttributes?.x)!, 10);
-      width += labelWidth;
-    }
-    if (shapeType === 'verticalBar' || shapeType === 'verticalPill') {
-      if (labelWidth > width) {
-        minX = -labelWidth / 2;
-        width = labelWidth;
-      }
-      minY -= labelHeight;
-      height += labelHeight;
-    }
-  }
-
+  const updatedViewBox = getViewBox(shapeType, viewBox, offset, labelWidth, labelHeight);
   const shapeAttributes = {
     className: 'canvasProgress',
     id: getId('svg'),
     ...(dimensions || {}),
-    viewBox: { minX, minY, width, height },
+    viewBox: updatedViewBox,
   };
 
   return (
