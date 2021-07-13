@@ -5,44 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import React from 'react';
 
 const EDITOR_ID = 'testEditor';
 
-jest.mock('../../../kibana_react/public', () => {
-  const original = jest.requireActual('../../../kibana_react/public');
-
-  /**
-   * We mock the CodeEditor because it requires the <KibanaReactContextProvider>
-   * with the uiSettings passed down. Let's use a simple <input /> in our tests.
-   */
-  const CodeEditorMock = (props: any) => {
-    // Forward our deterministic ID to the consumer
-    // We need below for the PainlessLang.getSyntaxErrors mock
-    props.editorDidMount({
-      getModel() {
-        return {
-          id: EDITOR_ID,
-        };
-      },
-    });
-
-    return (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-value={props.value}
-        value={props.value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          props.onChange(e.target.value);
-        }}
-      />
-    );
-  };
-
+jest.mock('@elastic/eui/lib/services/accessibility', () => {
   return {
-    ...original,
-    CodeEditor: CodeEditorMock,
+    htmlIdGenerator: () => () => `generated-id`,
   };
 });
 
@@ -76,5 +45,42 @@ jest.mock('@kbn/monaco', () => {
         [EDITOR_ID]: [],
       }),
     },
+  };
+});
+
+jest.mock('../../../../kibana_react/public', () => {
+  const original = jest.requireActual('../../../../kibana_react/public');
+
+  /**
+   * We mock the CodeEditor because it requires the <KibanaReactContextProvider>
+   * with the uiSettings passed down. Let's use a simple <input /> in our tests.
+   */
+  const CodeEditorMock = (props: any) => {
+    // Forward our deterministic ID to the consumer
+    // We need below for the PainlessLang.getSyntaxErrors mock
+    props.editorDidMount({
+      getModel() {
+        return {
+          id: EDITOR_ID,
+        };
+      },
+    });
+
+    return (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-value={props.value}
+        value={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.target.value);
+        }}
+      />
+    );
+  };
+
+  return {
+    ...original,
+    toMountPoint: (node: React.ReactNode) => node,
+    CodeEditor: CodeEditorMock,
   };
 });

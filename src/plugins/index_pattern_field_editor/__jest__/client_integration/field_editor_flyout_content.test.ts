@@ -7,58 +7,33 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import '../test_utils/setup_environment';
-import { registerTestBed, TestBed, noop, getCommonActions } from '../test_utils';
-
-import { FieldEditor } from './field_editor';
-import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
-import { docLinksServiceMock } from '../../../../core/public/mocks';
-
-const defaultProps: Props = {
-  onSave: noop,
-  onCancel: noop,
-  docLinks: docLinksServiceMock.createStartContract() as any,
-  FieldEditor,
-  indexPattern: { fields: [] } as any,
-  uiSettings: {} as any,
-  fieldFormats: {} as any,
-  fieldFormatEditors: {} as any,
-  fieldTypeToProcess: 'runtime',
-  runtimeFieldValidator: () => Promise.resolve(null),
-  isSavingField: false,
-};
-
-const setup = (props: Props = defaultProps) => {
-  const testBed = registerTestBed(FieldEditorFlyoutContent, {
-    memoryRouter: { wrapComponent: false },
-  })(props) as TestBed;
-
-  const actions = {
-    ...getCommonActions(testBed),
-  };
-
-  return {
-    ...testBed,
-    actions,
-  };
-};
+import type { Props } from '../../public/components/field_editor_flyout_content';
+import { setupEnvironment } from './helpers';
+import { setup } from './field_editor_flyout_content.helpers';
 
 describe('<FieldEditorFlyoutContent />', () => {
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
+
   beforeAll(() => {
     jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
+    server.restore();
   });
 
-  test('should have the correct title', () => {
-    const { exists, find } = setup();
+  beforeEach(() => {
+    httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['Set by Jest test'] });
+  });
+
+  test('should have the correct title', async () => {
+    const { exists, find } = await setup();
     expect(exists('flyoutTitle')).toBe(true);
     expect(find('flyoutTitle').text()).toBe('Create field');
   });
 
-  test('should allow a field to be provided', () => {
+  test('should allow a field to be provided', async () => {
     const field = {
       name: 'foo',
       type: 'ip',
@@ -67,7 +42,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       },
     };
 
-    const { find } = setup({ ...defaultProps, field });
+    const { find } = await setup({ field });
 
     expect(find('flyoutTitle').text()).toBe(`Edit field 'foo'`);
     expect(find('nameField.input').props().value).toBe(field.name);
@@ -83,7 +58,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-    const { find } = setup({ ...defaultProps, onSave, field });
+    const { find } = await setup({ onSave, field });
 
     await act(async () => {
       find('fieldSaveButton').simulate('click');
@@ -100,9 +75,9 @@ describe('<FieldEditorFlyoutContent />', () => {
     expect(fieldReturned).toEqual(field);
   });
 
-  test('should accept an onCancel prop', () => {
+  test('should accept an onCancel prop', async () => {
     const onCancel = jest.fn();
-    const { find } = setup({ ...defaultProps, onCancel });
+    const { find } = await setup({ onCancel });
 
     find('closeFlyoutButton').simulate('click');
 
@@ -113,7 +88,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     test('should validate the fields and prevent saving invalid form', async () => {
       const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-      const { find, exists, form, component } = setup({ ...defaultProps, onSave });
+      const { find, exists, form, component } = await setup({ onSave });
 
       expect(find('fieldSaveButton').props().disabled).toBe(false);
 
@@ -142,7 +117,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         component,
         form,
         actions: { toggleFormRow, changeFieldType },
-      } = setup({ ...defaultProps, onSave });
+      } = await setup({ onSave });
 
       act(() => {
         form.setInputValue('nameField.input', 'someName');
