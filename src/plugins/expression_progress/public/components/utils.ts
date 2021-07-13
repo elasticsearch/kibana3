@@ -116,13 +116,13 @@ export function getTextAttributes(
   textContent = label ? label.toString() : '';
 
   if (shapeType === Shape.HORIZONTAL_PILL) {
-    x = parseInt(String(textAttributes?.x)!, 10) + offset / 2;
+    x = parseInt(String(x)!, 10) + offset / 2;
   }
   if (shapeType === Shape.VERTICAL_PILL) {
-    y = parseInt(String(textAttributes?.y)!, 10) - offset / 2;
+    y = parseInt(String(y)!, 10) - offset / 2;
   }
   if (isHorisontalBarOrPill(shapeType)) {
-    x = parseInt(String(textAttributes?.x)!, 10);
+    x = parseInt(String(x)!, 10);
   }
 
   return { x, y, textContent };

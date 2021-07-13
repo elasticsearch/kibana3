@@ -37,11 +37,11 @@ export const getShapeComponent = (svgParams: SvgConfig) =>
     return (
       <svg xmlns="http://www.w3.org/2000/svg" {...{ ...(shapeAttributes || {}), viewBox }}>
         <SvgContentElement
-          {...{ ...(shapeContentAttributes || {}), ...defaultShapeContentAttributes }}
+          {...{ ...defaultShapeContentAttributes, ...(shapeContentAttributes || {}) }}
         />
         {children}
         {TextElement && (
-          <TextElement {...{ ...(textAttributes || {}), ...(defaultTextAttributes || {}) }}>
+          <TextElement {...{ ...(defaultTextAttributes || {}), ...(textAttributes || {}) }}>
             {textAttributes?.textContent}
           </TextElement>
         )}
