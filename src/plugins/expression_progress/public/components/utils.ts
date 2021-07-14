@@ -30,7 +30,7 @@ const getMinX: GetViewBoxParam = (shapeType, viewBox, offset = 0) => {
 const getMinY: GetViewBoxParam = (shapeType, viewBox, offset = 0, labelWidth, labelHeight = 0) => {
   let { minY } = viewBox;
   if (shapeType === Shape.SEMICIRCLE) minY -= offset / 2;
-  if (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) {
+  if (shapeType !== Shape.SEMICIRCLE && shapeType !== Shape.VERTICAL_BAR) {
     minY -= offset / 2;
   }
   if (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) {
@@ -57,7 +57,7 @@ const getHeight: GetViewBoxParam = (
 ) => {
   let { height } = viewBox;
   if (shapeType === Shape.SEMICIRCLE) height += offset / 2;
-  if (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) {
+  if (shapeType !== Shape.SEMICIRCLE && shapeType !== Shape.VERTICAL_BAR) {
     height += offset;
   }
   if (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) {
@@ -73,8 +73,8 @@ const updateMinxAndWidthIfNecessary = (
   width: number
 ) => {
   if (
-    shapeType === Shape.VERTICAL_BAR ||
-    (shapeType === Shape.VERTICAL_PILL && labelWidth > width)
+    (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) &&
+    labelWidth > width
   ) {
     minX = -labelWidth / 2;
     width = labelWidth;

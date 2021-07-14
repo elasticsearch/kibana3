@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { viewBoxToString } from '../../common/lib';
-import { ShapeProps, SvgConfig, SvgElementTypes, SvgTextAttributes } from './types';
+import { ShapeProps, SvgConfig, SvgElementTypes } from './types';
 
 export const getShapeComponent = (svgParams: SvgConfig) =>
   function Shape({
