@@ -10,19 +10,6 @@ import { SvgTextAttributes } from 'src/plugins/presentation_util/public';
 import { ViewBoxParams } from '../../../presentation_util/common';
 import { Shape } from '../../common';
 
-const isNotHorisontalBar = (shapeType: Shape) => shapeType !== Shape.HORIZONTAL_BAR;
-
-const isSemicircle = (shapeType: Shape) => shapeType === Shape.SEMICIRCLE;
-
-const isHorisontalBarOrPill = (shapeType: Shape) =>
-  shapeType === Shape.HORIZONTAL_BAR || shapeType === Shape.HORIZONTAL_PILL;
-
-const isVerticalBarOrPill = (shapeType: Shape) =>
-  shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL;
-
-const isNotVerticalBarOrSemicircle = (shapeType: Shape) =>
-  shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL;
-
 type GetViewBox = (
   shapeType: Shape,
   initialViewBox: ViewBoxParams,
@@ -36,22 +23,28 @@ type GetViewBoxParam = (...args: GetViewBoxArguments) => number;
 
 const getMinX: GetViewBoxParam = (shapeType, viewBox, offset = 0) => {
   let { minX } = viewBox;
-  if (isNotHorisontalBar(shapeType)) minX -= offset / 2;
+  if (shapeType !== Shape.HORIZONTAL_BAR) minX -= offset / 2;
   return minX;
 };
 
 const getMinY: GetViewBoxParam = (shapeType, viewBox, offset = 0, labelWidth, labelHeight = 0) => {
   let { minY } = viewBox;
-  if (isSemicircle(shapeType)) minY -= offset / 2;
-  if (isNotVerticalBarOrSemicircle(shapeType)) minY -= offset / 2;
-  if (isVerticalBarOrPill(shapeType)) minY -= labelHeight;
+  if (shapeType === Shape.SEMICIRCLE) minY -= offset / 2;
+  if (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) {
+    minY -= offset / 2;
+  }
+  if (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) {
+    minY -= labelHeight;
+  }
   return minY;
 };
 
 const getWidth: GetViewBoxParam = (shapeType, viewBox, offset = 0, labelWidth = 0) => {
   let { width } = viewBox;
-  if (isNotHorisontalBar(shapeType)) width += offset;
-  if (isHorisontalBarOrPill(shapeType)) width += labelWidth;
+  if (shapeType !== Shape.HORIZONTAL_BAR) width += offset;
+  if (shapeType === Shape.HORIZONTAL_BAR || shapeType === Shape.HORIZONTAL_PILL) {
+    width += labelWidth;
+  }
   return width;
 };
 
@@ -63,9 +56,13 @@ const getHeight: GetViewBoxParam = (
   labelHeight = 0
 ) => {
   let { height } = viewBox;
-  if (isSemicircle(shapeType)) height += offset / 2;
-  if (isNotVerticalBarOrSemicircle(shapeType)) height += offset;
-  if (isVerticalBarOrPill(shapeType)) height += labelHeight;
+  if (shapeType === Shape.SEMICIRCLE) height += offset / 2;
+  if (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) {
+    height += offset;
+  }
+  if (shapeType === Shape.VERTICAL_BAR || shapeType === Shape.VERTICAL_PILL) {
+    height += labelHeight;
+  }
   return height;
 };
 
@@ -75,7 +72,10 @@ const updateMinxAndWidthIfNecessary = (
   minX: number,
   width: number
 ) => {
-  if (isVerticalBarOrPill(shapeType) && labelWidth > width) {
+  if (
+    shapeType === Shape.VERTICAL_BAR ||
+    (shapeType === Shape.VERTICAL_PILL && labelWidth > width)
+  ) {
     minX = -labelWidth / 2;
     width = labelWidth;
   }
@@ -121,7 +121,7 @@ export function getTextAttributes(
   if (shapeType === Shape.VERTICAL_PILL) {
     y = parseInt(String(y)!, 10) - offset / 2;
   }
-  if (isHorisontalBarOrPill(shapeType)) {
+  if (shapeType === Shape.HORIZONTAL_BAR || shapeType === Shape.HORIZONTAL_PILL) {
     x = parseInt(String(x)!, 10);
   }
 
