@@ -41,6 +41,7 @@ function ProgressComponent({
     width: parentNode.offsetWidth,
     height: parentNode.offsetHeight,
   });
+  const [totalLength, setTotalLength] = useState<number>(0);
 
   useEffect(() => {
     setDimensions({
@@ -55,6 +56,10 @@ function ProgressComponent({
   >(null);
   const textRef = useRef<SVGTextElement>(null);
 
+  useEffect(() => {
+    setTotalLength(barProgressRef.current ? barProgressRef.current.getTotalLength() : 0);
+  }, [shapeType, barProgressRef]);
+
   const Shape = shapes[shapeType];
   const BarProgress = getShapeContentElement(Shape.data.shapeType);
 
@@ -66,9 +71,8 @@ function ProgressComponent({
     ref: barProgressRef,
   };
 
-  const length = barProgressRef.current ? barProgressRef.current.getTotalLength() : 1;
   const percent = value / max;
-  const to = length * (1 - percent);
+  const to = totalLength * (1 - percent);
 
   const barProgressAttributes = {
     ...Shape.data.shapeContentAttributes,
@@ -76,7 +80,7 @@ function ProgressComponent({
     fill: 'none',
     stroke: valueColor,
     strokeWidth: `${valueWeight}px`,
-    strokeDasharray: length,
+    strokeDasharray: totalLength,
     strokeDashoffset: Math.max(0, to),
   };
 
