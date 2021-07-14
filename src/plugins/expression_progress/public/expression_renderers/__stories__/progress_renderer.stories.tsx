@@ -9,20 +9,25 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render } from '../../../../presentation_util/public/__stories__';
-import { progressVisRenderer } from '../progressVis_renderer';
-import {
-  elasticLogo,
-  elasticOutline,
-} from '../../../../../../src/plugins/presentation_util/common/lib';
+import { progressRenderer } from '../progress_renderer';
+import { Shape } from '../../../common';
 
-storiesOf('renderers/progressVis', module).add('default', () => {
+storiesOf('renderers/progress', module).add('default', () => {
   const config = {
-    count: 42,
-    image: elasticLogo,
-    size: 20,
-    max: 60,
-    emptyImage: elasticOutline,
+    barColor: '#bc1234',
+    barWeight: 20,
+    font: {
+      css: '',
+      spec: {},
+      type: 'style' as 'style',
+    },
+    label: '66%',
+    max: 1,
+    shape: Shape.UNICORN,
+    value: 0.66,
+    valueColor: '#000',
+    valueWeight: 15,
   };
 
-  return <Render renderer={progressVisRenderer} config={config} width="400px" />;
+  return <Render renderer={progressRenderer} config={config} />;
 });

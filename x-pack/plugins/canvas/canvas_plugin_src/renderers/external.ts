@@ -11,6 +11,7 @@ import { errorRenderer, debugRenderer } from '../../../../../src/plugins/express
 import { repeatImageRenderer } from '../../../../../src/plugins/expression_repeat_image/public';
 import { revealImageRenderer } from '../../../../../src/plugins/expression_reveal_image/public';
 import { shapeRenderer } from '../../../../../src/plugins/expression_shape/public';
+import { progressRenderer } from '../../../../../src/plugins/expression_progress/public';
 
 export const renderFunctions = [
   errorRenderer,
@@ -20,6 +21,7 @@ export const renderFunctions = [
   repeatImageRenderer,
   revealImageRenderer,
   shapeRenderer,
+  progressRenderer,
 ];
 
 export const renderFunctionFactories = [];

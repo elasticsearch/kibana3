@@ -8,19 +8,19 @@
 
 import { ExecutionContext } from '../../../expressions';
 import { functionWrapper, fontStyle } from '../../../presentation_util/common/lib';
-import { progressVisFunction, errors } from './progress_function';
+import { progressFunction, errors } from './progress_function';
 
-describe('progressVis', () => {
-  const fn = functionWrapper(progressVisFunction);
+describe('progress', () => {
+  const fn = functionWrapper(progressFunction);
   const value = 0.33;
 
-  it('returns a render as progressVis', () => {
+  it('returns a render as progress', () => {
     const result = fn(0.2, {}, {} as ExecutionContext);
     expect(result).toHaveProperty('type', 'render');
-    expect(result).toHaveProperty('as', 'progressVis');
+    expect(result).toHaveProperty('as', 'progress');
   });
 
-  it('sets the progressVis to context', () => {
+  it('sets the progress to context', () => {
     const result = fn(0.58, {}, {} as ExecutionContext);
     expect(result.value).toHaveProperty('value', 0.58);
   });
@@ -36,7 +36,7 @@ describe('progressVis', () => {
 
   describe('args', () => {
     describe('shape', () => {
-      it('sets the progressVis element shape', () => {
+      it('sets the progress element shape', () => {
         const result = fn(
           value,
           {
@@ -81,7 +81,7 @@ describe('progressVis', () => {
     });
 
     describe('valueColor', () => {
-      it('sets the color of the progressVis bar', () => {
+      it('sets the color of the progress bar', () => {
         const result = fn(
           value,
           {
@@ -155,7 +155,7 @@ describe('progressVis', () => {
     });
 
     describe('label', () => {
-      it('sets the label of the progressVis', () => {
+      it('sets the label of the progress', () => {
         const result = fn(value, { label: 'foo' }, {} as ExecutionContext);
 
         expect(result.value).toHaveProperty('label', 'foo');

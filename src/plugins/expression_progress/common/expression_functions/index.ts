@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { progressVisFunction } from './progress_function';
+import { progressFunction } from './progress_function';
 
-export const functions = [progressVisFunction];
+export const functions = [progressFunction];
 
-export { progressVisFunction };
+export { progressFunction };

@@ -15,3 +15,4 @@ export function plugin() {
 }
 
 export * from './expression_renderers';
+export { shapes } from './components/shapes';

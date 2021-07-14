@@ -1,6 +1,6 @@
 # expressionProgress
 
-Expression Progress plugin adds a `progressVis` function to the expression plugin and an associated renderer. @todo write the description of the plugin.
+Expression Progress plugin adds a `progress` function to the expression plugin and an associated renderer. @todo write the description of the plugin.
 
 ---
 

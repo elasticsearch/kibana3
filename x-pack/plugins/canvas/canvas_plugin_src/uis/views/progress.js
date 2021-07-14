@@ -6,7 +6,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { shapes } from '../../renderers/progress/shapes';
+import { shapes } from '../../../../../../src/plugins/expression_progress/public';
 import { ViewStrings } from '../../../i18n';
 
 const { Progress: strings } = ViewStrings;

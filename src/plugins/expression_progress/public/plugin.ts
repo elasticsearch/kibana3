@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { progressVisRenderer } from './expression_renderers';
+import { progressRenderer } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -25,7 +25,7 @@ export class ExpressionMetricPlugin
   implements
     Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
-    expressions.registerRenderer(progressVisRenderer);
+    expressions.registerRenderer(progressRenderer);
   }
 
   public start(core: CoreStart): ExpressionMetricPluginStart {}

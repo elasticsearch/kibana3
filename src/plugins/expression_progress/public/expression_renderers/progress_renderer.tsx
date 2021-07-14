@@ -17,17 +17,17 @@ const ProgressComponent = withSuspense(LazyProgressComponent);
 
 const strings = {
   getDisplayName: () =>
-    i18n.translate('expressionProgress.renderer.progressVis.displayName', {
+    i18n.translate('expressionProgress.renderer.progress.displayName', {
       defaultMessage: 'Progress',
     }),
   getHelpDescription: () =>
-    i18n.translate('expressionProgress.renderer.progressVis.helpDescription', {
-      defaultMessage: 'Render a basic progressVis',
+    i18n.translate('expressionProgress.renderer.progress.helpDescription', {
+      defaultMessage: 'Render a basic progress',
     }),
 };
 
-export const progressVisRenderer = (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
-  name: 'progressVis',
+export const progressRenderer = (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
+  name: 'progress',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,

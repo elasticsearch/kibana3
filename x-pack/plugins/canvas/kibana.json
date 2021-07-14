@@ -13,6 +13,7 @@
       "expressionError",
       "expressionImage",
       "expressionMetric",
+      "expressionProgress",
       "expressionRepeatImage",
       "expressionRevealImage",
       "expressionShape",
