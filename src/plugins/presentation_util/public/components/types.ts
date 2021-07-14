@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Component, SVGProps } from 'react';
-import { CSSProperties } from 'styled-components';
+import { Component, SVGProps, CSSProperties } from 'react';
 import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
 import { ViewBoxParams } from '../../common/types';
 
