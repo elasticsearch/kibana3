@@ -7,46 +7,38 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
+import { ViewBoxParams, ShapeType } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
-  shape?: string;
+  shape?: ShapeType;
 }
 
-export const ShapePreview: FC<Props> = ({ shape }) => {
-  if (!shape) {
-    return <div className="canvasShapePreview" />;
+export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
+  if (!Shape) return <div className="canvasShapePreview" />;
+
+  function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
+    const { minX, minY, width, height } = defaultViewBox;
+    return {
+      minX: minX - defaultWidth / 2,
+      minY: minY - defaultWidth / 2,
+      width: width + defaultWidth,
+      height: height + defaultWidth,
+    };
   }
-
-  const weight = 5;
-  const parser = new DOMParser();
-  const shapeSvg = parser
-    .parseFromString(shape, 'image/svg+xml')
-    .getElementsByTagName('svg')
-    .item(0);
-
-  if (!shapeSvg) {
-    throw new Error('An unexpected error occurred: the SVG was not parseable');
-  }
-
-  shapeSvg.setAttribute('fill', 'none');
-  shapeSvg.setAttribute('stroke', 'black');
-
-  const viewBox = shapeSvg.getAttribute('viewBox') || '0 0 0 0';
-  const initialViewBox = viewBox.split(' ').map((v: string) => parseInt(v, 10));
-
-  let [minX, minY, width, height] = initialViewBox;
-  minX -= weight / 2;
-  minY -= weight / 2;
-  width += weight;
-  height += weight;
-  shapeSvg.setAttribute('viewBox', [minX, minY, width, height].join(' '));
 
   return (
-    // eslint-disable-next-line react/no-danger
-    <div className="canvasShapePreview" dangerouslySetInnerHTML={{ __html: shapeSvg.outerHTML }} />
+    <div className="canvasShapePreview">
+      <Shape.Component
+        shapeAttributes={{
+          fill: 'none',
+          stroke: 'black',
+          viewBox: getViewBox(5, Shape.data.viewBox),
+        }}
+      />
+    </div>
   );
 };
 
 ShapePreview.propTypes = {
-  shape: PropTypes.string,
+  shape: PropTypes.func,
 };

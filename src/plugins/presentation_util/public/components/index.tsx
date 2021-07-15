@@ -34,3 +34,5 @@ export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker')
 export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
 );
+export * from './shape';
+export * from './types';
