@@ -8,13 +8,14 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
+import { ShapeType } from '../../../../../../src/plugins/presentation_util/public';
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
 
 interface Props {
   shapes: {
-    [key: string]: string;
+    [key: string]: ShapeType;
   };
   onChange?: (key: string) => void;
   value?: string;
