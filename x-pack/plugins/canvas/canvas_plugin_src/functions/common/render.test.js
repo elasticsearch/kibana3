@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
+import {
+  functionWrapper,
+  fontStyle,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 import { testTable } from './__fixtures__/test_tables';
-import { fontStyle, containerStyle } from './__fixtures__/test_styles';
+import { containerStyle } from './__fixtures__/test_styles';
 import { render } from './render';
 
 const renderTable = {

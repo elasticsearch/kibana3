@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Component, SVGProps, CSSProperties } from 'react';
 import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
+import { ViewBoxParams } from '../../common/types';
 
 interface SaveModalDocumentInfo {
   id?: string;
@@ -22,3 +24,76 @@ export interface SaveModalDashboardProps {
   onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
+
+export type ShapeProps = {
+  shapeAttributes?: ShapeAttributes;
+  shapeContentAttributes?: ShapeContentAttributes & SpecificShapeContentAttributes;
+  textAttributes?: SvgTextAttributes;
+} & Component['props'] & { ref?: React.RefObject<any> };
+
+export enum SvgElementTypes {
+  polygon,
+  circle,
+  rect,
+  path,
+}
+
+export interface ShapeAttributes {
+  fill?: SVGProps<SVGElement>['fill'];
+  stroke?: SVGProps<SVGElement>['stroke'];
+  width?: SVGProps<SVGElement>['width'];
+  height?: SVGProps<SVGElement>['height'];
+  viewBox?: ViewBoxParams;
+  overflow?: SVGProps<SVGElement>['overflow'];
+  preserveAspectRatio?: SVGProps<SVGElement>['preserveAspectRatio'];
+}
+
+export interface ShapeContentAttributes {
+  strokeWidth?: SVGProps<SVGElement>['strokeWidth'];
+  stroke?: SVGProps<SVGElement>['stroke'];
+  fill?: SVGProps<SVGElement>['fill'];
+  vectorEffect?: SVGProps<SVGElement>['vectorEffect'];
+  strokeMiterlimit?: SVGProps<SVGElement>['strokeMiterlimit'];
+}
+export interface SvgConfig {
+  shapeType?: SvgElementTypes;
+  viewBox: ViewBoxParams;
+  shapeContentAttributes: ShapeContentAttributes &
+    SpecificShapeContentAttributes &
+    Component['props'] & { ref?: React.RefObject<any> };
+  textAttributes?: SvgTextAttributes;
+}
+
+export type SvgTextAttributes = Partial<Element> & {
+  x?: SVGProps<SVGTextElement>['x'];
+  y?: SVGProps<SVGTextElement>['y'];
+  textAnchor?: SVGProps<SVGTextElement>['textAnchor'];
+  dominantBaseline?: SVGProps<SVGTextElement>['dominantBaseline'];
+  dx?: SVGProps<SVGTextElement>['dx'];
+  dy?: SVGProps<SVGTextElement>['dy'];
+} & { style?: CSSProperties } & { ref?: React.RefObject<SVGTextElement> };
+
+interface CircleParams {
+  r: SVGProps<SVGCircleElement>['r'];
+  cx: SVGProps<SVGCircleElement>['cx'];
+  cy: SVGProps<SVGCircleElement>['cy'];
+}
+
+interface RectParams {
+  x: SVGProps<SVGRectElement>['x'];
+  y: SVGProps<SVGRectElement>['y'];
+  width: SVGProps<SVGRectElement>['width'];
+  height: SVGProps<SVGRectElement>['height'];
+}
+
+interface PathParams {
+  d: SVGProps<SVGPathElement>['d'];
+  strokeLinecap?: SVGProps<SVGPathElement>['strokeLinecap'];
+}
+
+interface PolygonParams {
+  points?: SVGProps<SVGPolygonElement>['points'];
+  strokeLinejoin?: SVGProps<SVGPolygonElement>['strokeLinejoin'];
+}
+
+type SpecificShapeContentAttributes = CircleParams | RectParams | PathParams | PolygonParams;
