@@ -59,7 +59,7 @@ export interface BulkUpdateOptions<Params extends AlertTypeParams> {
   ids: string[];
   status: string;
   index: string;
-  query: object;
+  query: Query;
 }
 
 interface GetAlertParams {
@@ -200,10 +200,21 @@ export class AlertsClient {
 
       console.error('RESULT', JSON.stringify(result, null, 2));
 
+      const actualIds = new Set(Array.from(allowedRuleTypeIds).map((item) => item.id));
+
+      console.error('ALLOWED RULE TYPE IDS', allowedRuleTypeIds);
+
+      console.error(
+        'EVERY ITEM IN ALLOWED RULETYPEIDS',
+        result.body?.aggregations?.ruleTypeIdsAgg.buckets.every((bucketItem) =>
+          actualIds.has(bucketItem.key)
+        )
+      );
+
       if (
         query == null &&
-        result.body?.aggregations?.ruleTypeIdsAgg.buckets.every((bucketItem) =>
-          allowedRuleTypeIds.has(bucketItem.key)
+        !result.body?.aggregations?.ruleTypeIdsAgg.buckets.every((bucketItem) =>
+          actualIds.has(bucketItem.key)
         )
       ) {
         console.error('not every id is available, sorry!');
@@ -340,32 +351,32 @@ export class AlertsClient {
     index,
     status,
   }: BulkUpdateOptions<Params>) {
-    let queryObject;
-    if (ids) {
-      // maybe use an aggs query to make this fast
-      // queryObject = {
-      //   ids: { values: ids },
-      //   // // USE AGGS and then get returned fields against ensureAuthorizedForAllRuleTypes
-      //   // @ts-expect-error
-      //   aggs: {
-      //     ...(await this.authorization.getFindAuthorizationFilter(
-      //       AlertingAuthorizationEntity.Alert,
-      //       {
-      //         type: AlertingAuthorizationFilterType.ESDSL,
-      //         fieldNames: { consumer: 'kibana.rac.alert.owner', ruleTypeId: 'rule.id' },
-      //       },
-      //       WriteOperations.Update
-      //     )),
-      //   },
-      // };
-      const fetchAlertsRes = await this.fetchAlerts({ index, ids });
-    } else if (query) {
-      queryObject = {
-        bool: {
-          ...query,
-        },
-      };
+    const { filter: authzFilter } = await this.authorization.getFindAuthorizationFilter(
+      AlertingAuthorizationEntity.Alert,
+      {
+        type: AlertingAuthorizationFilterType.ESDSL,
+        fieldNames: { consumer: 'kibana.rac.alert.owner', ruleTypeId: 'rule.id' },
+      },
+      WriteOperations.Update
+    );
+    if (authzFilter == null) {
+      return;
     }
+    // console.error('WHAT IS THIS', JSON.stringify(afilter, null, 2));
+    const {
+      authorizedRuleTypes: allowedRuleTypeIds,
+    } = await this.authorization.getAugmentedRuleTypesWithAuthorization(
+      validFeatureIds,
+      [WriteOperations.Update],
+      AlertingAuthorizationEntity.Alert
+    );
+    const queryObject =
+      query == null
+        ? {
+            query: { ids: { values: ids } },
+            aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
+          }
+        : { query: buildEsQuery(undefined, query, [(authzFilter as unknown) as Filter]) };
     try {
       // USE AGGS FOR QUERY, GET THE HITS AND THEN DO BULK UPDATE WITH IDS AND AUDIT LOG THAT
       const result = await this.esClient.updateByQuery({
@@ -379,7 +390,7 @@ export class AlertsClient {
             source: `ctx._source['kibana.rac.alert.status'] = '${status}'`,
             lang: 'painless',
           },
-          query: queryObject,
+          ...queryObject,
         },
         ignore_unavailable: true,
       });

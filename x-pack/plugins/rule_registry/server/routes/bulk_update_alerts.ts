@@ -37,12 +37,12 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
     async (context, req, response) => {
       try {
         const alertsClient = await context.rac.getAlertsClient();
-        const { status, ids, index } = req.body;
+        const { status, ids, index, query } = req.body;
 
         const updatedAlert = await alertsClient.bulkUpdate({
           ids,
           status,
-          query: {},
+          query,
           index,
         });
 
