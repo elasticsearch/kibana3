@@ -25,6 +25,14 @@ import {
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { mapConsumerToIndexName, validFeatureIds, isValidFeatureId } from '../utils/rbac';
 
+import {
+  Filter,
+  IIndexPattern,
+  buildEsQuery,
+  EsQueryConfig,
+  Query,
+} from '../../../../../src/plugins/data/common';
+
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
   { [K in Props]-?: NonNullable<Obj[K]> };
@@ -143,33 +151,21 @@ export class AlertsClient {
   }: {
     ids: string[];
     index: string;
-    query: object;
+    query: Query;
   }): Promise<(AlertType & { _version: string | undefined }) | null | undefined> {
     try {
-      // const afilter = await this.authorization.getFindAuthorizationFilter(
-      //   AlertingAuthorizationEntity.Alert,
-      //   {
-      //     type: AlertingAuthorizationFilterType.ESDSL,
-      //     fieldNames: { consumer: 'kibana.rac.alert.owner', ruleTypeId: 'rule.id' },
-      //   },
-      //   WriteOperations.Update
-      // );
-      // console.error('WHAT IS THIS', JSON.stringify(afilter, null, 2));
-      const result = await this.esClient.search<ParsedTechnicalFields>({
-        // Context: Originally thought of always just searching `.alerts-*` but that could
-        // result in a big performance hit. If the client already knows which index the alert
-        // belongs to, passing in the index will speed things up
-        index: index ?? '.alerts-*',
-        ignore_unavailable: true,
-        body: {
-          query: query == null ? { ids: { values: ids } } : query,
-          aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
+      const { filter: authzFilter } = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.ESDSL,
+          fieldNames: { consumer: 'kibana.rac.alert.owner', ruleTypeId: 'rule.id' },
         },
-        seq_no_primary_term: true,
-      });
-
-      console.error('RESULT', JSON.stringify(result, null, 2));
-
+        WriteOperations.Update
+      );
+      if (authzFilter == null) {
+        return;
+      }
+      // console.error('WHAT IS THIS', JSON.stringify(afilter, null, 2));
       const {
         authorizedRuleTypes: allowedRuleTypeIds,
       } = await this.authorization.getAugmentedRuleTypesWithAuthorization(
@@ -178,13 +174,41 @@ export class AlertsClient {
         AlertingAuthorizationEntity.Alert
       );
 
-      // if (
-      //   result.body?.aggregations?.ruleTypeIdsAgg.buckets.every((bucketItem) =>
-      //     allowedRuleTypeIds.has(bucketItem.key)
-      //   )
-      // ) {
+      const queryBody =
+        query == null
+          ? {
+              query: { ids: { values: ids } },
+              aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
+            }
+          : { query: buildEsQuery(undefined, query, [(authzFilter as unknown) as Filter]) };
+      const result = await this.esClient.search<ParsedTechnicalFields>({
+        // Context: Originally thought of always just searching `.alerts-*` but that could
+        // result in a big performance hit. If the client already knows which index the alert
+        // belongs to, passing in the index will speed things up
+        index: index ?? '.alerts-*',
+        ignore_unavailable: true,
+        body: queryBody,
+        // body: {
+        //   query:
+        //     query == null
+        //       ? { ids: { values: ids } }
+        //       : buildEsQuery(undefined, query, [(authzFilter as unknown) as Filter]),
+        //   aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
+        // },
+        seq_no_primary_term: true,
+      });
 
-      // }
+      console.error('RESULT', JSON.stringify(result, null, 2));
+
+      if (
+        query == null &&
+        result.body?.aggregations?.ruleTypeIdsAgg.buckets.every((bucketItem) =>
+          allowedRuleTypeIds.has(bucketItem.key)
+        )
+      ) {
+        console.error('not every id is available, sorry!');
+        return;
+      }
       if (result == null || result.body == null || result.body.hits.hits.length === 0) {
         return;
       }
