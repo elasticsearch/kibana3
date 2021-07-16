@@ -6,6 +6,12 @@
  */
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import {
+  AggregationsFiltersAggregate,
+  AggregationsFiltersBucketItem,
+  QueryDslQueryContainer,
+  Script,
+} from '@elastic/elasticsearch/api/types';
 import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
 import {
   ReadOperations,
@@ -25,13 +31,7 @@ import {
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { mapConsumerToIndexName, validFeatureIds, isValidFeatureId } from '../utils/rbac';
 
-import {
-  Filter,
-  IIndexPattern,
-  buildEsQuery,
-  EsQueryConfig,
-  Query,
-} from '../../../../../src/plugins/data/common';
+import { Filter, buildEsQuery, Query, EsQueryConfig } from '../../../../../src/plugins/data/common';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
@@ -56,10 +56,10 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
 }
 
 export interface BulkUpdateOptions<Params extends AlertTypeParams> {
-  ids: string[];
+  ids: string[] | undefined | null;
   status: string;
   index: string;
-  query: Query;
+  query: string | undefined | null;
 }
 
 interface GetAlertParams {
@@ -149,10 +149,10 @@ export class AlertsClient {
     index,
     query,
   }: {
-    ids: string[];
+    ids: string[] | undefined | null;
     index: string;
-    query: Query;
-  }): Promise<(AlertType & { _version: string | undefined }) | null | undefined> {
+    query: string | undefined | null;
+  }) {
     try {
       const { filter: authzFilter } = await this.authorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Alert,
@@ -174,66 +174,58 @@ export class AlertsClient {
         AlertingAuthorizationEntity.Alert
       );
 
+      const config: EsQueryConfig = {
+        allowLeadingWildcards: true,
+        queryStringOptions: { analyze_wildcard: true },
+        ignoreFilterIfFieldNotInIndex: false,
+        dateFormatTZ: 'Zulu',
+      };
+
       const queryBody =
         query == null
           ? {
               query: { ids: { values: ids } },
               aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
             }
-          : { query: buildEsQuery(undefined, query, [(authzFilter as unknown) as Filter]) };
-      const result = await this.esClient.search<ParsedTechnicalFields>({
+          : // @ts-expect-error
+            { query: buildEsQuery(undefined, { query, language: 'kuery' }, [authzFilter], config) };
+      const result = await this.esClient.search<
+        ParsedTechnicalFields | (ParsedTechnicalFields & AggregationsFiltersAggregate)
+      >({
         // Context: Originally thought of always just searching `.alerts-*` but that could
         // result in a big performance hit. If the client already knows which index the alert
         // belongs to, passing in the index will speed things up
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
+        // @ts-expect-error
         body: queryBody,
-        // body: {
-        //   query:
-        //     query == null
-        //       ? { ids: { values: ids } }
-        //       : buildEsQuery(undefined, query, [(authzFilter as unknown) as Filter]),
-        //   aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
-        // },
         seq_no_primary_term: true,
       });
 
-      console.error('RESULT', JSON.stringify(result, null, 2));
-
       const actualIds = new Set(Array.from(allowedRuleTypeIds).map((item) => item.id));
-
-      console.error('ALLOWED RULE TYPE IDS', allowedRuleTypeIds);
-
-      console.error(
-        'EVERY ITEM IN ALLOWED RULETYPEIDS',
-        result.body?.aggregations?.ruleTypeIdsAgg.buckets.every((bucketItem) =>
-          actualIds.has(bucketItem.key)
-        )
-      );
 
       if (
         query == null &&
-        !result.body?.aggregations?.ruleTypeIdsAgg.buckets.every((bucketItem) =>
+        !((result.body!.aggregations!.ruleTypeIdsAgg! as AggregationsFiltersAggregate)
+          .buckets as AggregationsFiltersBucketItem[]).every((bucketItem) =>
+          // @ts-expect-error Property 'key' does not exist on type 'AggregationsFiltersBucketItemKeys'
           actualIds.has(bucketItem.key)
         )
       ) {
-        console.error('not every id is available, sorry!');
+        this.logger.error('not every rule type id is accessible with the provided privileges');
         return;
       }
       if (result == null || result.body == null || result.body.hits.hits.length === 0) {
         return;
       }
 
-      if (!isValidAlert(result.body.hits.hits[0]._source)) {
+      if (!result.body.hits.hits.every((hit) => isValidAlert(hit._source))) {
         const errorMessage = `Unable to retrieve alert details for alert with id of "${ids}".`;
         this.logger.debug(errorMessage);
         throw new Error(errorMessage);
       }
 
-      return {
-        ...result.body.hits.hits[0]._source,
-        _version: encodeHitVersion(result.body.hits.hits[0]),
-      };
+      return result;
     } catch (error) {
       const errorMessage = `Unable to retrieve alert with id of "${ids}".`;
       this.logger.debug(errorMessage);
@@ -362,29 +354,55 @@ export class AlertsClient {
     if (authzFilter == null) {
       return;
     }
-    // console.error('WHAT IS THIS', JSON.stringify(afilter, null, 2));
-    const {
-      authorizedRuleTypes: allowedRuleTypeIds,
-    } = await this.authorization.getAugmentedRuleTypesWithAuthorization(
-      validFeatureIds,
-      [WriteOperations.Update],
-      AlertingAuthorizationEntity.Alert
-    );
-    const queryObject =
-      query == null
-        ? {
-            query: { ids: { values: ids } },
-            aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
-          }
-        : { query: buildEsQuery(undefined, query, [(authzFilter as unknown) as Filter]) };
+
+    let queryObject;
+
     try {
+      const config: EsQueryConfig = {
+        allowLeadingWildcards: true,
+        queryStringOptions: { analyze_wildcard: true },
+        ignoreFilterIfFieldNotInIndex: false,
+        dateFormatTZ: 'Zulu',
+      };
+      queryObject =
+        query == null
+          ? {
+              query: { ids: { values: ids } },
+              aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
+            }
+          : {
+              query: buildEsQuery(
+                undefined,
+                { query, language: 'kuery' },
+                [(authzFilter as unknown) as Filter],
+                config
+              ),
+            };
+    } catch (exc) {
+      console.error('THE EXCEPTION', exc);
+    }
+    console.error('QUERY OBJECT', JSON.stringify(queryObject, null, 2));
+    try {
+      const alertsToUpdate = await this.fetchAlerts({ ids, query, index });
+      if (alertsToUpdate == null) {
+        this.logger.error('OH OH');
+        return;
+      }
+      alertsToUpdate?.body.hits.hits.forEach((hit) => {
+        this.logger.debug(`audit logging hit with id ${hit._id}`);
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: AlertAuditAction.UPDATE,
+            id: hit._id,
+            outcome: 'unknown',
+          })
+        );
+      });
       // USE AGGS FOR QUERY, GET THE HITS AND THEN DO BULK UPDATE WITH IDS AND AUDIT LOG THAT
       const result = await this.esClient.updateByQuery({
         index,
         conflicts: 'abort', // conflicts ?? 'abort',
-        // @ts-expect-error refresh should allow for 'wait_for'
-        // refresh: 'wait_for',
-        refresh: true,
+        refresh: false,
         body: {
           script: {
             source: `ctx._source['kibana.rac.alert.status'] = '${status}'`,
@@ -397,8 +415,7 @@ export class AlertsClient {
       return result;
     } catch (err) {
       // TODO: Update error message
-      this.logger.error('');
-      console.error('UPDATE ERROR', JSON.stringify(err, null, 2));
+      this.logger.error(`UPDATE ERROR: ${JSON.stringify(err, null, 2)}`);
       throw err;
     }
     // Looking like we may need to first fetch the alerts to ensure we are

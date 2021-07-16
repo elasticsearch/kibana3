@@ -13,6 +13,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from './utils/route_validation';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
+import { Query } from '../../../../../src/plugins/data/common';
 
 export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
@@ -23,9 +24,9 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
           t.exact(
             t.type({
               status: t.string,
-              ids: t.array(t.string),
+              ids: t.union([t.undefined, t.array(t.string)]),
               index: t.string,
-              query: t.unknown,
+              query: t.union([t.undefined, t.string]),
             })
           )
         ),
@@ -38,6 +39,8 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
       try {
         const alertsClient = await context.rac.getAlertsClient();
         const { status, ids, index, query } = req.body;
+
+        console.error('THE QUERY', JSON.stringify(query, null, 2));
 
         const updatedAlert = await alertsClient.bulkUpdate({
           ids,
