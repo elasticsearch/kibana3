@@ -34,6 +34,8 @@ import { ALERT_DETAILS } from './translations';
 import { isIsolationSupported } from '../../../../../common/endpoint/service/host_isolation/utils';
 import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_check';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -52,7 +54,12 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
-  expandedEvent: { eventId: string; indexName: string };
+  expandedEvent: {
+    eventId: string;
+    indexName: string;
+    ecsData?: Ecs;
+    nonEcsData?: TimelineNonEcsData[];
+  };
   handleOnEventClosed: () => void;
   isFlyoutView?: boolean;
   tabType: TimelineTabs;
@@ -186,12 +193,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
               <TakeActionDropdown
                 agentId={agentId}
                 eventId={expandedEvent?.eventId}
+                ecsData={expandedEvent?.ecsData}
+                nonEcsData={expandedEvent?.nonEcsData}
                 isAlert={isAlert}
                 isEndpointAlert={isEndpointAlert}
                 isolationSupported={isolationSupported}
                 isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+                loadingEventDetails={loading}
                 onChange={showHostIsolationPanel}
-                // timelineId={timelineId}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
