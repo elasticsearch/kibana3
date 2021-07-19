@@ -50,7 +50,6 @@ export interface TaskRunResult {
   size: number;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
-  needs_sorting?: boolean;
   warnings?: string[];
 }
 
