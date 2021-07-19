@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": ".reporting-2020.04.19",
+    "index": ".reporting-2021-07-18",
     "mappings": {
       "properties": {
         "attempts": {
@@ -55,6 +55,9 @@
             }
           }
         },
+        "migration_version": {
+          "type": "keyword"
+        },
         "output": {
           "properties": {
             "content": {
@@ -64,14 +67,17 @@
             "content_type": {
               "type": "keyword"
             },
-            "csv_contains_formulas": {
-              "type": "boolean"
-            },
-            "max_size_reached": {
-              "type": "boolean"
-            },
             "size": {
               "type": "long"
+            },
+            "warnings": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             }
           }
         },
@@ -99,6 +105,9 @@
     "settings": {
       "index": {
         "auto_expand_replicas": "0-1",
+        "lifecycle": {
+          "name": "kibana-reporting"
+        },
         "number_of_replicas": "0",
         "number_of_shards": "1"
       }
