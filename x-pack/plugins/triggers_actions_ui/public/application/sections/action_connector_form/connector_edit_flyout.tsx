@@ -139,6 +139,11 @@ const ConnectorEditFlyout = ({
     [testExecutionResult]
   );
 
+  const [callbacks, setCallbacks] = useState<null | {
+    beforeActionConnectorSave?: () => void;
+    afterActionConnectorSave?: () => void;
+  }>(null);
+
   const closeFlyout = useCallback(() => {
     setConnector(getConnectorWithoutSecrets());
     setHasChanges(false);
@@ -250,7 +255,9 @@ const ConnectorEditFlyout = ({
       return;
     }
     setIsSaving(true);
+    await callbacks?.beforeActionConnectorSave?.();
     const savedAction = await onActionConnectorSave();
+    await callbacks?.afterActionConnectorSave?.();
     setIsSaving(false);
     if (savedAction) {
       setHasChanges(false);
@@ -314,6 +321,7 @@ const ConnectorEditFlyout = ({
                 }}
                 actionTypeRegistry={actionTypeRegistry}
                 consumer={consumer}
+                setCallbacks={setCallbacks}
               />
               {isLoading ? (
                 <>
