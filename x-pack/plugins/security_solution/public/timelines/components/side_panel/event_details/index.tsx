@@ -25,6 +25,7 @@ import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
 import {
   ISOLATE_HOST,
@@ -84,10 +85,17 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
-  const [isolateAction, setIsolateAction] = useState('isolateHost');
+  const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
+    'isolateHost'
+  );
+
+  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] = useState(
+    false
+  );
 
   const showAlertDetails = useCallback(() => {
     setIsHostIsolationPanel(false);
+    setIsIsolateActionSuccessBannerVisible(false);
   }, []);
 
   const showHostIsolationPanel = useCallback((action) => {
@@ -119,6 +127,16 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     return findAgentVersion ? findAgentVersion[0] : '';
   }, [detailsData]);
 
+  const alertId = useMemo(() => {
+    const findAlertId = find({ category: '_id', field: '_id' }, detailsData)?.values;
+    return findAlertId ? findAlertId[0] : '';
+  }, [detailsData]);
+
+  const hostName = useMemo(() => {
+    const findHostName = find({ category: 'host', field: 'host.name' }, detailsData)?.values;
+    return findHostName ? findHostName[0] : '';
+  }, [detailsData]);
+
   const isolationSupported = isIsolationSupported({
     osName: hostOsFamily,
     version: agentVersion,
@@ -147,6 +165,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
 
   const handleIsolationActionSuccess = useCallback(() => {
+    setIsIsolateActionSuccessBannerVisible(true);
     // If a case details refresh ref is defined, then refresh actions and comments
     if (caseDetailsRefresh) {
       caseDetailsRefresh.refreshUserActionsAndComments();
@@ -166,6 +185,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           <ExpandableEventTitle isAlert={isAlert} loading={loading} />
         )}
       </EuiFlyoutHeader>
+      {isIsolateActionSuccessBannerVisible && (
+        <EndpointIsolateSuccess
+          hostName={hostName}
+          alertId={alertId}
+          isolateAction={isolateAction}
+        />
+      )}
       <StyledEuiFlyoutBody>
         {isHostIsolationPanelOpen ? (
           <HostIsolationPanel
