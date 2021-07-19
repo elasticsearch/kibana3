@@ -21,7 +21,7 @@ import { Job } from '../job';
 
 export interface JobContent {
   content: string;
-  content_type: boolean;
+  content_type: string;
 }
 
 export interface DiagnoseResponse {
@@ -84,7 +84,7 @@ export class ReportingAPIClient implements IReportingAPI {
     return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`);
   }
 
-  public getContent(jobId: string): Promise<JobContent> {
+  public getError(jobId: string): Promise<JobContent> {
     return this.http.get(`${API_LIST_URL}/output/${jobId}`, {
       asSystemRequest: true,
     });
