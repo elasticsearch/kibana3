@@ -321,6 +321,7 @@ const ConnectorEditFlyout = ({
                 actionTypeRegistry={actionTypeRegistry}
                 consumer={consumer}
                 setCallbacks={setCallbacks}
+                isEdit={true}
               />
               {isLoading ? (
                 <>
