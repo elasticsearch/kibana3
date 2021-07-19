@@ -31,7 +31,7 @@ jobQueueClientMock.findForJobIds = async (jobIds: string[]) => mockJobsFound;
 jobQueueClientMock.getInfo = () =>
   Promise.resolve(({ content: 'this is the completed report data' } as unknown) as Job);
 jobQueueClientMock.getError = () =>
-  Promise.resolve({ content: 'this is the completed report data', content_type: 'text/csv' });
+  Promise.resolve({ content: 'this is the completed report data', content_type: false });
 jobQueueClientMock.getManagementLink = () => '/#management';
 jobQueueClientMock.getDownloadLink = () => '/reporting/download/job-123';
 

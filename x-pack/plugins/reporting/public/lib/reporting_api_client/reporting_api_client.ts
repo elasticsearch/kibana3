@@ -15,14 +15,15 @@ import {
   API_MIGRATE_ILM_POLICY_URL,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import { DownloadReportFn, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
+import {
+  DownloadReportFn,
+  JobContent,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+} from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
-
-export interface JobContent {
-  content: string;
-  content_type: string;
-}
 
 export interface DiagnoseResponse {
   help: string[];
@@ -85,9 +86,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public getError(jobId: string): Promise<JobContent> {
-    return this.http.get(`${API_LIST_URL}/output/${jobId}`, {
-      asSystemRequest: true,
-    });
+    return this.http.get(`${API_LIST_URL}/output/${jobId}`);
   }
 
   public async getInfo(jobId: string) {

@@ -16,10 +16,6 @@ interface JobResponseHandlerParams {
   docId: string;
 }
 
-interface JobResponseHandlerOpts {
-  excludeContent?: boolean;
-}
-
 export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
   const jobsQuery = jobsQueryFactory(reporting);
   const exportTypesRegistry = reporting.getExportTypesRegistry();
@@ -29,8 +25,7 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
     user: ReportingUser,
-    params: JobResponseHandlerParams,
-    opts: JobResponseHandlerOpts = {}
+    params: JobResponseHandlerParams
   ) {
     try {
       const { docId } = params;

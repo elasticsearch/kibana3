@@ -119,8 +119,10 @@ export type JobStatus =
   | 'processing' // Report job has been claimed and is executing
   | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
 
+// payload for retrieving the error message of a failed job
 export interface JobContent {
   content: string;
+  content_type: false;
 }
 
 /*
