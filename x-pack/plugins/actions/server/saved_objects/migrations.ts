@@ -43,13 +43,20 @@ export function getMigrations(
 
   const migrationActionsFourteen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
-    pipeMigrations(addisMissingSecretsField)
+    pipeMigrations(addIsMissingSecretsField)
+  );
+
+  const migrationActionsFifteen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      doc.attributes.actionTypeId === '.servicenow',
+    pipeMigrations(markOldServiceNowITSMConnectorAsLegacy)
   );
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
+    '7.15.0': executeMigrationWithErrorHandling(migrationActionsFifteen, '7.15.0'),
   };
 }
 
@@ -133,7 +140,7 @@ const addHasAuthConfigurationObject = (
   };
 };
 
-const addisMissingSecretsField = (
+const addIsMissingSecretsField = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
   return {
@@ -141,6 +148,21 @@ const addisMissingSecretsField = (
     attributes: {
       ...doc.attributes,
       isMissingSecrets: false,
+    },
+  };
+};
+
+const markOldServiceNowITSMConnectorAsLegacy = (
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> => {
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      config: {
+        ...doc.attributes.config,
+        isLegacy: true,
+      },
     },
   };
 };
