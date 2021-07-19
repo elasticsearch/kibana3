@@ -9,13 +9,18 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { buildSiemResponse, mergeStatuses, getFailingRules } from '../utils';
+import { buildSiemResponse, mergeStatuses, getFailingRules, convertToSnakeCase } from '../utils';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import {
   findRulesStatusesSchema,
   FindRulesStatusesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/find_rule_statuses_schema';
 import { mergeAlertWithSidecarStatus } from '../../schemas/rule_converters';
+import { ConfigType } from '../../../../config';
+import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
+import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { invariant } from '../../../../../common/utils/invariant';
 
 /**
  * Given a list of rule ids, return the current status and
@@ -24,7 +29,11 @@ import { mergeAlertWithSidecarStatus } from '../../schemas/rule_converters';
  * @param router
  * @returns RuleStatusResponse
  */
-export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => {
+export const findRulesStatusesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  ruleExecutionLogClient?: RuleExecutionLogClient | null
+) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
@@ -47,8 +56,42 @@ export const findRulesStatusesRoute = (router: SecuritySolutionPluginRouter) => 
         return siemResponse.error({ statusCode: 404 });
       }
 
+      // TODO: Once we are past experimental phase this code should be removed
+      const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
+
       const ids = body.ids;
       try {
+        if (ruleRegistryEnabled) {
+          invariant(
+            ruleExecutionLogClient,
+            'Rule registry is enabled but RuleExecutionLogClient is not initialized'
+          );
+
+          const spaceId = context.securitySolution.getSpaceId();
+
+          const [statusesById, lastErrorsById] = await Promise.all([
+            ruleExecutionLogClient.findBulk({ ruleIds: ids, spaceId }),
+            ruleExecutionLogClient.findBulk({
+              ruleIds: ids,
+              statuses: [RuleExecutionStatus.failed],
+              logsCount: 5,
+              spaceId,
+            }),
+          ]);
+
+          const statuses = Object.fromEntries(
+            Object.entries(statusesById).map(([ruleId, ruleStatuses]) => [
+              ruleId,
+              {
+                current_status: convertToSnakeCase(ruleStatuses[0]),
+                failures: (lastErrorsById[ruleId] || []).map(convertToSnakeCase),
+              },
+            ])
+          );
+
+          return response.ok({ body: statuses });
+        }
+
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const [statusesById, failingRules] = await Promise.all([
           ruleStatusClient.findBulk(ids, 6),

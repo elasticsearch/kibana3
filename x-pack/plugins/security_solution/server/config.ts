@@ -28,6 +28,9 @@ export const configSchema = schema.object({
     }
   ),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
+  ruleExecutionLog: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 
   /**
    * For internal use. A list of string values (comma delimited) that will enable experimental

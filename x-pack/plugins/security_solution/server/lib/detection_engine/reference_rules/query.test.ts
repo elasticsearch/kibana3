@@ -18,7 +18,11 @@ import { createRuleTypeMocks } from './__mocks__/rule_type';
 describe('Custom query alerts', () => {
   it('does not send an alert when no events found', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
-    const queryAlertType = createQueryAlertType(dependencies.ruleDataClient, dependencies.logger);
+    const queryAlertType = createQueryAlertType(
+      dependencies.ruleDataClient,
+      dependencies.logger,
+      dependencies.ruleExecutionLogClient
+    );
 
     dependencies.alerting.registerType(queryAlertType);
 
@@ -55,7 +59,11 @@ describe('Custom query alerts', () => {
 
   it('sends a properly formatted alert when events are found', async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
-    const queryAlertType = createQueryAlertType(dependencies.ruleDataClient, dependencies.logger);
+    const queryAlertType = createQueryAlertType(
+      dependencies.ruleDataClient,
+      dependencies.logger,
+      dependencies.ruleExecutionLogClient
+    );
 
     dependencies.alerting.registerType(queryAlertType);
 

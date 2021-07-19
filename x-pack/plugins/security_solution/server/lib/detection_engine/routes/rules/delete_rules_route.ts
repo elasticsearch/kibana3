@@ -21,10 +21,12 @@ import { buildSiemResponse } from '../utils';
 
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
+import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
 
 export const deleteRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null,
+  ruleExecutionLogClient?: RuleExecutionLogClient | null
 ) => {
   router.delete(
     {

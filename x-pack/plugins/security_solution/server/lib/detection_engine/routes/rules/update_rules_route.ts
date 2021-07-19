@@ -22,11 +22,13 @@ import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
 
 export const updateRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: RuleDataClient | null,
+  ruleExecutionLogClient?: RuleExecutionLogClient | null
 ) => {
   router.put(
     {

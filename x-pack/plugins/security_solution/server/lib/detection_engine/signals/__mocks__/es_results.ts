@@ -23,6 +23,7 @@ import { getListArrayMock } from '../../../../../common/detection_engine/schemas
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const sampleRuleSO = <T extends RuleParams>(params: T): SavedObject<AlertAttributes<T>> => {
   return {
@@ -326,7 +327,7 @@ export const sampleSignalHit = (): SignalHit => ({
       type: 'query',
       threat: [],
       version: 1,
-      status: 'succeeded',
+      status: RuleExecutionStatus.succeeded,
       status_date: '2020-02-22T16:47:50.047Z',
       last_success_at: '2020-02-22T16:47:50.047Z',
       last_success_message: 'succeeded',
@@ -391,7 +392,7 @@ export const sampleThresholdSignalHit = (): SignalHit => ({
       type: 'query',
       threat: [],
       version: 1,
-      status: 'succeeded',
+      status: RuleExecutionStatus.succeeded,
       status_date: '2020-02-22T16:47:50.047Z',
       last_success_at: '2020-02-22T16:47:50.047Z',
       last_success_message: 'succeeded',
@@ -712,7 +713,7 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () 
   attributes: {
     alertId: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
     statusDate: '2020-03-27T22:55:59.517Z',
-    status: 'succeeded',
+    status: RuleExecutionStatus.succeeded,
     lastFailureAt: null,
     lastSuccessAt: '2020-03-27T22:55:59.517Z',
     lastFailureMessage: null,

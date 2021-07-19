@@ -20,10 +20,15 @@ import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_s
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
 import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
+import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
+import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
+import { ConfigType } from '../../../../config';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: RuleDataClient | null
+  config: ConfigType,
+  ruleDataClient?: RuleDataClient | null,
+  ruleExecutionLogClient?: RuleExecutionLogClient | null
 ) => {
   router.get(
     {
@@ -53,6 +58,12 @@ export const findRulesRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
+        // TODO: Once we are past experimental phase this code should be removed
+        const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
+        if (!ruleExecutionLogClient && ruleRegistryEnabled) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rules = await findRules({
           alertsClient,
@@ -64,8 +75,14 @@ export const findRulesRoute = (
           fields: query.fields,
         });
         const alertIds = rules.data.map((rule) => rule.id);
+
         const [ruleStatuses, ruleActions] = await Promise.all([
-          ruleStatusClient.findBulk(alertIds, 1),
+          ruleRegistryEnabled
+            ? ruleExecutionLogClient!.findBulk({
+                ruleIds: alertIds,
+                spaceId: context.securitySolution.getSpaceId(),
+              })
+            : ruleStatusClient.findBulk(alertIds, 1),
           getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
         const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);

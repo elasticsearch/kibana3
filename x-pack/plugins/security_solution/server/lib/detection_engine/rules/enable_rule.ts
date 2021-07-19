@@ -8,6 +8,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { SanitizedAlert } from '../../../../../alerting/common';
 import { AlertsClient } from '../../../../../alerting/server';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RuleParams } from '../schemas/rule_schemas';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 
@@ -41,7 +42,7 @@ export const enableRule = async ({ rule, alertsClient, savedObjectsClient }: Ena
     const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
     await ruleStatusClient.update(currentStatusToDisable.id, {
       ...currentStatusToDisable.attributes,
-      status: 'going to run',
+      status: RuleExecutionStatus['going to run'],
     });
   }
 };

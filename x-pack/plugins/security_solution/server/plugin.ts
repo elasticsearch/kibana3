@@ -67,6 +67,7 @@ import {
   NOTIFICATIONS_ID,
   REFERENCE_RULE_ALERT_TYPE_ID,
   REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+  DEFAULT_SPACE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -89,6 +90,7 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 
 export interface SetupPlugins {
@@ -181,6 +183,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       APP_ID,
       (context, request, response) => ({
         getAppClient: () => this.appClientFactory.create(request),
+        getSpaceId: () => plugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
       })
     );
 
@@ -193,17 +196,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
 
     let ruleDataClient: RuleDataClient | null = null;
+    let ruleExecutionLogClient: RuleExecutionLogClient | null = null;
     if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
 
       const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
 
       const initializeRuleDataTemplates = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
-
         if (!ruleDataService.isWriteEnabled()) {
           return;
         }
+        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
         await ruleDataService.createOrUpdateComponentTemplate({
           name: componentTemplateName,
@@ -242,13 +245,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         () => initializeRuleDataTemplatesPromise
       );
 
-      // sec
+      ruleExecutionLogClient = new RuleExecutionLogClient(
+        ruleDataService,
+        config.ruleExecutionLog.enabled
+      );
 
       // Register reference rule types via rule-registry
-      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
-      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
       this.setupPlugins.alerting.registerType(
-        createThresholdAlertType(ruleDataClient, this.logger)
+        createQueryAlertType(ruleDataClient, this.logger, ruleExecutionLogClient)
+      );
+      this.setupPlugins.alerting.registerType(
+        createEqlAlertType(ruleDataClient, this.logger, ruleExecutionLogClient)
+      );
+      this.setupPlugins.alerting.registerType(
+        createThresholdAlertType(ruleDataClient, this.logger, ruleExecutionLogClient)
       );
     }
 
@@ -259,7 +269,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
       plugins.ml,
-      ruleDataClient
+      ruleDataClient,
+      ruleExecutionLogClient
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);

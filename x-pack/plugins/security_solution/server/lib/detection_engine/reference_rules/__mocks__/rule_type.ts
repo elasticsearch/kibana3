@@ -14,6 +14,7 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import type { RuleDataClient } from '../../../../../../rule_registry/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
+import { RuleExecutionLogClient } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
 
 export const createRuleTypeMocks = () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -27,6 +28,8 @@ export const createRuleTypeMocks = () => {
     warn: jest.fn(),
     error: jest.fn(),
   } as unknown) as Logger;
+
+  const ruleExecutionLogClient = new RuleExecutionLogClient();
 
   const alerting = {
     registerType: ({ executor }) => {
@@ -42,6 +45,7 @@ export const createRuleTypeMocks = () => {
     findAlerts: jest.fn(), // TODO: does this stay?
     alertWithPersistence: jest.fn(),
     logger: loggerMock,
+    ruleExecutionLogClient,
   };
 
   return {
@@ -62,6 +66,7 @@ export const createRuleTypeMocks = () => {
         },
         isWriteEnabled: jest.fn(() => true),
       } as unknown) as RuleDataClient,
+      ruleExecutionLogClient,
     },
     services,
     scheduleActions,

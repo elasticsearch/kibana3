@@ -19,23 +19,31 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   OWNER,
+  EVENT_SEQUENCE,
+  EVENT_DURATION,
+  EVENT_END,
   PRODUCER,
   RULE_CATEGORY,
   RULE_ID,
   RULE_NAME,
   RULE_UUID,
+  SPACE_IDS,
   TAGS,
   TIMESTAMP,
-  SPACE_IDS,
+  MESSAGE,
 } from '../../../common/technical_rule_data_field_names';
 import { ecsFieldMap } from './ecs_field_map';
 
 export const technicalRuleFieldMap = {
   ...pickWithPatterns(
     ecsFieldMap,
+    MESSAGE,
     TIMESTAMP,
     EVENT_KIND,
     EVENT_ACTION,
+    EVENT_SEQUENCE,
+    EVENT_DURATION,
+    EVENT_END,
     RULE_UUID,
     RULE_ID,
     RULE_NAME,

@@ -16,6 +16,7 @@ export { AppClient };
 
 export interface AppRequestContext {
   getAppClient: () => AppClient;
+  getSpaceId: () => string;
 }
 
 export type SecuritySolutionRequestHandlerContext = RequestHandlerContext & {
