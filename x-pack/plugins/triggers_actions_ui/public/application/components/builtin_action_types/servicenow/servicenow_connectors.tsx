@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   EuiFieldText,
@@ -26,11 +26,26 @@ import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import { DeprecatedCallout } from './deprecated_callout';
+import { useGetAppInfo } from './use_get_app_info';
+import { ApplicationRequiredCallout } from './application_required_callout';
+import { isRESTApiError } from './helpers';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, setCallbacks }) => {
-  const { docLinks } = useKibana().services;
+> = ({
+  action,
+  editActionSecrets,
+  editActionConfig,
+  errors,
+  consumer,
+  readOnly,
+  setCallbacks,
+  isEdit,
+}) => {
+  const {
+    docLinks,
+    notifications: { toasts },
+  } = useKibana().services;
   const { apiUrl, isLegacy } = action.config;
 
   const isApiUrlInvalid: boolean =
@@ -53,17 +68,34 @@ const ServiceNowConnectorFields: React.FC<
     [editActionSecrets]
   );
 
-  const beforeActionConnectorSave = useCallback(() => {
-    // TODO: Validate instance
-  }, []);
+  const { fetchAppInfo, isLoading } = useGetAppInfo({ toastNotifications: toasts });
 
-  const afterActionConnectorSave = useCallback(() => {
+  const [applicationRequired, setApplicationRequired] = useState<boolean>(false);
+
+  const beforeActionConnectorSave = useCallback(async () => {
+    if (!isLegacy) {
+      try {
+        const res = await fetchAppInfo(action);
+        if (isRESTApiError(res)) {
+          setApplicationRequired(true);
+          return;
+        }
+      } catch (e) {
+        // We need to throw here so the connector will be not be saved.
+        throw e;
+      }
+    }
+  }, [action, fetchAppInfo, isLegacy]);
+
+  const afterActionConnectorSave = useCallback(async () => {
     // TODO: Implement
   }, []);
 
-  // Callbacks are being set only once mount.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => setCallbacks({ beforeActionConnectorSave, afterActionConnectorSave }), []);
+  useEffect(() => setCallbacks({ beforeActionConnectorSave, afterActionConnectorSave }), [
+    afterActionConnectorSave,
+    beforeActionConnectorSave,
+    setCallbacks,
+  ]);
 
   return (
     <>
@@ -97,6 +129,7 @@ const ServiceNowConnectorFields: React.FC<
                   editActionConfig('apiUrl', '');
                 }
               }}
+              disabled={isLoading}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -145,6 +178,7 @@ const ServiceNowConnectorFields: React.FC<
                   editActionSecrets('username', '');
                 }
               }}
+              disabled={isLoading}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -172,11 +206,13 @@ const ServiceNowConnectorFields: React.FC<
                   editActionSecrets('password', '');
                 }
               }}
+              disabled={isLoading}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       {isLegacy && <DeprecatedCallout />}
+      {applicationRequired && <ApplicationRequiredCallout />}
     </>
   );
 };
