@@ -25,12 +25,13 @@ import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { DeprecatedCallout } from './deprecated_callout';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
 > = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, setCallbacks }) => {
   const { docLinks } = useKibana().services;
-  const { apiUrl } = action.config;
+  const { apiUrl, isLegacy } = action.config;
 
   const isApiUrlInvalid: boolean =
     errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
@@ -175,6 +176,7 @@ const ServiceNowConnectorFields: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {isLegacy && <DeprecatedCallout />}
     </>
   );
 };
