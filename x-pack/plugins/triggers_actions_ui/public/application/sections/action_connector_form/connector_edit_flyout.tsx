@@ -35,6 +35,8 @@ import {
   IErrorObject,
   EditConectorTabs,
   UserConfiguredActionConnector,
+  ActionConnectorFieldsSetCallbacks,
+  ActionConnectorFieldsCallbacks,
 } from '../../../types';
 import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
@@ -139,10 +141,7 @@ const ConnectorEditFlyout = ({
     [testExecutionResult]
   );
 
-  const [callbacks, setCallbacks] = useState<null | {
-    beforeActionConnectorSave?: () => void;
-    afterActionConnectorSave?: () => void;
-  }>(null);
+  const [callbacks, setCallbacks] = useState<ActionConnectorFieldsCallbacks>(null);
 
   const closeFlyout = useCallback(() => {
     setConnector(getConnectorWithoutSecrets());
@@ -257,10 +256,10 @@ const ConnectorEditFlyout = ({
     setIsSaving(true);
     await callbacks?.beforeActionConnectorSave?.();
     const savedAction = await onActionConnectorSave();
-    await callbacks?.afterActionConnectorSave?.();
     setIsSaving(false);
     if (savedAction) {
       setHasChanges(false);
+      await callbacks?.afterActionConnectorSave?.(savedAction);
       if (closeAfterSave) {
         closeFlyout();
       }

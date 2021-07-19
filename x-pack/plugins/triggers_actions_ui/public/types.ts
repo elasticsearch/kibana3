@@ -68,6 +68,14 @@ export type ActionTypeRegistryContract<
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
+export type ActionConnectorFieldsCallbacks = {
+  beforeActionConnectorSave?: () => Promise<void>;
+  afterActionConnectorSave?: (connector: ActionConnector) => Promise<void>;
+} | null;
+export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
+  React.SetStateAction<ActionConnectorFieldsCallbacks>
+>;
+
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
   editActionConfig: (property: string, value: unknown) => void;
@@ -75,12 +83,8 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
-  setCallbacks: React.Dispatch<
-    React.SetStateAction<{
-      beforeActionConnectorSave?: (() => void) | undefined;
-      afterActionConnectorSave?: ((connector: ActionConnector) => void) | undefined;
-    } | null>
-  >;
+  setCallbacks: ActionConnectorFieldsSetCallbacks;
+  isEdit: boolean;
 }
 
 export enum AlertFlyoutCloseReason {
