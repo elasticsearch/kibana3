@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { HttpSetup } from 'src/core/public';
@@ -15,14 +16,15 @@ import {
   API_MIGRATE_ILM_POLICY_URL,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import { DownloadReportFn, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
+import {
+  DownloadReportFn,
+  JobContent,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+} from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
-
-export interface JobContent {
-  content: string;
-  content_type: boolean;
-}
 
 export interface DiagnoseResponse {
   help: string[];
@@ -46,7 +48,7 @@ interface IReportingAPI {
   deleteReport(jobId: string): Promise<void>;
   list(page: number, jobIds: string[]): Promise<Job[]>; // gets the first 10 report of the page
   total(): Promise<number>;
-  getError(jobId: string): Promise<JobContent>;
+  getError(jobId: string): Promise<string>;
   getInfo(jobId: string): Promise<Job>;
   findForJobIds(jobIds: string[]): Promise<Job[]>;
 
@@ -108,8 +110,13 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async getError(jobId: string) {
-    return await this.http.get(`${API_LIST_URL}/output/${jobId}`, {
-      asSystemRequest: true,
+    const errorInfo: JobContent = await this.http.get(`${API_LIST_URL}/output/${jobId}`);
+    if (errorInfo.content != null) {
+      return errorInfo.content;
+    }
+    return i18n.translate('xpack.reporting.apiClient.unknownError', {
+      defaultMessage: `Report job {job} failed: Unknown error.`,
+      values: { job: jobId },
     });
   }
 

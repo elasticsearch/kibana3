@@ -115,20 +115,20 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       } = await reporting.getLicenseInfo();
 
       const jobsQuery = jobsQueryFactory(reporting);
-      const result = await jobsQuery.getContent(user, docId);
+      const result = await jobsQuery.getError(user, docId);
 
       if (!result) {
         throw Boom.notFound();
       }
 
-      const { jobtype: jobType, output } = result;
+      const { jobtype: jobType, content, content_type: contentType } = result;
 
       if (!jobTypes.includes(jobType)) {
         throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
       }
 
       return res.ok({
-        body: output?.content ?? {},
+        body: { content, content_type: contentType },
         headers: {
           'content-type': 'application/json',
         },
