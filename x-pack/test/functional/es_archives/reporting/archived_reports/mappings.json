@@ -67,6 +67,12 @@
             "content_type": {
               "type": "keyword"
             },
+            "csv_contains_formulas": {
+              "type": "boolean"
+            },
+            "max_size_reached": {
+              "type": "boolean"
+            },
             "size": {
               "type": "long"
             },
