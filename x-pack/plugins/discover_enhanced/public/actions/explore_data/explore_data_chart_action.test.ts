@@ -54,6 +54,7 @@ const setup = (
     ),
     navigate: jest.fn(async () => {}),
     getUrl: jest.fn(),
+    getRedirectUrl: jest.fn(),
     useUrl: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),

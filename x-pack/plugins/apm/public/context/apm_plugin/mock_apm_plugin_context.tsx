@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { Observable, of } from 'rxjs';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { useHistory } from 'react-router-dom';
+import { createMemoryHistory, History } from 'history';
 import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
+import { apmRouter } from '../../components/routing/apm_route_config';
 import { MlLocatorDefinition } from '../../../../ml/public';
 
 const uiSettings: Record<string, unknown> = {
@@ -92,6 +96,7 @@ const urlService = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
+  getRedirectUrl: async () => 'http://localhost:8888',
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 
@@ -124,21 +129,32 @@ export const mockApmPluginContextValue = {
 export function MockApmPluginContextWrapper({
   children,
   value = {} as ApmPluginContextValue,
+  history,
 }: {
   children?: React.ReactNode;
   value?: ApmPluginContextValue;
+  history?: History;
 }) {
   if (value.core) {
     createCallApmApi(value.core);
   }
+
+  const contextHistory = useHistory();
+
+  const usedHistory = useMemo(() => {
+    return history || contextHistory || createMemoryHistory();
+  }, [history, contextHistory]);
+
   return (
-    <ApmPluginContext.Provider
-      value={{
-        ...mockApmPluginContextValue,
-        ...value,
-      }}
-    >
-      {children}
-    </ApmPluginContext.Provider>
+    <RouterProvider router={apmRouter as any} history={usedHistory}>
+      <ApmPluginContext.Provider
+        value={{
+          ...mockApmPluginContextValue,
+          ...value,
+        }}
+      >
+        {children}
+      </ApmPluginContext.Provider>
+    </RouterProvider>
   );
 }
