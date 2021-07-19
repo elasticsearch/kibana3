@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
 import { ReportingCore } from '../../';
-import { ReportApiJSON, ReportDocument, ReportSource, TaskRunResult } from '../../../common/types';
+import { JobContent, ReportApiJSON, ReportDocument, ReportSource } from '../../../common/types';
 import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
@@ -37,11 +37,6 @@ export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> 
   payload?: Pick<ReportSource['payload'], 'title'>;
 };
 
-export interface ReportErrorFields {
-  content: TaskRunResult['content'];
-  content_type: false;
-}
-
 interface JobsQueryFactory {
   list(
     jobTypes: string[],
@@ -53,7 +48,7 @@ interface JobsQueryFactory {
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getContent(user: ReportingUser, id: string): Promise<ReportContent | void>;
-  getError(user: ReportingUser, id: string): Promise<(ReportContent & ReportErrorFields) | void>;
+  getError(user: ReportingUser, id: string): Promise<(ReportContent & JobContent) | void>;
   delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
 }
 

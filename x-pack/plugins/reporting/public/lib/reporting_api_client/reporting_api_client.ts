@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { HttpSetup } from 'src/core/public';
@@ -47,7 +48,7 @@ interface IReportingAPI {
   deleteReport(jobId: string): Promise<void>;
   list(page: number, jobIds: string[]): Promise<Job[]>; // gets the first 10 report of the page
   total(): Promise<number>;
-  getError(jobId: string): Promise<JobContent>;
+  getError(jobId: string): Promise<string>;
   getInfo(jobId: string): Promise<Job>;
   findForJobIds(jobIds: string[]): Promise<Job[]>;
 
@@ -82,15 +83,47 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async deleteReport(jobId: string) {
-    return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`);
+    return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`, {
+      asSystemRequest: true,
+    });
   }
 
-  public getError(jobId: string): Promise<JobContent> {
-    return this.http.get(`${API_LIST_URL}/output/${jobId}`);
+  public async list(page = 0, jobIds: string[] = []) {
+    const query = { page } as any;
+    if (jobIds.length > 0) {
+      // Only getting the first 10, to prevent URL overflows
+      query.ids = jobIds.slice(0, 10).join(',');
+    }
+
+    const jobQueueEntries: ReportApiJSON[] = await this.http.get(`${API_LIST_URL}/list`, {
+      query,
+      asSystemRequest: true,
+    });
+
+    return jobQueueEntries.map((report) => new Job(report));
+  }
+
+  public async total() {
+    return await this.http.get(`${API_LIST_URL}/count`, {
+      asSystemRequest: true,
+    });
+  }
+
+  public async getError(jobId: string) {
+    const errorInfo: JobContent = await this.http.get(`${API_LIST_URL}/output/${jobId}`);
+    if (errorInfo.content != null) {
+      return errorInfo.content;
+    }
+    return i18n.translate('xpack.reporting.apiClient.unknownError', {
+      defaultMessage: `Report job {job} failed: Unknown error.`,
+      values: { job: jobId },
+    });
   }
 
   public async getInfo(jobId: string) {
-    const report: ReportApiJSON = await this.http.get(`${API_LIST_URL}/info/${jobId}`);
+    const report: ReportApiJSON = await this.http.get(`${API_LIST_URL}/info/${jobId}`, {
+      asSystemRequest: true,
+    });
     return new Job(report);
   }
 
@@ -133,42 +166,24 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public async verifyConfig() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/config`);
+    return await this.http.post(`${API_BASE_URL}/diagnose/config`, {
+      asSystemRequest: true,
+    });
   }
 
   public async verifyBrowser() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/browser`);
+    return await this.http.post(`${API_BASE_URL}/diagnose/browser`, {
+      asSystemRequest: true,
+    });
   }
 
   public async verifyScreenCapture() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/screenshot`);
+    return await this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
+      asSystemRequest: true,
+    });
   }
 
   public async migrateReportingIndicesIlmPolicy() {
     return await this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
-  }
-
-  /*
-   * System requests - used for page autorefresh
-   */
-  public async list(page = 0, jobIds: string[] = []) {
-    const query = { page } as any;
-    if (jobIds.length > 0) {
-      // Only getting the first 10, to prevent URL overflows
-      query.ids = jobIds.slice(0, 10).join(',');
-    }
-
-    const jobQueueEntries: ReportApiJSON[] = await this.http.get(`${API_LIST_URL}/list`, {
-      query,
-      asSystemRequest: true,
-    });
-
-    return jobQueueEntries.map((report) => new Job(report));
-  }
-
-  public async total() {
-    return await this.http.get(`${API_LIST_URL}/count`, {
-      asSystemRequest: true,
-    });
   }
 }

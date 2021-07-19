@@ -121,14 +121,14 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         throw Boom.notFound();
       }
 
-      const { jobtype: jobType, ...errorInfo } = result;
+      const { jobtype: jobType, content, content_type: contentType } = result;
 
       if (!jobTypes.includes(jobType)) {
         throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
       }
 
       return res.ok({
-        body: { content: errorInfo.content, content_type: errorInfo.content_type },
+        body: { content, content_type: contentType },
         headers: {
           'content-type': 'application/json',
         },

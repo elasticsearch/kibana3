@@ -102,9 +102,9 @@ class ReportErrorButtonUi extends Component<Props, State> {
 
     this.setState({ isLoading: true });
     try {
-      const reportContent = await apiClient.getError(record.id);
+      const errorText = await apiClient.getError(record.id);
       if (this.mounted) {
-        this.setState({ isLoading: false, error: reportContent.content });
+        this.setState({ isLoading: false, error: errorText });
       }
     } catch (kfetchError) {
       if (this.mounted) {

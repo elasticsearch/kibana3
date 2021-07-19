@@ -121,7 +121,7 @@ export type JobStatus =
 
 // payload for retrieving the error message of a failed job
 export interface JobContent {
-  content: string;
+  content: TaskRunResult['content'];
   content_type: false;
 }
 
