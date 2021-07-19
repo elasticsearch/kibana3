@@ -10,7 +10,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { JOB_STATUSES } from '../../common/constants';
 import { Job as ListingJob } from '../lib/job';
-import { JobContent, ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface Props {
   intl: InjectedIntl;
@@ -102,7 +102,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
 
     this.setState({ isLoading: true });
     try {
-      const reportContent: JobContent = await apiClient.getError(record.id);
+      const reportContent = await apiClient.getError(record.id);
       if (this.mounted) {
         this.setState({ isLoading: false, error: reportContent.content });
       }

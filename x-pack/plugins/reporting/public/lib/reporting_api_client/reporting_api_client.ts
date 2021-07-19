@@ -81,42 +81,17 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async deleteReport(jobId: string) {
-    return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`, {
-      asSystemRequest: true,
-    });
+    return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`);
   }
 
-  public async list(page = 0, jobIds: string[] = []) {
-    const query = { page } as any;
-    if (jobIds.length > 0) {
-      // Only getting the first 10, to prevent URL overflows
-      query.ids = jobIds.slice(0, 10).join(',');
-    }
-
-    const jobQueueEntries: ReportApiJSON[] = await this.http.get(`${API_LIST_URL}/list`, {
-      query,
-      asSystemRequest: true,
-    });
-
-    return jobQueueEntries.map((report) => new Job(report));
-  }
-
-  public async total() {
-    return await this.http.get(`${API_LIST_URL}/count`, {
-      asSystemRequest: true,
-    });
-  }
-
-  public async getError(jobId: string) {
-    return await this.http.get(`${API_LIST_URL}/output/${jobId}`, {
+  public getContent(jobId: string): Promise<JobContent> {
+    return this.http.get(`${API_LIST_URL}/output/${jobId}`, {
       asSystemRequest: true,
     });
   }
 
   public async getInfo(jobId: string) {
-    const report: ReportApiJSON = await this.http.get(`${API_LIST_URL}/info/${jobId}`, {
-      asSystemRequest: true,
-    });
+    const report: ReportApiJSON = await this.http.get(`${API_LIST_URL}/info/${jobId}`);
     return new Job(report);
   }
 
@@ -159,24 +134,42 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public async verifyConfig() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/config`, {
-      asSystemRequest: true,
-    });
+    return await this.http.post(`${API_BASE_URL}/diagnose/config`);
   }
 
   public async verifyBrowser() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/browser`, {
-      asSystemRequest: true,
-    });
+    return await this.http.post(`${API_BASE_URL}/diagnose/browser`);
   }
 
   public async verifyScreenCapture() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
-      asSystemRequest: true,
-    });
+    return await this.http.post(`${API_BASE_URL}/diagnose/screenshot`);
   }
 
   public async migrateReportingIndicesIlmPolicy() {
     return await this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
+  }
+
+  /*
+   * System requests - used for page autorefresh
+   */
+  public async list(page = 0, jobIds: string[] = []) {
+    const query = { page } as any;
+    if (jobIds.length > 0) {
+      // Only getting the first 10, to prevent URL overflows
+      query.ids = jobIds.slice(0, 10).join(',');
+    }
+
+    const jobQueueEntries: ReportApiJSON[] = await this.http.get(`${API_LIST_URL}/list`, {
+      query,
+      asSystemRequest: true,
+    });
+
+    return jobQueueEntries.map((report) => new Job(report));
+  }
+
+  public async total() {
+    return await this.http.get(`${API_LIST_URL}/count`, {
+      asSystemRequest: true,
+    });
   }
 }
