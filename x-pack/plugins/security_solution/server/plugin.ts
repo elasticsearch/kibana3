@@ -47,9 +47,11 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { compose } from './lib/compose/kibana';
-import { createQueryAlertType } from './lib/detection_engine/reference_rules/query';
-import { createEqlAlertType } from './lib/detection_engine/reference_rules/eql';
-import { createThresholdAlertType } from './lib/detection_engine/reference_rules/threshold';
+import {
+  createEqlAlertType,
+  createQueryAlertType,
+  createThresholdAlertType,
+} from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -89,6 +91,9 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
+import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 
 export interface SetupPlugins {
@@ -212,7 +217,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
-              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
+              mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }),
             },
           },
         });
@@ -244,15 +249,34 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       // sec
 
-      // Register reference rule types via rule-registry
-      this.setupPlugins.alerting.registerType(createQueryAlertType(ruleDataClient, this.logger));
-      this.setupPlugins.alerting.registerType(createEqlAlertType(ruleDataClient, this.logger));
+      // Register rule types via rule-registry
       this.setupPlugins.alerting.registerType(
-        createThresholdAlertType(ruleDataClient, this.logger)
+        createQueryAlertType({
+          lists: plugins.lists,
+          logger: this.logger,
+          mergeStrategy: this.config.alertMergeStrategy,
+          ruleDataClient,
+        })
+      );
+      this.setupPlugins.alerting.registerType(
+        createEqlAlertType({
+          lists: plugins.lists,
+          logger: this.logger,
+          mergeStrategy: this.config.alertMergeStrategy,
+          ruleDataClient,
+        })
+      );
+      this.setupPlugins.alerting.registerType(
+        createThresholdAlertType({
+          lists: plugins.lists,
+          logger: this.logger,
+          mergeStrategy: this.config.alertMergeStrategy,
+          ruleDataClient,
+        })
       );
     }
 
-    // TO DO We need to get the endpoint routes inside of initRoutes
+    // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
       router,
       config,

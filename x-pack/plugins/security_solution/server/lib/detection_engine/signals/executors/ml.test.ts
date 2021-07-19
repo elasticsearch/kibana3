@@ -58,7 +58,6 @@ describe('ml_executor', () => {
     (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
       success: true,
       bulkCreateDuration: 0,
-      createdItemsCount: 0,
       errors: [],
     });
   });
@@ -96,7 +95,7 @@ describe('ml_executor', () => {
     });
     expect(logger.warn).toHaveBeenCalled();
     expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
-    expect(response.warningMessages.length).toEqual(1);
+    expect(response.warnings.length).toEqual(1);
   });
 
   it('should record a partial failure if Machine learning job was not started', async () => {
@@ -122,6 +121,6 @@ describe('ml_executor', () => {
     });
     expect(logger.warn).toHaveBeenCalled();
     expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
-    expect(response.warningMessages.length).toEqual(1);
+    expect(response.warnings.length).toEqual(1);
   });
 });

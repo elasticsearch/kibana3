@@ -146,7 +146,6 @@ export const searchAfterAndBulkCreate = async ({
 
         const {
           bulkCreateDuration: bulkDuration,
-          createdItemsCount: createdCount,
           createdItems,
           success: bulkSuccess,
           errors: bulkErrors,
@@ -155,14 +154,13 @@ export const searchAfterAndBulkCreate = async ({
           toReturn,
           createSearchAfterReturnType({
             success: bulkSuccess,
-            createdSignalsCount: createdCount,
             createdSignals: createdItems,
             bulkCreateTimes: bulkDuration ? [bulkDuration] : undefined,
             errors: bulkErrors,
           }),
         ]);
-        signalsCreatedCount += createdCount;
-        logger.debug(buildRuleMessage(`created ${createdCount} signals`));
+        signalsCreatedCount += createdItems.length;
+        logger.debug(buildRuleMessage(`created ${createdItems.length} signals`));
         logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
         logger.debug(
           buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.hits.hits.length}`)
@@ -186,6 +184,6 @@ export const searchAfterAndBulkCreate = async ({
       ]);
     }
   }
-  logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
+  logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignals.length}`));
   return toReturn;
 };

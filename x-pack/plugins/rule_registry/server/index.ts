@@ -24,6 +24,7 @@ export {
   createLifecycleExecutor,
 } from './utils/create_lifecycle_executor';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
+export * from './utils/persistence_types';
 export type { AlertTypeWithExecutor } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) =>

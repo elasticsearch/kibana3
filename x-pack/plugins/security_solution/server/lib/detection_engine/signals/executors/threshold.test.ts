@@ -79,12 +79,11 @@ describe('threshold_executor', () => {
           errors: [],
           success: true,
           bulkCreateDuration: '0',
-          createdItemsCount: 0,
           createdItems: [],
         })),
         wrapHits: jest.fn(),
       });
-      expect(response.warningMessages.length).toEqual(1);
+      expect(response.warnings.length).toEqual(1);
     });
   });
 });

@@ -28,19 +28,20 @@ export const createLifecycleRuleTypeFactory = ({
   logger,
   ruleDataClient,
 }: {
-  ruleDataClient: RuleDataClient;
   logger: Logger;
+  ruleDataClient: RuleDataClient;
 }) => <
+  TState extends AlertTypeState,
   TParams extends AlertTypeParams,
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends { alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext> }
 >(
-  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
-): AlertTypeWithExecutor<TParams, TAlertInstanceContext, any> => {
+  type: AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>
+): AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, any> => {
   const createBoundLifecycleExecutor = createLifecycleExecutor(logger, ruleDataClient);
   const executor = createBoundLifecycleExecutor<
     TParams,
-    AlertTypeState,
+    TState,
     AlertInstanceState,
     TAlertInstanceContext,
     string

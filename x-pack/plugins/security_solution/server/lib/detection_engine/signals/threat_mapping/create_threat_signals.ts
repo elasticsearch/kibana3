@@ -49,14 +49,12 @@ export const createThreatSignals = async ({
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
-    warning: false,
     bulkCreateTimes: [],
     searchAfterTimes: [],
     lastLookBackDate: null,
-    createdSignalsCount: 0,
     createdSignals: [],
     errors: [],
-    warningMessages: [],
+    warnings: [],
   };
 
   let threatListCount = await getThreatListCount({
@@ -134,13 +132,13 @@ export const createThreatSignals = async ({
     threatListCount -= threatList.hits.hits.length;
     logger.debug(
       buildRuleMessage(
-        `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
+        `Concurrent indicator match searches completed with ${results.createdSignals.length} signals found`,
         `search times of ${results.searchAfterTimes}ms,`,
         `bulk create times ${results.bulkCreateTimes}ms,`,
         `all successes are ${results.success}`
       )
     );
-    if (results.createdSignalsCount >= params.maxSignals) {
+    if (results.createdSignals.length >= params.maxSignals) {
       logger.debug(
         buildRuleMessage(
           `Indicator match has reached its max signals count ${params.maxSignals}. Additional indicator items not checked are ${threatListCount}`

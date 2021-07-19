@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertInstanceContext, AlertTypeParams, AlertTypeState } from '../../../alerting/common';
 import { AlertExecutorOptions } from '../../../alerting/server';
 import {
   PRODUCER,
@@ -15,6 +16,8 @@ import {
   TAGS,
 } from '../../common/technical_rule_data_field_names';
 import { AlertTypeExecutor, AlertTypeWithExecutor } from '../types';
+import { WrappedLifecycleRuleState } from './create_lifecycle_executor';
+import { LifecycleAlertService } from './create_lifecycle_rule_type_factory';
 
 export interface RuleExecutorData {
   [RULE_CATEGORY]: string;
@@ -25,9 +28,16 @@ export interface RuleExecutorData {
   [TAGS]: string[];
 }
 
-export function getRuleExecutorData(
-  type: AlertTypeWithExecutor<any, any, any>,
-  options: Parameters<AlertTypeExecutor>[0]
+export function getRuleExecutorData<
+  TState extends AlertTypeState,
+  TParams extends AlertTypeParams,
+  TAlertInstanceContext extends AlertInstanceContext,
+  TServices extends { alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext> }
+>(
+  type: AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>,
+  options: Parameters<
+    AlertTypeExecutor<WrappedLifecycleRuleState<TState>, TParams, TAlertInstanceContext, TServices>
+  >[0]
 ) {
   return {
     [RULE_ID]: type.id,
