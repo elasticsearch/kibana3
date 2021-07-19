@@ -94,7 +94,10 @@ class ReportErrorButtonUi extends Component<Props, State> {
   };
 
   private closePopover = () => {
-    this.setState({ isPopoverOpen: false });
+    this.setState({
+      isPopoverOpen: false,
+      error: undefined, // clear cached error text
+    });
   };
 
   private loadError = async () => {
