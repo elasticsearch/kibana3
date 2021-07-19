@@ -16,13 +16,7 @@ import {
   API_MIGRATE_ILM_POLICY_URL,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import {
-  DownloadReportFn,
-  JobContent,
-  JobId,
-  ManagementLinkFn,
-  ReportApiJSON,
-} from '../../../common/types';
+import { DownloadReportFn, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
@@ -110,9 +104,10 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async getError(jobId: string) {
-    const errorInfo: JobContent = await this.http.get(`${API_LIST_URL}/output/${jobId}`);
-    if (errorInfo.content != null) {
-      return errorInfo.content;
+    const job = await this.getInfo(jobId);
+
+    if (job.warnings != null) {
+      return job.warnings.join('');
     }
     return i18n.translate('xpack.reporting.apiClient.unknownError', {
       defaultMessage: `Report job {job} failed: Unknown error.`,
