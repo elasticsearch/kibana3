@@ -18,8 +18,8 @@ import {
   UrlGeneratorsSetup,
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
-import { UrlService } from '../common/url_service';
-import { formatSearchParams, RedirectManager } from './url_service';
+import { UrlService, formatSearchParams } from '../common/url_service';
+import { RedirectManager } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;
