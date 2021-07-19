@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import {
   EuiFieldText,
@@ -28,7 +28,7 @@ import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_l
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
+> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, setCallbacks }) => {
   const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
 
@@ -51,6 +51,19 @@ const ServiceNowConnectorFields: React.FC<
     (key: string, value: string) => editActionSecrets(key, value),
     [editActionSecrets]
   );
+
+  const beforeActionConnectorSave = useCallback(() => {
+    // TODO: Validate instance
+  }, []);
+
+  const afterActionConnectorSave = useCallback(() => {
+    // TODO: Implement
+  }, []);
+
+  // Callbacks are being set only once mount.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setCallbacks({ beforeActionConnectorSave, afterActionConnectorSave }), []);
+
   return (
     <>
       <EuiFlexGroup>
