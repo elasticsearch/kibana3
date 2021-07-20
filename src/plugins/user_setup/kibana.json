@@ -7,6 +7,7 @@
   "description": "This plugin provides UI and APIs for the interactive setup mode.",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
+  "type": "preboot",
   "configPath": ["userSetup"],
   "server": true,
   "ui": true
