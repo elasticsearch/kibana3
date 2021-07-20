@@ -23,6 +23,7 @@ import {
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Schema, SchemaType } from '../../../shared/schema/types';
+import { ReorderableTable } from '../../../shared/tables/reorderable_table';
 import { Result } from '../result';
 
 export const Library: React.FC = () => {
@@ -249,12 +250,74 @@ export const Library: React.FC = () => {
           </EuiDragDropContext>
           <EuiSpacer />
 
-          <EuiSpacer />
           <EuiTitle size="s">
             <h3>With field value type highlights</h3>
           </EuiTitle>
           <EuiSpacer />
           <Result {...props} schemaForTypeHighlights={schema} />
+          <EuiSpacer />
+
+          <EuiTitle size="m">
+            <h2>ReorderableTable</h2>
+          </EuiTitle>
+          <EuiSpacer />
+
+          <ReorderableTable
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With reordering disabled</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            disableReordering
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>With reordering enabled, but dragging disabled</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            disableDragging
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+          <EuiSpacer />
+
+          <EuiTitle size="s">
+            <h3>Using the rowProps prop to apply dynamic properties to each row</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <ReorderableTable
+            rowProps={(item) => ({
+              style: {
+                backgroundColor: item.id % 2 === 0 ? 'red' : 'green',
+              },
+            })}
+            items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
+            columns={[
+              { name: 'ID', render: (item) => <div>{item.id}</div> },
+              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+            ]}
+          />
+
+          <EuiSpacer />
+          <EuiSpacer />
           <EuiSpacer />
         </EuiPageContentBody>
       </EuiPageContent>
