@@ -156,6 +156,8 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             // We manually add fields that we **don't** want to be treated as "unknownOptions"
             'internal_networks',
             'internal_networks_field',
+            'value',
+            'copy_from',
           ];
 
           // The processor that we are updating may have options configured the UI does not know about
