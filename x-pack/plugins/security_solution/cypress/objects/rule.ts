@@ -12,10 +12,6 @@ import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
-export const totalNumberOfPrebuiltRulesInEsArchive = 127;
-
-export const totalNumberOfPrebuiltRulesInEsArchiveCustomRule = 145;
-
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
 interface MitreAttackTechnique {

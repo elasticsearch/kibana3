@@ -36,8 +36,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
+import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 
 describe('Alerts rules, prebuilt rules', () => {
   beforeEach(() => {
@@ -48,7 +48,6 @@ describe('Alerts rules, prebuilt rules', () => {
     const rowsPerPage = 100;
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedNumberOfPages = Math.ceil(totalNumberOfPrebuiltRules / rowsPerPage);
-    const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
@@ -57,20 +56,34 @@ describe('Alerts rules, prebuilt rules', () => {
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
-    cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
+    // The result should be at least equal to the number of rules we have on disk
+    // but could be greater than this number if there are additional cloud rules
+    cy.get(ELASTIC_RULES_BTN)
+      .first()
+      .then((result) => {
+        expect(+result.text().replace(/[^0-9]/g, '')).to.be.least(expectedNumberOfRules);
+        expect(result.text()).to.match(/Elastic rules\s\([0-9]+\)/);
+      });
 
     changeRowsPerPageTo(rowsPerPage);
 
-    cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} rules`);
+    // The result should be at least equal to the number of rules we have on disk
+    // but could be greater than this number if there are additional cloud rules
+    cy.get(SHOWING_RULES_TEXT)
+      .first()
+      .then((result) => {
+        expect(+result.text().replace(/[^0-9]/g, '')).to.be.least(expectedNumberOfRules);
+        expect(result.text()).to.match(/Showing\s[0-9]+\srules/);
+      });
+
     cy.get(pageSelector(expectedNumberOfPages)).should('exist');
   });
 });
 
 describe('Actions with prebuilt rules', () => {
-  beforeEach(() => {
-    const expectedNumberOfRules = totalNumberOfPrebuiltRules;
-    const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
+  const expectedNumberOfRules = totalNumberOfPrebuiltRules;
 
+  beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
@@ -78,8 +91,17 @@ describe('Actions with prebuilt rules', () => {
     waitForRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
+  });
 
-    cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
+  it('Has the correct number of rules', () => {
+    // The result should be at least equal to the number of rules we have on disk
+    // but could be greater than this number if there are additional cloud rules
+    cy.get(ELASTIC_RULES_BTN)
+      .first()
+      .then((result) => {
+        expect(+result.text().replace(/[^0-9]/g, '')).to.be.least(expectedNumberOfRules);
+        expect(result.text()).to.match(/Elastic rules\s\([0-9]+\)/);
+      });
   });
 
   it('Allows to activate/deactivate all rules at once', () => {
@@ -122,10 +144,17 @@ describe('Actions with prebuilt rules', () => {
     cy.reload();
     changeRowsPerPageTo100();
 
-    cy.get(ELASTIC_RULES_BTN).should(
-      'have.text',
-      `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
-    );
+    // The result should be at least equal to the number of rules we have on disk
+    // but could be greater than this number if there are additional cloud rules.
+    cy.get(ELASTIC_RULES_BTN)
+      .first()
+      .then((result) => {
+        expect(+result.text().replace(/[^0-9]/g, '')).to.be.least(
+          expectedNumberOfRulesAfterDeletion
+        );
+        expect(result.text()).to.match(/Elastic rules\s\([0-9]+\)/);
+      });
+
     cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
     cy.get(RELOAD_PREBUILT_RULES_BTN).should('have.text', 'Install 1 Elastic prebuilt rule ');
 
@@ -136,10 +165,16 @@ describe('Actions with prebuilt rules', () => {
     cy.reload();
     changeRowsPerPageTo100();
 
-    cy.get(ELASTIC_RULES_BTN).should(
-      'have.text',
-      `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
-    );
+    // The result should be at least equal to the number of rules we have on disk
+    // but could be greater than this number if there are additional cloud rules
+    cy.get(ELASTIC_RULES_BTN)
+      .first()
+      .then((result) => {
+        expect(+result.text().replace(/[^0-9]/g, '')).to.be.least(
+          expectedNumberOfRulesAfterRecovering
+        );
+        expect(result.text()).to.match(/Elastic rules\s\([0-9]+\)/);
+      });
   });
 
   it('Deletes and recovers more than one rule', () => {
@@ -159,10 +194,17 @@ describe('Actions with prebuilt rules', () => {
       'have.text',
       `Install ${numberOfRulesToBeSelected} Elastic prebuilt rules `
     );
-    cy.get(ELASTIC_RULES_BTN).should(
-      'have.text',
-      `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
-    );
+
+    // The result should be at least equal to the number of rules we have on disk
+    // but could be greater than this number if there are additional cloud rules
+    cy.get(ELASTIC_RULES_BTN)
+      .first()
+      .then((result) => {
+        expect(+result.text().replace(/[^0-9]/g, '')).to.be.least(
+          expectedNumberOfRulesAfterDeletion
+        );
+        expect(result.text()).to.match(/Elastic rules\s\([0-9]+\)/);
+      });
 
     reloadDeletedRules();
 
@@ -171,9 +213,15 @@ describe('Actions with prebuilt rules', () => {
     cy.reload();
     changeRowsPerPageTo100();
 
-    cy.get(ELASTIC_RULES_BTN).should(
-      'have.text',
-      `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
-    );
+    // The result should be at least equal to the number of rules we have on disk
+    // but could be greater than this number if there are additional cloud rules
+    cy.get(ELASTIC_RULES_BTN)
+      .first()
+      .then((result) => {
+        expect(+result.text().replace(/[^0-9]/g, '')).to.be.least(
+          expectedNumberOfRulesAfterRecovering
+        );
+        expect(result.text()).to.match(/Elastic rules\s\([0-9]+\)/);
+      });
   });
 });
