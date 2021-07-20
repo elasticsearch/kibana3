@@ -8,15 +8,18 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { Filter, Query } from '../../../../../../../src/plugins/data/public';
+
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import { UpdateDateRange } from '../../../common/components/charts/common';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { AlertsHistogramPanel } from '../../../detections/components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../../detections/components/alerts_histogram_panel/config';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import * as i18n from '../../pages/translations';
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+
+import { useFiltersForSignalsByCategory } from './use_filters_for_signals_by_category';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
@@ -44,6 +47,8 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const { signalIndexName } = useSignalIndex();
+  const filtersForSignalsByCategory = useFiltersForSignalsByCategory(filters);
+
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
@@ -65,7 +70,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
     <AlertsHistogramPanel
       combinedQueries={combinedQueries}
       deleteQuery={deleteQuery}
-      filters={filters}
+      filters={filtersForSignalsByCategory}
       from={from}
       headerChildren={headerChildren}
       onlyField={onlyField}
