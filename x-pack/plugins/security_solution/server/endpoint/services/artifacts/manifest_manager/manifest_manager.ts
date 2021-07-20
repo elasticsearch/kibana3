@@ -92,6 +92,10 @@ const getArtifactIds = (manifest: ManifestSchema) =>
 const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
   isEqual(new Set(getArtifactIds(manifest1)), new Set(getArtifactIds(manifest2)));
 
+/**
+ * Manages the Endpoint Integration Policy manifest that contains information about Kibana user generated Artifacts that
+  * are used by the Elastic Endpoint. Examples of artifacts include Exception Lists, Trusted Application and Event Filters.
+ */
 export class ManifestManager {
   protected artifactClient: EndpointArtifactClientInterface;
   protected exceptionListClient: ExceptionListClient;
