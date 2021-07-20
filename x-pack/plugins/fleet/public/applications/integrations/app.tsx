@@ -9,7 +9,6 @@ import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { createHashHistory } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +25,10 @@ import {
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
 import { AgentPolicyContextProvider, useUrlModal } from './hooks';
@@ -185,25 +187,12 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   /** For testing purposes only */
-  routerHistory?: History<any>;
-}> = memo(
-  ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
-    const [routerHistoryInstance] = useState(routerHistory || createHashHistory());
+  routerHistory?: History<any>; // TODO remove
+}> = memo(({ children, startServices, config, history, kibanaVersion, extensions }) => {
+  const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
-    // Sync our hash history with Kibana scoped history
-    useEffect(() => {
-      const unlistenParentHistory = history.listen(() => {
-        const newHash = createHashHistory();
-        if (newHash.location.pathname !== routerHistoryInstance.location.pathname) {
-          routerHistoryInstance.replace(newHash.location.pathname + newHash.location.search || '');
-        }
-      });
-
-      return unlistenParentHistory;
-    }, [history, routerHistoryInstance]);
-
-    return (
+  return (
+    <RedirectAppLinks application={startServices.application}>
       <startServices.i18n.Context>
         <KibanaContextProvider services={{ ...startServices }}>
           <EuiErrorBoundary>
@@ -213,7 +202,7 @@ export const IntegrationsAppContext: React.FC<{
                   <UIExtensionsContext.Provider value={extensions}>
                     <FleetStatusProvider>
                       <IntraAppStateProvider kibanaScopedHistory={history}>
-                        <Router history={routerHistoryInstance}>
+                        <Router history={history}>
                           <AgentPolicyContextProvider>
                             <PackageInstallProvider notifications={startServices.notifications}>
                               {children}
@@ -229,9 +218,9 @@ export const IntegrationsAppContext: React.FC<{
           </EuiErrorBoundary>
         </KibanaContextProvider>
       </startServices.i18n.Context>
-    );
-  }
-);
+    </RedirectAppLinks>
+  );
+});
 
 export const AppRoutes = memo(() => {
   const { modal, setModal } = useUrlModal();
