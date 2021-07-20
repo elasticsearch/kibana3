@@ -28,6 +28,8 @@ interface InvestigateInTimelineActionProps {
   ariaLabel?: string;
   alertIds?: string[];
   fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
+  buttonType?: 'text' | 'icon';
+  onInvestigateInTimelineAlertClick?: () => void;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
@@ -36,6 +38,8 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   ecsRowData,
   fetchEcsAlertsData,
   nonEcsRowData,
+  buttonType,
+  onInvestigateInTimelineAlertClick,
 }) => {
   const {
     data: { search: searchStrategyClient },
@@ -69,6 +73,9 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {
+    if (onInvestigateInTimelineAlertClick) {
+      onInvestigateInTimelineAlertClick();
+    }
     try {
       if (ecsRowData != null) {
         await sendAlertToTimelineAction({
@@ -98,6 +105,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     ecsRowData,
     fetchEcsAlertsData,
     nonEcsRowData,
+    onInvestigateInTimelineAlertClick,
     searchStrategyClient,
     updateTimelineIsLoading,
   ]);
@@ -110,6 +118,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
       iconType="timeline"
       onClick={investigateInTimelineAlertClick}
       isDisabled={false}
+      buttonType={buttonType}
     />
   );
 };
