@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './kbn_client';
+export { KbnEnvConfig } from './kbn_env_config';
+export { KbnEnvConfigDiscovery } from './kbn_env_config_discovery';
+
+export { runEnv } from './run_env';
+export { runKibana } from './run_kibana';
+export { runElasticsearch } from './run_elasticsearch';

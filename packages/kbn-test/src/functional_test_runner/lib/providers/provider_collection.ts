@@ -10,7 +10,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 
 import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
-import { Providers } from './read_provider_spec';
+import { Providers, AnyProviderFn } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
 import { GenericFtrService } from '../../public_types';
 
@@ -31,7 +31,7 @@ export class ProviderCollection {
     return pageObjects;
   };
 
-  public loadExternalService(name: string, provider: (...args: any) => any) {
+  public loadExternalService(name: string, provider: AnyProviderFn) {
     return this.getInstance('Service', name, provider);
   }
 
@@ -58,7 +58,7 @@ export class ProviderCollection {
     }
   }
 
-  public invokeProviderFn(provider: (args: any) => any) {
+  public invokeProviderFn(provider: AnyProviderFn) {
     const ctx = {
       getService: this.getService,
       hasService: this.hasService,
@@ -66,12 +66,12 @@ export class ProviderCollection {
       getPageObjects: this.getPageObjects,
     };
 
-    if (provider.prototype instanceof GenericFtrService) {
+    if ((provider as any).prototype instanceof GenericFtrService) {
       const Constructor = (provider as any) as new (ctx: any) => any;
       return new Constructor(ctx);
     }
 
-    return provider(ctx);
+    return (provider as (ctx: any) => any)(ctx);
   }
 
   private findProvider(type: string, name: string) {

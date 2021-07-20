@@ -18,7 +18,7 @@ export interface ApmAgentConfig {
   serverUrl?: string;
   secretToken?: string;
   logUncaughtExceptions?: boolean;
-  globalLabels?: Record<string, string | boolean>;
+  globalLabels?: Record<string, string | number | boolean>;
   centralConfig?: boolean;
   metricsInterval?: string;
   captureSpanStackTraces?: boolean;

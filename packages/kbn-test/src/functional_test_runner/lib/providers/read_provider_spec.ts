@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { GenericFtrService } from '../../public_types';
+
 export type Providers = ReturnType<typeof readProviderSpec>;
 export type Provider = Providers extends Array<infer X> ? X : unknown;
+export type AnyProviderFn =
+  | (new (...args: any[]) => GenericFtrService<any>)
+  | ((...args: any[]) => any);
 
-export function readProviderSpec(type: string, providers: Record<string, (...args: any[]) => any>) {
+export function readProviderSpec(type: string, providers: Record<string, AnyProviderFn>) {
   return Object.keys(providers).map((name) => {
     return {
       type,

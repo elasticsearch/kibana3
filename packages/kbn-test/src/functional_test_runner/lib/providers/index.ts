@@ -7,5 +7,5 @@
  */
 
 export { ProviderCollection } from './provider_collection';
-export { readProviderSpec } from './read_provider_spec';
+export * from './read_provider_spec';
 export type { Provider } from './read_provider_spec';

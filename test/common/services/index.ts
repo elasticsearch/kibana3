@@ -29,3 +29,7 @@ export const services = {
   esDeleteAllIndices: EsDeleteAllIndicesProvider,
   savedObjectInfo: SavedObjectInfoService,
 };
+
+export const servicesCompatibleWithJourneys = {
+  ...services,
+};

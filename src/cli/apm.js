@@ -14,5 +14,6 @@ const rootDir = join(__dirname, '../..');
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
 module.exports = function (serviceName = name) {
+  debugger;
   initApm(process.argv, rootDir, isKibanaDistributable, serviceName);
 };

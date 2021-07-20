@@ -40,6 +40,8 @@ SRC_DEPS = [
     "//packages/kbn-std",
     "//packages/kbn-utils",
     "@npm//@elastic/elasticsearch",
+    "@npm//@elastic/synthetics",
+    "@npm//@hapi/hapi",
     "@npm//axios",
     "@npm//@babel/traverse",
     "@npm//chance",
