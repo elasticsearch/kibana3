@@ -121,7 +121,6 @@ export class AlertsClient {
         ignore_unavailable: true,
         body: {
           query: { term: { _id: id! } },
-          aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
         },
         seq_no_primary_term: true,
       });
