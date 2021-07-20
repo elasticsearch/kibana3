@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ConnectorTypes } from '../../../common';
@@ -78,7 +78,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
           {
             value: connector.id,
             inputDisplay: (
-              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIconExtended
                     type={
@@ -88,9 +88,20 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                     size={ICON_SIZE}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <span>{connector.name}</span>
                 </EuiFlexItem>
+                {connector.config.isLegacy && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      aria-label="Warning"
+                      size={ICON_SIZE}
+                      type="alert"
+                      color="warning"
+                      content="Deprecated connector. Please create a new one."
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             ),
             'data-test-subj': `dropdown-connector-${connector.id}`,
