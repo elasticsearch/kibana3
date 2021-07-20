@@ -138,6 +138,7 @@ rollup index, or you can remove or archive it using <<creating-index-lifecycle-p
 
 Your next step is to visualize your rolled up data in a vertical bar chart.
 Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.
+TSVB visualizations support rolled up index patterns when they are not combined together with other index patterns.
 
 . Open the main menu, then click *Stack Management > Index Patterns*.
 
