@@ -6,11 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  isRefResult,
-  isFullScreenshot,
-  ScreenshotBlockDoc,
-} from '../../../common/runtime_types/ping/synthetics';
+import { isRefResult, isFullScreenshot } from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';
@@ -39,19 +35,15 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
   handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
 
-    let result: ScreenshotReturnTypesUnion | null = null;
-    try {
-      result = await libs.requests.getJourneyScreenshot({
-        uptimeEsClient,
-        checkGroup,
-        stepIndex,
-      });
-    } catch (e) {
-      return response.customError({ body: { message: e }, statusCode: 500 });
-    }
+    const result: ScreenshotReturnTypesUnion | null = await libs.requests.getJourneyScreenshot({
+      uptimeEsClient,
+      checkGroup,
+      stepIndex,
+    });
 
+    if (result === null) return response.notFound();
     if (isFullScreenshot(result)) {
-      if (!result.synthetics.blob) {
+      if (!result.synthetics?.blob) {
         return response.notFound();
       }
 
@@ -63,20 +55,15 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
         },
       });
     } else if (isRefResult(result)) {
-      const blockIds = result.screenshot_ref.blocks.map(({ hash }) => hash);
-      let blocks: ScreenshotBlockDoc[];
-      try {
-        blocks = await libs.requests.getJourneyScreenshotBlocks({
-          uptimeEsClient,
-          blockIds,
-        });
-      } catch (e: unknown) {
-        return response.custom({ statusCode: 500, body: { message: e } });
-      }
+      // const blockIds = result.screenshot_ref.blocks.map(({ hash }) => hash);
+      // const blocks: ScreenshotBlockDoc[] = await libs.requests.getJourneyScreenshotBlocks({
+      //   uptimeEsClient,
+      //   blockIds,
+      // });
       return response.ok({
         body: {
           screenshotRef: result,
-          blocks,
+          // blocks,
         },
         headers: getSharedHeaders(result.synthetics.step.name, result.totalSteps ?? 0),
       });

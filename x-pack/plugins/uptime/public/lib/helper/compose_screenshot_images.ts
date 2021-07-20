@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ScreenshotRefImageData } from '../../../common/runtime_types';
+import {
+  ScreenshotBlockBlob,
+  ScreenshotRefImageData,
+} from '../../../common/runtime_types/ping/synthetics';
 
 /**
  * Draws image fragments on a canvas.
@@ -15,16 +18,17 @@ import { ScreenshotRefImageData } from '../../../common/runtime_types';
  */
 export async function composeScreenshotRef(
   data: ScreenshotRefImageData,
-  canvas: HTMLCanvasElement
+  canvas: HTMLCanvasElement,
+  blocks: { [key: string]: ScreenshotBlockBlob }
 ) {
   const {
-    ref: { screenshotRef, blocks },
+    ref: { screenshotRef },
   } = data;
+
+  const ctx = canvas.getContext('2d', { alpha: false });
 
   canvas.width = screenshotRef.screenshot_ref.width;
   canvas.height = screenshotRef.screenshot_ref.height;
-
-  const ctx = canvas.getContext('2d', { alpha: false });
 
   /**
    * We need to treat each operation as an async task, otherwise we will race between drawing image
@@ -32,12 +36,11 @@ export async function composeScreenshotRef(
    */
   const drawOperations: Array<Promise<void>> = [];
 
-  for (const block of screenshotRef.screenshot_ref.blocks) {
+  for (const { hash, top, left, width, height } of screenshotRef.screenshot_ref.blocks) {
     drawOperations.push(
       new Promise<void>((resolve, reject) => {
         const img = new Image();
-        const { top, left, width, height, hash } = block;
-        const blob = blocks.find((b) => b.id === hash);
+        const blob = blocks[hash];
         if (!blob) {
           reject(Error(`Error processing image. Expected image data with hash ${hash} is missing`));
         } else {

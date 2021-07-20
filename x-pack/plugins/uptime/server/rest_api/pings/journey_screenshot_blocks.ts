@@ -10,7 +10,41 @@ import { isRight } from 'fp-ts/lib/Either';
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
-import { ScreenshotBlockDoc } from '../../../common/runtime_types/ping/synthetics';
+
+export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+  method: 'POST',
+  path: '/api/uptime/journey/screenshot/block',
+  validate: {
+    body: schema.object({
+      hashes: schema.arrayOf(schema.string()),
+    }),
+    query: schema.object({
+      _inspect: schema.maybe(schema.boolean()),
+    }),
+  },
+  handler: async ({ request, response, uptimeEsClient }) => {
+    const { hashes } = request.body;
+
+    const decoded = t.array(t.string).decode(hashes);
+    if (!isRight(decoded)) {
+      return response.badRequest();
+    }
+    const { right: data } = decoded;
+    const result = await libs.requests.getJourneyScreenshotBlocks({
+      blockIds: data,
+      uptimeEsClient,
+    });
+    if (result.length === 0) {
+      return response.notFound();
+    }
+    return response.ok({
+      body: result,
+      headers: {
+        'Cache-Control': 'max-age=604800',
+      },
+    });
+  },
+});
 
 export const createJourneyScreenshotBlockRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -29,20 +63,15 @@ export const createJourneyScreenshotBlockRoute: UMRestApiRouteFactory = (libs: U
       return response.badRequest();
     }
     const { right: data } = decoded;
-    let result: ScreenshotBlockDoc[];
-    try {
-      result = await libs.requests.getJourneyScreenshotBlocks({
-        blockIds: Array.isArray(data) ? data : [data],
-        uptimeEsClient,
-      });
-    } catch (e: unknown) {
-      return response.custom({ statusCode: 500, body: { message: e } });
-    }
+    const result = await libs.requests.getJourneyScreenshotBlocks({
+      blockIds: Array.isArray(data) ? data : [data],
+      uptimeEsClient,
+    });
     if (result.length === 0) {
       return response.notFound();
     }
     return response.ok({
-      body: result,
+      body: result[0],
       headers: {
         // we can cache these blocks with extreme prejudice as they are inherently unchanging
         // when queried by ID, since the ID is the hash of the data

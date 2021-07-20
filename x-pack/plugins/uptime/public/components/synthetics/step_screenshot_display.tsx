@@ -28,7 +28,7 @@ import { getJourneyScreenshot } from '../../state/api/journey';
 import { useCompositeImage } from '../../hooks';
 
 interface StepScreenshotDisplayProps {
-  isScreenshotBlob: boolean;
+  isFullScreenshot: boolean;
   isScreenshotRef: boolean;
   checkGroup?: string;
   stepIndex?: number;
@@ -96,7 +96,7 @@ const ComposedStepImage = ({
 
 export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   checkGroup,
-  isScreenshotBlob: isScreenshotBlob,
+  isFullScreenshot: isScreenshotBlob,
   isScreenshotRef,
   stepIndex,
   stepName,
