@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import moment from 'moment';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
@@ -30,7 +29,11 @@ import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient, useInternalApiClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
 import type { SharePluginSetup } from '../shared_imports';
-import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
+import { ReportDeleteButton } from './report_delete_button';
+import { ReportDownloadButton } from './report_download_button';
+import { ReportInfoButton } from './report_info_button';
+import { ReportErrorButton } from './report_error_button';
+import { ReportWarningsButton } from './report_warnings_button';
 import { IlmPolicyLink } from './ilm_policy_link';
 import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 import { ReportDiagnostic } from './report_diagnostic';
@@ -272,15 +275,6 @@ class ReportListingUi extends Component<Props, State> {
     return this.state.showLinks && this.state.enableLinks;
   };
 
-  private formatDate(timestamp: string) {
-    try {
-      return moment(timestamp).format('YYYY-MM-DD @ hh:mm A');
-    } catch (error) {
-      // ignore parse error and display unformatted value
-      return timestamp;
-    }
-  }
-
   private renderTable() {
     const { intl } = this.props;
 
@@ -308,17 +302,7 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.createdAtTitle',
           defaultMessage: 'Created at',
         }),
-        render: (createdAt: string, record: Job) => {
-          if (record.created_by) {
-            return (
-              <div>
-                <div>{this.formatDate(createdAt)}</div>
-                <span>{record.created_by}</span>
-              </div>
-            );
-          }
-          return this.formatDate(createdAt);
-        },
+        render: (_createdAt: string, record: Job) => record.getCreatedAtLabel(),
       },
       {
         field: 'status',
@@ -326,20 +310,7 @@ class ReportListingUi extends Component<Props, State> {
           id: 'xpack.reporting.listing.tableColumns.statusTitle',
           defaultMessage: 'Status',
         }),
-        render: (status: string, record: Job) => {
-          if (status === 'pending') {
-            return (
-              <div>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.pendingStatusReachedText"
-                  defaultMessage="Pending - waiting for job to be processed"
-                />
-              </div>
-            );
-          }
-
-          return record.getStatusLabel();
-        },
+        render: (_status: string, record: Job) => record.getStatusLabel(),
       },
       {
         name: intl.formatMessage({
@@ -351,6 +322,7 @@ class ReportListingUi extends Component<Props, State> {
             render: (record: Job) => {
               return (
                 <div>
+                  <ReportWarningsButton {...this.props} record={record} />
                   <ReportDownloadButton {...this.props} record={record} />
                   <ReportErrorButton {...this.props} record={record} />
                   <ReportInfoButton {...this.props} jobId={record.id} />

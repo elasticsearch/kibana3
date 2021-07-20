@@ -80,14 +80,12 @@ class ReportInfoButtonUi extends Component<Props, State> {
     const attempts = info.attempts ? info.attempts.toString() : NA;
     const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
-    const warnings = info.warnings?.join(',') ?? null;
 
     const jobInfo = [
       { title: 'Title', description: info.title || NA },
-      { title: 'Created By', description: info.created_by || NA },
-      { title: 'Created At', description: info.created_at || NA },
+      { title: 'Created At', description: info.getCreatedAtLabel() },
+      { title: 'Status', description: info.getStatusLabel() },
       { title: 'Timezone', description: info.browserTimezone || NA },
-      { title: 'Status', description: info.status || NA },
     ];
 
     const processingInfo = [
@@ -111,7 +109,11 @@ class ReportInfoButtonUi extends Component<Props, State> {
       { title: 'Browser Type', description: info.browser_type || NA },
     ];
 
-    const warningInfo = warnings && [{ title: 'Errors', description: warnings }];
+    const warnings = info.getWarnings();
+    const warningsInfo = warnings && [{ title: 'Warnings', description: warnings }];
+
+    const errored = info.getError();
+    const errorInfo = errored && [{ title: 'Error', description: errored }];
 
     return (
       <>
@@ -124,10 +126,16 @@ class ReportInfoButtonUi extends Component<Props, State> {
             <EuiDescriptionList listItems={jobScreenshot} type="column" align="center" compressed />
           </>
         ) : null}
-        {warningInfo ? (
+        {warningsInfo ? (
           <>
             <EuiSpacer size="s" />
-            <EuiDescriptionList listItems={warningInfo} type="column" align="center" compressed />
+            <EuiDescriptionList listItems={warningsInfo} type="column" align="center" compressed />
+          </>
+        ) : null}
+        {errorInfo ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiDescriptionList listItems={errorInfo} type="column" align="center" compressed />
           </>
         ) : null}
       </>

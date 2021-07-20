@@ -62,7 +62,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id="popover"
+        id="errors_popover"
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}

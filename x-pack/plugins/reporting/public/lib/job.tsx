@@ -9,10 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
-import { JOB_STATUSES as JobStatus } from '../../common/constants';
+import { JOB_STATUSES } from '../../common/constants';
 import { JobId, ReportApiJSON, ReportSource, TaskRunResult } from '../../common/types';
 
 type ReportPayload = ReportSource['payload'];
+
+const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
 
 /*
  * This class represents a report job for the UI
@@ -33,7 +35,7 @@ export class Job {
   public created_at: ReportSource['created_at'];
   public started_at: ReportSource['started_at'];
   public completed_at: ReportSource['completed_at'];
-  public status: ReportSource['status'];
+  public status: JOB_STATUSES; // FIXME conflicting type definition for status across this class and ReportSource
   public attempts: ReportSource['attempts'];
   public max_attempts: ReportSource['max_attempts'];
 
@@ -60,7 +62,7 @@ export class Job {
     this.created_at = report.created_at;
     this.started_at = report.started_at;
     this.completed_at = report.completed_at;
-    this.status = report.status;
+    this.status = report.status as JOB_STATUSES; // FIXME, same as above
     this.attempts = report.attempts;
     this.max_attempts = report.max_attempts;
 
@@ -79,11 +81,21 @@ export class Job {
   }
 
   getStatusLabel() {
-    const status = this.status as JobStatus; // FIXME there are conflicting type definitions for status
-
+    const status = this.status; // FIXME there are conflicting type definitions for status
     let statusLabel = jobStatusLabelsMap.get(status);
 
-    if (status === JobStatus.PROCESSING) {
+    if (status === PENDING) {
+      return (
+        <div>
+          <FormattedMessage
+            id="xpack.reporting.listing.tableValue.statusDetail.pendingStatusReachedText"
+            defaultMessage="Pending - waiting for job to be processed"
+          />
+        </div>
+      );
+    }
+
+    if (status === PROCESSING) {
       statusLabel = statusLabel + ` (attempt ${this.attempts} of ${this.max_attempts})`;
     }
 
@@ -129,13 +141,13 @@ export class Job {
 
   // There is no error unless the status is 'failed'
   getError() {
-    if (this.status === JobStatus.FAILED) {
+    if (this.status === FAILED) {
       return this.warnings;
     }
   }
 
   getWarnings() {
-    if (this.status !== JobStatus.FAILED) {
+    if (this.status !== FAILED) {
       const warnings: string[] = [];
       if (this.isDeprecated) {
         warnings.push(`Update your POST URL for automation to continue working`);
@@ -147,11 +159,19 @@ export class Job {
         warnings.push(`Max size of the CSV generation has been reached`);
       }
 
-      if (this.warnings) {
+      if (this.warnings?.length) {
         warnings.push(...this.warnings);
       }
 
-      return warnings;
+      if (warnings.length) {
+        return (
+          <ul>
+            {warnings.map((w) => {
+              return <li>{w}</li>;
+            })}
+          </ul>
+        );
+      }
     }
   }
 
@@ -165,55 +185,48 @@ export class Job {
   }
 
   private getStatusTimestamp() {
-    const status = this.status as JobStatus;
+    const status = this.status;
     let statusTimestamp = this.created_at;
-    if (status === JobStatus.PROCESSING && this.started_at) {
+
+    if (status === PROCESSING && this.started_at) {
       statusTimestamp = this.started_at;
-    } else if (
-      this.completed_at &&
-      ([JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.WARNINGS] as string[]).includes(status)
-    ) {
+    } else if (this.completed_at && ([COMPLETED, FAILED, WARNINGS] as string[]).includes(status)) {
       statusTimestamp = this.completed_at;
     }
+
     return statusTimestamp;
   }
 }
 
-const jobStatusLabelsMap = new Map<JobStatus, string>([
+const jobStatusLabelsMap = new Map<JOB_STATUSES, string>([
   [
-    JobStatus.PENDING,
+    PENDING,
     i18n.translate('xpack.reporting.jobStatuses.pendingText', {
       defaultMessage: 'Pending',
     }),
   ],
   [
-    JobStatus.PROCESSING,
+    PROCESSING,
     i18n.translate('xpack.reporting.jobStatuses.processingText', {
       defaultMessage: 'Processing',
     }),
   ],
   [
-    JobStatus.COMPLETED,
+    COMPLETED,
     i18n.translate('xpack.reporting.jobStatuses.completedText', {
       defaultMessage: 'Completed',
     }),
   ],
   [
-    JobStatus.WARNINGS,
+    WARNINGS,
     i18n.translate('xpack.reporting.jobStatuses.warningText', {
       defaultMessage: 'Completed with warnings',
     }),
   ],
   [
-    JobStatus.FAILED,
+    FAILED,
     i18n.translate('xpack.reporting.jobStatuses.failedText', {
       defaultMessage: 'Failed',
-    }),
-  ],
-  [
-    JobStatus.CANCELLED,
-    i18n.translate('xpack.reporting.jobStatuses.cancelledText', {
-      defaultMessage: 'Cancelled',
     }),
   ],
 ]);

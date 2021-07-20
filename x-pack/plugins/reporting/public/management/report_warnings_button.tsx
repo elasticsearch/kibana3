@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
+import { Job as ListingJob } from '../lib/job';
+import { Props as ListingProps } from './report_listing';
+
+type Props = { record: ListingJob } & ListingProps;
+
+export const ReportWarningsButton: FunctionComponent<Props> = (props: Props) => {
+  const { record, intl } = props;
+
+  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+
+  const togglePopover = () => {
+    if (!isPopoverOpen) {
+      setPopoverIsOpen(true);
+    } else {
+      setPopoverIsOpen(false);
+    }
+  };
+
+  const warnings = record.getWarnings();
+  if (!warnings) {
+    return null;
+  }
+
+  const button = (
+    <EuiButtonIcon
+      onClick={togglePopover}
+      iconType="alert"
+      aria-label={intl.formatMessage({
+        id: 'xpack.reporting.listing.table.warningsReportAriaLabel',
+        defaultMessage: 'Warnings',
+      })}
+    />
+  );
+
+  return (
+    <EuiPopover
+      id="warnings_popover"
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setPopoverIsOpen(false)}
+      anchorPosition="downRight"
+    >
+      <EuiCallOut
+        color="danger"
+        title={props.intl.formatMessage({
+          id: 'xpack.reporting.warningsButton.reportHasWarnings',
+          defaultMessage: 'This report has warnings',
+        })}
+      >
+        {warnings}
+      </EuiCallOut>
+    </EuiPopover>
+  );
+};
