@@ -72,7 +72,10 @@ export function createExecutionEnqueuerFunction({
         apiKey,
         relatedSavedObjects,
       },
-      executionSourceAsSavedObjectReferences(source)
+      {
+        ...executionSourceAsSavedObjectReferences(source),
+        refresh: false,
+      }
     );
 
     await taskManager.schedule({
