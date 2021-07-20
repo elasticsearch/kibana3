@@ -44,6 +44,7 @@ export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
 export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
+export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
@@ -110,6 +111,7 @@ export const SOURCE_META_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${META_DAT
 export const SOURCE_FORMATTERS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${FORMATTERS_DATA_REQUEST_ID_SUFFIX}`;
 export const SOURCE_BOUNDS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_bounds`;
 export const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
+export const IS_DRAW_LAYER_REQUEST_ID = 'IS_DRAW_LAYER_REQUEST_ID';
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -310,7 +312,7 @@ export type RawValue = string | string[] | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
 
-export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
+export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
