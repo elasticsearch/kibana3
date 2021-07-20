@@ -16,6 +16,8 @@ import {
   ESConnectorFields,
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
+import { connectorIDReferenceName } from '../services';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -136,6 +138,37 @@ export const caseMigrations = {
   },
 };
 
+export const configureConnectorIdMigration = (
+  doc: SavedObjectUnsanitizedDoc<{ connector: { id: string } }>
+): SavedObjectSanitizedDoc<unknown> => {
+  // removing the id field since it will be stored in the references instead
+  const { id: connectorId, ...restConnector } = doc.attributes.connector;
+  const { references = [] } = doc;
+  // don't create a reference if the connector ID is none
+  const connectorReference =
+    connectorId !== 'none'
+      ? [
+          {
+            id: connectorId,
+            type: ACTION_SAVED_OBJECT_TYPE,
+
+            name: connectorIDReferenceName,
+          },
+        ]
+      : [];
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      connector: {
+        ...restConnector,
+      },
+    },
+    references: [...references, ...connectorReference],
+  };
+};
+
 export const configureMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigureConnector>
@@ -161,6 +194,7 @@ export const configureMigrations = {
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
   },
+  '7.15.0': configureConnectorIdMigration,
 };
 
 export const userActionsMigrations = {

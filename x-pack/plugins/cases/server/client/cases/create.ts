@@ -25,7 +25,6 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { getConnectorFromConfiguration } from '../utils';
 
 import { Operations } from '../../authorization';
 import {
@@ -48,7 +47,6 @@ export const create = async (
   const {
     unsecuredSavedObjectsClient,
     caseService,
-    caseConfigureService,
     userActionService,
     user,
     logger,
@@ -90,10 +88,6 @@ export const create = async (
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const createdDate = new Date().toISOString();
-    const myCaseConfigure = await caseConfigureService.find({
-      unsecuredSavedObjectsClient,
-    });
-    const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
     const newCase = await caseService.postNewCase({
       unsecuredSavedObjectsClient,
@@ -103,7 +97,8 @@ export const create = async (
         username,
         full_name,
         email,
-        connector: transformCaseConnectorToEsConnector(query.connector ?? caseConfigureConnector),
+        // TODO: refactor this so it doesn't need to convert
+        connector: transformCaseConnectorToEsConnector(query.connector),
       }),
       id: savedObjectID,
     });
