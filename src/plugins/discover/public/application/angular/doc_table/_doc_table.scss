@@ -2,7 +2,7 @@
  * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
  */
 // stylelint-disable selector-no-qualifying-type
-doc-table {
+.kbnDocTableWrapper {
   @include euiScrollBar;
   overflow: auto;
   flex: 1 1 100%;
@@ -21,6 +21,18 @@ doc-table {
     z-index: $euiZLevel1;
     opacity: .5;
   }
+
+  // SASSTODO: add a monospace modifier to the doc-table component
+  .kbnDocTable__row {
+    font-family: $euiCodeFontFamily;
+    font-size: $euiFontSizeXS;
+  }
+}
+
+.kbnDocTable__footer {
+  background-color: $euiColorLightShade;
+  padding: $euiSizeXS $euiSizeS;
+  text-align: center;
 }
 
 .kbnDocTable__container.loading {
