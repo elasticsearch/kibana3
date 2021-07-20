@@ -24,9 +24,9 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
           t.exact(
             t.type({
               status: t.string,
-              ids: t.union([t.undefined, t.array(t.string)]),
+              ids: t.union([t.null, t.undefined, t.array(t.string)]),
               index: t.string,
-              query: t.union([t.undefined, t.string]),
+              query: t.union([t.null, t.undefined, t.string]),
             })
           )
         ),
@@ -40,7 +40,7 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
         const alertsClient = await context.rac.getAlertsClient();
         const { status, ids, index, query } = req.body;
 
-        console.error('THE QUERY', JSON.stringify(query, null, 2));
+        // console.error('THE QUERY', JSON.stringify(query, null, 2));
 
         const updatedAlert = await alertsClient.bulkUpdate({
           ids,

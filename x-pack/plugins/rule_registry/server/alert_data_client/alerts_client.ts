@@ -29,7 +29,12 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { mapConsumerToIndexName, validFeatureIds, isValidFeatureId } from '../utils/rbac';
+import {
+  mapConsumerToIndexName,
+  validFeatureIds,
+  isValidFeatureId,
+  getSafeSortIds,
+} from '../utils/rbac';
 
 import { Filter, buildEsQuery, Query, EsQueryConfig } from '../../../../../src/plugins/data/common';
 
@@ -144,92 +149,138 @@ export class AlertsClient {
     }
   }
 
-  private async fetchAlerts({
+  private async fetchAndAuditAlerts({
     ids,
     index,
     query,
+    operation,
+    auditOperation,
   }: {
     ids: string[] | undefined | null;
     index: string;
     query: string | undefined | null;
+    operation: WriteOperations | ReadOperations;
+    auditOperation: AlertAuditAction;
   }) {
-    try {
-      const { filter: authzFilter } = await this.authorization.getFindAuthorizationFilter(
-        AlertingAuthorizationEntity.Alert,
-        {
-          type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: { consumer: 'kibana.rac.alert.owner', ruleTypeId: 'rule.id' },
-        },
-        WriteOperations.Update
-      );
-      if (authzFilter == null) {
-        return;
-      }
-      // console.error('WHAT IS THIS', JSON.stringify(afilter, null, 2));
-      const {
-        authorizedRuleTypes: allowedRuleTypeIds,
-      } = await this.authorization.getAugmentedRuleTypesWithAuthorization(
-        validFeatureIds,
-        [WriteOperations.Update],
-        AlertingAuthorizationEntity.Alert
-      );
+    let lastSortIds;
+    let hasSortIds = true;
 
-      const config: EsQueryConfig = {
-        allowLeadingWildcards: true,
-        queryStringOptions: { analyze_wildcard: true },
-        ignoreFilterIfFieldNotInIndex: false,
-        dateFormatTZ: 'Zulu',
-      };
+    while (hasSortIds) {
+      try {
+        const { filter: authzFilter } = await this.authorization.getFindAuthorizationFilter(
+          AlertingAuthorizationEntity.Alert,
+          {
+            type: AlertingAuthorizationFilterType.ESDSL,
+            fieldNames: { consumer: 'kibana.rac.alert.owner', ruleTypeId: 'rule.id' },
+          },
+          operation
+        );
+        if (authzFilter == null) {
+          return;
+        }
+        // console.error('WHAT IS THIS', JSON.stringify(afilter, null, 2));
+        const {
+          authorizedRuleTypes: allowedRuleTypeIds,
+        } = await this.authorization.getAugmentedRuleTypesWithAuthorization(
+          validFeatureIds,
+          [operation],
+          AlertingAuthorizationEntity.Alert
+        );
 
-      const queryBody =
-        query == null
-          ? {
-              query: { ids: { values: ids } },
-              aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
-            }
-          : // @ts-expect-error
-            { query: buildEsQuery(undefined, { query, language: 'kuery' }, [authzFilter], config) };
-      const result = await this.esClient.search<
-        ParsedTechnicalFields | (ParsedTechnicalFields & AggregationsFiltersAggregate)
-      >({
-        // Context: Originally thought of always just searching `.alerts-*` but that could
-        // result in a big performance hit. If the client already knows which index the alert
-        // belongs to, passing in the index will speed things up
-        index: index ?? '.alerts-*',
-        ignore_unavailable: true,
-        // @ts-expect-error
-        body: queryBody,
-        seq_no_primary_term: true,
-      });
+        const config: EsQueryConfig = {
+          allowLeadingWildcards: true,
+          queryStringOptions: { analyze_wildcard: true },
+          ignoreFilterIfFieldNotInIndex: false,
+          dateFormatTZ: 'Zulu',
+        };
 
-      const actualIds = new Set(Array.from(allowedRuleTypeIds).map((item) => item.id));
+        const queryBody =
+          query == null
+            ? {
+                query: { ids: { values: ids } },
+                aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
+              }
+            : {
+                // @ts-expect-error
+                query: { exists: { field: 'kibana.rac.alert.status' } }, // buildEsQuery(undefined, { query, language: 'kuery' }, [authzFilter], config),
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'asc',
+                      unmapped_type: 'date',
+                    },
+                  },
+                ],
+                search_after: lastSortIds,
+              };
+        // need to implement another big loop..
+        // this search could result in more than 10k items
+        // so we need to log that access and operation in
+        // the audit log
+        // maybe just log the search in the audit log?
+        this.logger.debug(`QUERY BODY: ${JSON.stringify(queryBody, null, 2)}`);
+        const result = await this.esClient.search<
+          ParsedTechnicalFields | (ParsedTechnicalFields & AggregationsFiltersAggregate)
+        >({
+          // Context: Originally thought of always just searching `.alerts-*` but that could
+          // result in a big performance hit. If the client already knows which index the alert
+          // belongs to, passing in the index will speed things up
+          index: index ?? '.alerts-*',
+          ignore_unavailable: true,
+          // @ts-expect-error
+          body: queryBody,
+          seq_no_primary_term: true,
+        });
 
-      if (
-        query == null &&
-        !((result.body!.aggregations!.ruleTypeIdsAgg! as AggregationsFiltersAggregate)
-          .buckets as AggregationsFiltersBucketItem[]).every((bucketItem) =>
-          // @ts-expect-error Property 'key' does not exist on type 'AggregationsFiltersBucketItemKeys'
-          actualIds.has(bucketItem.key)
-        )
-      ) {
-        this.logger.error('not every rule type id is accessible with the provided privileges');
-        return;
-      }
-      if (result == null || result.body == null || result.body.hits.hits.length === 0) {
-        return;
-      }
+        const actualIds = new Set(Array.from(allowedRuleTypeIds).map((item) => item.id));
 
-      if (!result.body.hits.hits.every((hit) => isValidAlert(hit._source))) {
-        const errorMessage = `Unable to retrieve alert details for alert with id of "${ids}".`;
+        if (
+          query == null &&
+          !((result.body!.aggregations!.ruleTypeIdsAgg! as AggregationsFiltersAggregate)
+            .buckets as AggregationsFiltersBucketItem[]).every((bucketItem) =>
+            // @ts-expect-error Property 'key' does not exist on type 'AggregationsFiltersBucketItemKeys'
+            actualIds.has(bucketItem.key)
+          )
+        ) {
+          this.logger.error('not every rule type id is accessible with the provided privileges');
+          return false;
+        }
+        if (lastSortIds != null && result.body.hits.hits.length === 0) {
+          return true;
+        }
+        if (result == null || result.body == null || result.body.hits.hits.length === 0) {
+          this.logger.error('RESULT WAS EMPTY');
+          return false;
+        }
+
+        if (!result.body.hits.hits.every((hit) => isValidAlert(hit._source))) {
+          const errorMessage = `Unable to retrieve alert details for alert with id of "${ids}".`;
+          this.logger.debug(errorMessage);
+          throw new Error(errorMessage);
+        }
+
+        result?.body.hits.hits.forEach((hit) => {
+          this.logger.debug(`audit logging hit with id ${hit._id}`);
+          this.auditLogger?.log(
+            alertAuditEvent({
+              action: auditOperation,
+              id: hit._id,
+              outcome: 'unknown',
+            })
+          );
+        });
+        lastSortIds = getSafeSortIds(result.body.hits.hits[result.body.hits.hits.length - 1]?.sort);
+        if (lastSortIds != null && lastSortIds.length !== 0) {
+          hasSortIds = true;
+        } else {
+          hasSortIds = false;
+          return true;
+        }
+      } catch (error) {
+        const errorMessage = `Unable to retrieve alert with id of "${ids}".`;
         this.logger.debug(errorMessage);
-        throw new Error(errorMessage);
+        throw error;
       }
-
-      return result;
-    } catch (error) {
-      const errorMessage = `Unable to retrieve alert with id of "${ids}".`;
-      this.logger.debug(errorMessage);
-      throw error;
     }
   }
 
@@ -355,53 +406,47 @@ export class AlertsClient {
       return;
     }
 
-    let queryObject;
+    const config: EsQueryConfig = {
+      allowLeadingWildcards: true,
+      queryStringOptions: { analyze_wildcard: true },
+      ignoreFilterIfFieldNotInIndex: false,
+      dateFormatTZ: 'Zulu',
+    };
+    const queryObject =
+      query == null
+        ? {
+            query: { ids: { values: ids } },
+            aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
+          }
+        : {
+            query: buildEsQuery(
+              undefined,
+              { query, language: 'kuery' },
+              [(authzFilter as unknown) as Filter],
+              config
+            ),
+          };
 
     try {
-      const config: EsQueryConfig = {
-        allowLeadingWildcards: true,
-        queryStringOptions: { analyze_wildcard: true },
-        ignoreFilterIfFieldNotInIndex: false,
-        dateFormatTZ: 'Zulu',
-      };
-      queryObject =
-        query == null
-          ? {
-              query: { ids: { values: ids } },
-              aggs: { ruleTypeIdsAgg: { terms: { field: RULE_ID } } },
-            }
-          : {
-              query: buildEsQuery(
-                undefined,
-                { query, language: 'kuery' },
-                [(authzFilter as unknown) as Filter],
-                config
-              ),
-            };
-    } catch (exc) {
-      console.error('THE EXCEPTION', exc);
-    }
-    console.error('QUERY OBJECT', JSON.stringify(queryObject, null, 2));
-    try {
-      const alertsToUpdate = await this.fetchAlerts({ ids, query, index });
-      if (alertsToUpdate == null) {
-        this.logger.error('OH OH');
+      // execute either a query with ids or
+      // query to be executed in updateByQuery
+      // audit results of that query
+      const auditedAlerts = await this.fetchAndAuditAlerts({
+        ids,
+        query,
+        index,
+        operation: WriteOperations.Update,
+        auditOperation: AlertAuditAction.UPDATE,
+      });
+
+      if (!auditedAlerts) {
         return;
       }
-      alertsToUpdate?.body.hits.hits.forEach((hit) => {
-        this.logger.debug(`audit logging hit with id ${hit._id}`);
-        this.auditLogger?.log(
-          alertAuditEvent({
-            action: AlertAuditAction.UPDATE,
-            id: hit._id,
-            outcome: 'unknown',
-          })
-        );
-      });
+
       // USE AGGS FOR QUERY, GET THE HITS AND THEN DO BULK UPDATE WITH IDS AND AUDIT LOG THAT
       const result = await this.esClient.updateByQuery({
         index,
-        conflicts: 'abort', // conflicts ?? 'abort',
+        conflicts: 'proceed', // 'abort', // conflicts ?? 'abort',
         refresh: false,
         body: {
           script: {

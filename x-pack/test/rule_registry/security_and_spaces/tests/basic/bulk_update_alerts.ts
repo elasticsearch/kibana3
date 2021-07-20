@@ -100,6 +100,39 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
+    // it.only(`${superUser.username} should bulk update alert with given id ${SECURITY_SOLUTION_ALERT_ID} in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+    //   await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
+    //   const res = await supertestWithoutAuth
+    //     .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/bulk_update`)
+    //     .auth(superUser.username, superUser.password)
+    //     .set('kbn-xsrf', 'true')
+    //     .send({
+    //       ids: [SECURITY_SOLUTION_ALERT_ID],
+    //       status: 'closed',
+    //       query: 'kibana.rac.alert.status: open',
+    //       index: SECURITY_SOLUTION_ALERT_INDEX,
+    //     })
+    //     .expect(200);
+    //   console.error('WHAT IS THE RESPONSE', res.body);
+    //   // .expect(200);
+    // });
+
+    // it.only(`${superUser.username} should bulk update alert with given id ${SECURITY_SOLUTION_ALERT_ID} in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+    //   await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
+    //   const res = await supertestWithoutAuth
+    //     .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/bulk_update`)
+    //     .auth(superUser.username, superUser.password)
+    //     .set('kbn-xsrf', 'true')
+    //     .send({
+    //       ids: [SECURITY_SOLUTION_ALERT_ID],
+    //       status: 'closed',
+    //       index: SECURITY_SOLUTION_ALERT_INDEX,
+    //     })
+    //     .expect(200);
+    //   console.error('WHAT IS THE RESPONSE', res.body);
+    //   // .expect(200);
+    // });
+
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should bulk update alert with given id ${alertId} in ${space}/${index}`, async () => {
@@ -111,7 +144,6 @@ export default ({ getService }: FtrProviderContext) => {
             .send({
               ids: [alertId],
               status: 'closed',
-              query: null,
               index,
             })
             .expect(200);
@@ -123,9 +155,9 @@ export default ({ getService }: FtrProviderContext) => {
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .send({
-              ids: null,
+              ids: [alertId],
               status: 'closed',
-              query: "'kibana.rac.alert.status': 'open'",
+              query: 'kibana.rac.alert.status: open',
               index,
             })
             .expect(200);
@@ -163,7 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       unauthorizedUsers.forEach(({ username, password }) => {
         it(`${username} should NOT be able to update alert ${alertId} in ${space}/${index}`, async () => {
-          await supertestWithoutAuth
+          const res = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
@@ -171,13 +203,15 @@ export default ({ getService }: FtrProviderContext) => {
               ids: [alertId],
               status: 'closed',
               index,
-              query: null,
-            })
-            .expect(403);
+              // query: 'kibana.rac.alert.status: open',
+            });
+          expect([403, 404]).to.contain(res.statusCode);
         });
       });
     }
 
+    // Alert - Update - RBAC - spaces Security Solution superuser should bulk update alerts which match query in space1/.alerts-security.alerts
+    // Alert - Update - RBAC - spaces superuser should bulk update alert with given id 020202 in space1/.alerts-security.alerts
     describe('Security Solution', () => {
       const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
       const authorizedOnlyInSpace1 = [secOnly, obsSec];
