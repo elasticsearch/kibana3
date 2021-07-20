@@ -389,6 +389,14 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
+        'no-restricted-properties': [
+          'error',
+          {
+            object: 'window',
+            property: 'fetch',
+            message: 'Plugins should only use core.http.fetch for accessing the Kibana server',
+          },
+        ],
         '@kbn/eslint/no-restricted-paths': [
           'error',
           {
@@ -483,6 +491,16 @@ module.exports = {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
                 from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
+              },
+              {
+                target: [
+                  '(src|x-pack)/plugins/*/public/**/*',
+                  'src/legacy/core_plugins/*/public/**/*',
+                  'x-pack/legacy/plugins/*/public/**/*',
+                ],
+                from: ['axios'],
+                errorMessage:
+                  'Plugins should only use core.http.fetch for accessing the Kibana server',
               },
             ],
           },
