@@ -9,8 +9,6 @@ import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils'
 import {
   AggregationsFiltersAggregate,
   AggregationsFiltersBucketItem,
-  QueryDslQueryContainer,
-  Script,
 } from '@elastic/elasticsearch/api/types';
 import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
 import {
@@ -36,7 +34,7 @@ import {
   getSafeSortIds,
 } from '../utils/rbac';
 
-import { Filter, buildEsQuery, Query, EsQueryConfig } from '../../../../../src/plugins/data/common';
+import { Filter, buildEsQuery, EsQueryConfig } from '../../../../../src/plugins/data/common';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
@@ -178,7 +176,6 @@ export class AlertsClient {
         if (authzFilter == null) {
           return;
         }
-        // console.error('WHAT IS THIS', JSON.stringify(afilter, null, 2));
         const {
           authorizedRuleTypes: allowedRuleTypeIds,
         } = await this.authorization.getAugmentedRuleTypesWithAuthorization(
@@ -202,7 +199,7 @@ export class AlertsClient {
               }
             : {
                 // @ts-expect-error
-                query: { exists: { field: 'kibana.rac.alert.status' } }, // buildEsQuery(undefined, { query, language: 'kuery' }, [authzFilter], config),
+                query: buildEsQuery(undefined, { query, language: 'kuery' }, [authzFilter], config),
                 sort: [
                   {
                     '@timestamp': {
@@ -448,6 +445,7 @@ export class AlertsClient {
         index,
         conflicts: 'proceed', // 'abort', // conflicts ?? 'abort',
         refresh: false,
+        // @ts-expect-error
         body: {
           script: {
             source: `ctx._source['kibana.rac.alert.status'] = '${status}'`,
@@ -463,70 +461,6 @@ export class AlertsClient {
       this.logger.error(`UPDATE ERROR: ${JSON.stringify(err, null, 2)}`);
       throw err;
     }
-    // Looking like we may need to first fetch the alerts to ensure we are
-    // pulling the correct ruleTypeId and owner
-    // await this.esClient.mget()
-
-    // try {
-    //   // ASSUMPTION: user bulk updating alerts from single owner/space
-    //   // may need to iterate to support rules shared across spaces
-
-    //   const ruleTypes = await this.authorization.ensureAuthorizedForAllRuleTypes({
-    //     owner,
-    //     operation: WriteOperations.Update,
-    //     entity: AlertingAuthorizationEntity.Alert,
-    //   });
-
-    //   const totalRuleTypes = this.authorization.getRuleTypesByProducer(owner);
-
-    //   console.error('RULE TYPES', ruleTypes);
-
-    //   // await this.authorization.ensureAuthorized({
-    //   //   ruleTypeId: 'siem.signals', // can they update multiple at once or will a single one just be passed in?
-    //   //   consumer: owner,
-    //   //   operation: WriteOperations.Update,
-    //   //   entity: AlertingAuthorizationEntity.Alert,
-    //   // });
-
-    //   try {
-    //     const index = this.authorization.getAuthorizedAlertsIndices(owner);
-    //     if (index == null) {
-    //       throw Error(`cannot find authorized index for owner: ${owner}`);
-    //     }
-
-    //     const body = ids.flatMap((id) => [
-    //       {
-    //         update: {
-    //           _id: id,
-    //           _index: this.authorization.getAuthorizedAlertsIndices(ruleTypes[0].producer),
-    //         },
-    //       },
-    //       {
-    //         doc: { 'kibana.rac.alert.status': data.status },
-    //       },
-    //     ]);
-
-    //     const result = await this.esClient.bulk({
-    //       index,
-    //       body,
-    //     });
-    //     return result;
-    //   } catch (updateError) {
-    //     this.logger.error(
-    //       `Unable to bulk update alerts for ${owner}. Error follows: ${updateError}`
-    //     );
-    //     throw updateError;
-    //   }
-    // } catch (error) {
-    //   console.error("HERE'S THE ERROR", error);
-    //   throw Boom.forbidden(
-    //     this.auditLogger.racAuthorizationFailure({
-    //       owner,
-    //       operation: ReadOperations.Get,
-    //       type: 'access',
-    //     })
-    //   );
-    // }
   }
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
