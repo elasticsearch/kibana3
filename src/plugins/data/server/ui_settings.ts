@@ -533,7 +533,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       value: `{
   "pause": false,
-  "value": 0
+  "value": 60
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsText', {
