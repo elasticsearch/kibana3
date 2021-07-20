@@ -6,15 +6,22 @@
  */
 
 import { remove } from 'lodash';
-import { JsonObject } from '@kbn/common-utils';
-import { nodeBuilder, EsQueryConfig } from '../../../../../src/plugins/data/common';
-import { toElasticsearchQuery } from '../../../../../src/plugins/data/common/es_query';
+
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
   KQL = 'kql',
   ESDSL = 'dsl',
+}
+
+export interface BooleanFilter {
+  bool: {
+    should?: unknown[];
+    filter?: unknown | unknown[];
+    minimum_should_match?: number;
+  };
 }
 
 export interface AlertingAuthorizationFilterOpts {
@@ -25,42 +32,35 @@ export interface AlertingAuthorizationFilterOpts {
 interface AlertingAuthorizationFilterFieldNames {
   ruleTypeId: string;
   consumer: string;
+  spaceIds?: string;
 }
-
-const esQueryConfig: EsQueryConfig = {
-  allowLeadingWildcards: true,
-  dateFormatTZ: 'Zulu',
-  ignoreFilterIfFieldNotInIndex: false,
-  queryStringOptions: { analyze_wildcard: true },
-};
 
 export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
-  opts: AlertingAuthorizationFilterOpts
-): KueryNode | JsonObject {
-  const kueryNode = nodeBuilder.or(
-    Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
-      ensureFieldIsSafeForQuery('ruleTypeId', id);
-      filters.push(
-        nodeBuilder.and([
-          nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
-          nodeBuilder.or(
-            Object.keys(authorizedConsumers).map((consumer) => {
-              ensureFieldIsSafeForQuery('consumer', consumer);
-              return nodeBuilder.is(opts.fieldNames.consumer, consumer);
-            })
-          ),
-        ])
-      );
-      return filters;
-    }, [])
-  );
-
+  opts: AlertingAuthorizationFilterOpts,
+  alertSpaceId?: string
+): KueryNode | BooleanFilter {
   if (opts.type === AlertingAuthorizationFilterType.ESDSL) {
-    return toElasticsearchQuery(kueryNode, undefined, esQueryConfig);
+    return buildRuleTypeFilter(ruleTypes, opts, alertSpaceId);
+  } else {
+    return nodeBuilder.or(
+      Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
+        ensureFieldIsSafeForQuery('ruleTypeId', id);
+        filters.push(
+          nodeBuilder.and([
+            nodeBuilder.is(opts.fieldNames.ruleTypeId, id),
+            nodeBuilder.or(
+              Object.keys(authorizedConsumers).map((consumer) => {
+                ensureFieldIsSafeForQuery('consumer', consumer);
+                return nodeBuilder.is(opts.fieldNames.consumer, consumer);
+              })
+            ),
+          ])
+        );
+        return filters;
+      }, [])
+    );
   }
-
-  return kueryNode;
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
@@ -78,3 +78,73 @@ export function ensureFieldIsSafeForQuery(field: string, value: string): boolean
   }
   return true;
 }
+
+export const buildRuleTypeFilter = (
+  ruleTypes: Set<RegistryAlertTypeWithAuth>,
+  opts: AlertingAuthorizationFilterOpts,
+  alertSpaceId?: string
+): JsonObject => {
+  const allFilters = Array.from(ruleTypes).map(({ id, authorizedConsumers }) => {
+    const ruleIdFilter = {
+      bool: {
+        should: [
+          {
+            match: {
+              [opts.fieldNames.ruleTypeId]: id,
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+    const spaceIdFilter =
+      alertSpaceId != null && opts.fieldNames.spaceIds != null
+        ? { term: { [opts.fieldNames.spaceIds]: alertSpaceId } }
+        : {};
+    const consumersFilter = {
+      bool: {
+        should: Object.keys(authorizedConsumers).map((consumer) => {
+          ensureFieldIsSafeForQuery('consumer', consumer);
+
+          if (Object.keys(authorizedConsumers).length === 1) {
+            return {
+              match: {
+                [opts.fieldNames.consumer]: consumer,
+              },
+            };
+          } else {
+            return {
+              bool: {
+                should: [{ match: { [opts.fieldNames.consumer]: consumer } }],
+                minimum_should_match: 1,
+              },
+            };
+          }
+        }),
+        minimum_should_match: 1,
+      },
+    };
+
+    const newFilter =
+      alertSpaceId != null
+        ? [{ ...ruleIdFilter }, { ...spaceIdFilter }, { ...consumersFilter }]
+        : [{ ...ruleIdFilter }, { ...consumersFilter }];
+
+    return {
+      bool: {
+        filter: [...newFilter],
+      },
+    };
+  });
+
+  if (ruleTypes.size > 1) {
+    return {
+      bool: {
+        minimum_should_match: 1,
+        should: [...allFilters],
+      },
+    };
+  }
+
+  return allFilters[0];
+};
