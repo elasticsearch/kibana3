@@ -95,5 +95,7 @@ export function useTransactionLatencyChartsFetcher() {
     latencyChartsData: memoizedData,
     latencyChartsStatus: status,
     latencyChartsError: error,
+    // @ts-ignore
+    _inspect: data?._inspect,
   };
 }
