@@ -43,8 +43,12 @@ export class FunctionalTestRunner {
   }
 
   async run() {
+    const startTime = Date.now();
+
     return await this._run(async (config, coreProviders) => {
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
+
+      this.log.info(`FTR Running ${relative(process.cwd(), this.configFile)}`);
 
       const providers = new ProviderCollection(this.log, [
         ...coreProviders,
@@ -66,7 +70,18 @@ export class FunctionalTestRunner {
       await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
-      return await runTests(this.lifecycle, mocha);
+      const failures = await runTests(this.lifecycle, mocha);
+      const sec = ((Date.now() - startTime) / 1000).toFixed(2);
+      const success = failures === 0 ? 'success' : 'failure';
+      const msg = `--- Tests finished after ${sec} seconds, ${failures} failures, ${success}`;
+
+      if (success === 'success') {
+        this.log.success(msg);
+      } else {
+        this.log.error(msg);
+      }
+
+      return failures;
     });
   }
 
@@ -120,9 +135,6 @@ export class FunctionalTestRunner {
       ) {
         throw new Error('No tests defined.');
       }
-
-      // eslint-disable-next-line
-      console.log(`--- Running ${relative(process.cwd(), this.configFile)}`);
 
       const dockerServers = new DockerServersService(
         config.get('dockerServers'),
