@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { JOB_STATUSES } from '../../common/constants';
 import { Job as ListingJob } from '../lib/job';
-import { JobContent, ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface Props {
   intl: InjectedIntl;
@@ -48,21 +48,27 @@ class ReportErrorButtonUi extends Component<Props, State> {
       return null;
     }
 
+    const toolMessage = this.props.intl.formatMessage({
+      id: 'xpack.reporting.errorButton.seeError',
+      defaultMessage: 'See error message',
+    });
     const button = (
-      <EuiButtonIcon
-        onClick={this.togglePopover}
-        iconType="alert"
-        color={'danger'}
-        aria-label={intl.formatMessage({
-          id: 'xpack.reporting.errorButton.showReportErrorAriaLabel',
-          defaultMessage: 'Show report error',
-        })}
-      />
+      <EuiToolTip position="top" content={toolMessage}>
+        <EuiButtonIcon
+          onClick={this.togglePopover}
+          iconType="alert"
+          color={'danger'}
+          aria-label={intl.formatMessage({
+            id: 'xpack.reporting.errorButton.showReportErrorAriaLabel',
+            defaultMessage: 'Show report error',
+          })}
+        />
+      </EuiToolTip>
     );
 
     return (
       <EuiPopover
-        id="popover"
+        id="errors_popover"
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
@@ -94,7 +100,10 @@ class ReportErrorButtonUi extends Component<Props, State> {
   };
 
   private closePopover = () => {
-    this.setState({ isPopoverOpen: false });
+    this.setState({
+      isPopoverOpen: false,
+      error: undefined, // clear cached error text
+    });
   };
 
   private loadError = async () => {
@@ -102,9 +111,9 @@ class ReportErrorButtonUi extends Component<Props, State> {
 
     this.setState({ isLoading: true });
     try {
-      const reportContent: JobContent = await apiClient.getError(record.id);
+      const errorText = await apiClient.getError(record.id);
       if (this.mounted) {
-        this.setState({ isLoading: false, error: reportContent.content });
+        this.setState({ isLoading: false, error: errorText });
       }
     } catch (kfetchError) {
       if (this.mounted) {
