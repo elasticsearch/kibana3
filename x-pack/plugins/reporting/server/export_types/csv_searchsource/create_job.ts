@@ -18,8 +18,16 @@ export const createJobFnFactory: CreateJobFnFactory<
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function createJob(jobParams, context, request) {
+  return async function createJob(jobParams, _context, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
+
+    if (jobParams.version) {
+      logger.debug(`Using SearchSource v${jobParams.version}`);
+    } else {
+      logger.warning(
+        `No version provided for SearchSource version. Assuming ${reporting.getKibanaVersion()}`
+      );
+    }
 
     return {
       headers: serializedEncryptedHeaders,

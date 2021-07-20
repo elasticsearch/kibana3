@@ -20,21 +20,25 @@ import { checkLicense } from '../lib/license_check';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
-export const ReportingCsvShareProvider = ({
-  apiClient,
-  toasts,
-  license$,
-  startServices$,
-  uiSettings,
-  usesUiCapabilities,
-}: {
+interface ShareOpts {
+  kibanaVersion: string;
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   license$: LicensingPluginSetup['license$'];
   startServices$: Rx.Observable<[CoreStart, object, unknown]>;
   uiSettings: IUiSettingsClient;
   usesUiCapabilities: boolean;
-}) => {
+}
+
+export const ReportingCsvShareProvider = ({
+  kibanaVersion,
+  apiClient,
+  toasts,
+  license$,
+  startServices$,
+  uiSettings,
+  usesUiCapabilities,
+}: ShareOpts) => {
   let licenseToolTipContent = '';
   let licenseHasCsvReporting = false;
   let licenseDisabled = true;
@@ -76,6 +80,7 @@ export const ReportingCsvShareProvider = ({
       objectType,
       searchSource: sharingData.searchSource as SearchSourceFields,
       columns: sharingData.columns as string[] | undefined,
+      version: kibanaVersion,
     };
 
     const getJobParams = () => jobParams;

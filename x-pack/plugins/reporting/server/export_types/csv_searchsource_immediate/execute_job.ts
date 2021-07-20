@@ -32,9 +32,10 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   const config = reporting.getConfig();
   const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE, 'execute-job']);
 
-  return async function runTask(jobId, immediateJobParams, context, req) {
+  return async function runTask(_jobId, immediateJobParams, context, req) {
     const job = {
       objectType: 'immediate-search',
+      version: reporting.getKibanaVersion(),
       ...immediateJobParams,
     };
 
