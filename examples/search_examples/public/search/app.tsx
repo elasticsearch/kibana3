@@ -47,6 +47,7 @@ import {
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
 import { IMyStrategyResponse } from '../../common/types';
+import { isWarningResponse } from '../../../../src/plugins/data/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
@@ -131,11 +132,45 @@ export const SearchExamplesApp = ({
     setSelectedNumericField(fields?.length ? getNumeric(fields)[0] : null);
   }, [fields]);
 
-  const doAsyncSearch = async (strategy?: string, sessionId?: string) => {
+  const doAsyncSearch = async (
+    strategy?: string,
+    sessionId?: string,
+    addWarning: boolean = false,
+    addError: boolean = false
+  ) => {
     if (!indexPattern || !selectedNumericField) return;
 
     // Construct the query portion of the search request
     const query = data.query.getEsQuery(indexPattern);
+
+    if (addWarning) {
+      query.bool.must.push({
+        // @ts-ignore
+        error_query: {
+          indices: [
+            {
+              name: indexPattern.title,
+              error_type: 'warning',
+              message: 'Watch out!',
+            },
+          ],
+        },
+      });
+    }
+    if (addError) {
+      query.bool.must.push({
+        // @ts-ignore
+        error_query: {
+          indices: [
+            {
+              name: indexPattern.title,
+              error_type: 'exception',
+              message: 'Watch out!',
+            },
+          ],
+        },
+      });
+    }
 
     // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
     const aggs = [{ type: 'avg', params: { field: selectedNumericField!.name } }];
@@ -193,14 +228,23 @@ export const SearchExamplesApp = ({
               }
             );
             searchSubscription$.unsubscribe();
+            if (isWarningResponse(res)) {
+              notifications.toasts.addWarning({
+                title: 'Warning',
+                text: mountReactNode(res.warning),
+              });
+            }
           } else if (isErrorResponse(res)) {
             // TODO: Make response error status clearer
-            notifications.toasts.addWarning('An error has occurred');
+            notifications.toasts.addDanger('An error has occurred');
             searchSubscription$.unsubscribe();
           }
         },
-        error: () => {
-          notifications.toasts.addDanger('Failed to run search');
+        error: (e) => {
+          notifications.toasts.addDanger({
+            title: 'Failed to run search',
+            text: e.message,
+          });
         },
       });
   };
@@ -270,6 +314,14 @@ export const SearchExamplesApp = ({
     doAsyncSearch('myStrategy');
   };
 
+  const onWarningSearchClickHandler = () => {
+    doAsyncSearch(undefined, undefined, true);
+  };
+
+  const onErrorSearchClickHandler = () => {
+    doAsyncSearch(undefined, undefined, false, true);
+  };
+
   const onPartialResultsClickHandler = () => {
     setSelectedTab(1);
     const req = {
@@ -299,8 +351,11 @@ export const SearchExamplesApp = ({
             searchSubscription$.unsubscribe();
           }
         },
-        error: () => {
-          notifications.toasts.addDanger('Failed to run search');
+        error: (e) => {
+          notifications.toasts.addDanger({
+            title: 'Failed to run search',
+            text: e.message,
+          });
         },
       });
   };
@@ -528,6 +583,40 @@ export const SearchExamplesApp = ({
                     defaultMessage="Bucket and metrics aggregations without other bucket."
                   />
                 </EuiText>
+              </EuiText>
+              <EuiSpacer />
+              <EuiTitle size="xs">
+                <h3>Handling errors & warnings</h3>
+              </EuiTitle>
+              <EuiText>
+                When fetching data from Elasticsearch, there are several different ways warnings and
+                errors may be returned. In general, it is recommended to use the utility functions
+                <EuiCode>isWarningResponse</EuiCode> and <EuiCode>isErrorResponse</EuiCode> when
+                handling responses.
+                <EuiSpacer />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onWarningSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithWarning"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchWithWarningButtonText"
+                    defaultMessage="Request with a warning in response"
+                  />
+                </EuiButtonEmpty>
+                <EuiText />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onErrorSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithError"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchWithErrorButtonText"
+                    defaultMessage="Request with an error in response"
+                  />
+                </EuiButtonEmpty>
               </EuiText>
               <EuiSpacer />
               <EuiTitle size="xs">
