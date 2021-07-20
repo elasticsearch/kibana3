@@ -18,7 +18,7 @@ export class MockSyncContext implements DataRequestContext {
   stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataMeta) => void;
   onJoinError: (errorMessage: string) => void;
   updateSourceData: (newData: unknown) => void;
-  forceRefresh: boolean;
+  forceRefreshDueToDrawing: boolean;
 
   constructor({ dataFilters }: { dataFilters: Partial<MapFilters> }) {
     const mapFilters: MapFilters = {
@@ -41,6 +41,6 @@ export class MockSyncContext implements DataRequestContext {
     this.stopLoading = sinon.spy();
     this.onJoinError = sinon.spy();
     this.updateSourceData = sinon.spy();
-    this.forceRefresh = false;
+    this.forceRefreshDueToDrawing = false;
   }
 }
