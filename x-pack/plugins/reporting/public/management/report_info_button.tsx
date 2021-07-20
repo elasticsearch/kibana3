@@ -20,27 +20,27 @@ import {
 import { injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
-import { Job } from '../lib/job';
+import { Job as ListingJob } from '../lib/job';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { Props as ListingProps } from './report_listing';
 
 interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
-  jobId: string;
   apiClient: ReportingAPIClient;
+  record: ListingJob;
 }
 
 interface State {
   isLoading: boolean;
   isFlyoutVisible: boolean;
   calloutTitle: string;
-  info: Job | null;
+  info: ListingJob | null;
   error: Error | null;
 }
 
 const NA = 'n/a';
 const UNKNOWN = 'unknown';
 
-const getDimensions = (info: Job): string => {
+const getDimensions = (info: ListingJob): string => {
   const defaultDimensions = { width: null, height: null };
   const { width, height } = info.layout?.dimensions || defaultDimensions;
   if (width && height) {
@@ -58,7 +58,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
     this.state = {
       isLoading: false,
       isFlyoutVisible: false,
-      calloutTitle: 'Job Info',
+      calloutTitle: 'record Info',
       info: null,
       error: null,
     };
@@ -176,15 +176,21 @@ class ReportInfoButtonUi extends Component<Props, State> {
       );
     }
 
+    const warnings = this.props.record.getWarnings();
+    let message = this.props.intl.formatMessage({
+      id: 'xpack.reporting.listing.table.reportInfoButtonTooltip',
+      defaultMessage: 'record info',
+    });
+    if (warnings) {
+      message = this.props.intl.formatMessage({
+        id: 'xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip',
+        defaultMessage: 'record info and warnings',
+      });
+    }
+
     return (
       <>
-        <EuiToolTip
-          position="top"
-          content={this.props.intl.formatMessage({
-            id: 'xpack.reporting.listing.table.reportInfo',
-            defaultMessage: 'Job info',
-          })}
-        >
+        <EuiToolTip position="top" content={message}>
           <EuiButtonIcon
             onClick={this.showFlyout}
             iconType="iInCircle"
@@ -201,7 +207,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
   private loadInfo = async () => {
     this.setState({ isLoading: true });
     try {
-      const info = await this.props.apiClient.getInfo(this.props.jobId);
+      const info = await this.props.apiClient.getInfo(this.props.record.id);
       if (this.mounted) {
         this.setState({ isLoading: false, info });
       }

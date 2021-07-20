@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { JOB_STATUSES } from '../../common/constants';
@@ -48,16 +48,22 @@ class ReportErrorButtonUi extends Component<Props, State> {
       return null;
     }
 
+    const toolMessage = this.props.intl.formatMessage({
+      id: 'xpack.reporting.errorButton.seeError',
+      defaultMessage: 'See error message',
+    });
     const button = (
-      <EuiButtonIcon
-        onClick={this.togglePopover}
-        iconType="alert"
-        color={'danger'}
-        aria-label={intl.formatMessage({
-          id: 'xpack.reporting.errorButton.showReportErrorAriaLabel',
-          defaultMessage: 'Show report error',
-        })}
-      />
+      <EuiToolTip position="top" content={toolMessage}>
+        <EuiButtonIcon
+          onClick={this.togglePopover}
+          iconType="alert"
+          color={'danger'}
+          aria-label={intl.formatMessage({
+            id: 'xpack.reporting.errorButton.showReportErrorAriaLabel',
+            defaultMessage: 'Show report error',
+          })}
+        />
+      </EuiToolTip>
     );
 
     return (

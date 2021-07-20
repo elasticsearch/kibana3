@@ -325,7 +325,7 @@ class ReportListingUi extends Component<Props, State> {
                   <ReportWarningsButton {...this.props} record={record} />
                   <ReportDownloadButton {...this.props} record={record} />
                   <ReportErrorButton {...this.props} record={record} />
-                  <ReportInfoButton {...this.props} jobId={record.id} />
+                  <ReportInfoButton {...this.props} record={record} />
                 </div>
               );
             },

@@ -12,9 +12,9 @@ import React from 'react';
 import { JOB_STATUSES } from '../../common/constants';
 import { JobId, ReportApiJSON, ReportSource, TaskRunResult } from '../../common/types';
 
-type ReportPayload = ReportSource['payload'];
-
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
+
+type ReportPayload = ReportSource['payload'];
 
 /*
  * This class represents a report job for the UI
@@ -81,7 +81,7 @@ export class Job {
   }
 
   getStatusLabel() {
-    const status = this.status; // FIXME there are conflicting type definitions for status
+    const status = this.status;
     let statusLabel = jobStatusLabelsMap.get(status);
 
     if (status === PENDING) {
@@ -150,13 +150,27 @@ export class Job {
     if (this.status !== FAILED) {
       const warnings: string[] = [];
       if (this.isDeprecated) {
-        warnings.push(`Update your POST URL for automation to continue working`);
+        warnings.push(
+          i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
+            defaultMessage:
+              'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
+          })
+        );
       }
       if (this.csv_contains_formulas) {
-        warnings.push(`CSV may contain formulas that can hurt your computer`);
+        warnings.push(
+          i18n.translate('xpack.reporting.jobWarning.csvContainsFormulas', {
+            defaultMessage:
+              'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
+          })
+        );
       }
       if (this.max_size_reached) {
-        warnings.push(`Max size of the CSV generation has been reached`);
+        warnings.push(
+          i18n.translate('xpack.reporting.jobWarning.maxSizeReachedTooltip', {
+            defaultMessage: 'Max size reached, contains partial data.',
+          })
+        );
       }
 
       if (this.warnings?.length) {

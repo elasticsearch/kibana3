@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { Job as ListingJob } from '../lib/job';
@@ -31,15 +31,21 @@ export const ReportWarningsButton: FunctionComponent<Props> = (props: Props) => 
     return null;
   }
 
+  const toolMessage = props.intl.formatMessage({
+    id: 'xpack.reporting.errorButton.seeWarnings',
+    defaultMessage: 'See warning messages',
+  });
   const button = (
-    <EuiButtonIcon
-      onClick={togglePopover}
-      iconType="alert"
-      aria-label={intl.formatMessage({
-        id: 'xpack.reporting.listing.table.warningsReportAriaLabel',
-        defaultMessage: 'Warnings',
-      })}
-    />
+    <EuiToolTip position="top" content={toolMessage}>
+      <EuiButtonIcon
+        onClick={togglePopover}
+        iconType="alert"
+        aria-label={intl.formatMessage({
+          id: 'xpack.reporting.listing.table.warningsReportAriaLabel',
+          defaultMessage: 'Warnings',
+        })}
+      />
+    </EuiToolTip>
   );
 
   return (
