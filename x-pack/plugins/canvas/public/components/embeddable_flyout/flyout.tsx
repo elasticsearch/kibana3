@@ -56,14 +56,19 @@ const mergeProps = (
   const { pageId, ...remainingStateProps } = stateProps;
   const { addEmbeddable } = dispatchProps;
 
+  // TODO: hook up to lab service
+  const isByValueEnabled = true;
+
   return {
     ...remainingStateProps,
     ...ownProps,
     onSelect: (id: string, type: string): void => {
-      const partialElement = {
-        expression: `markdown "Could not find embeddable for type ${type}" | render`,
-      };
-      if (allowedEmbeddables[type]) {
+      const partialElement = isByValueEnabled
+        ? { expression: `embeddable id="${id}" type="${type}" | render` }
+        : {
+            expression: `markdown "Could not find embeddable for type ${type}" | render`,
+          };
+      if (isByValueEnabled || allowedEmbeddables[type]) {
         partialElement.expression = allowedEmbeddables[type](id);
       }
 
@@ -99,7 +104,10 @@ export class EmbeddableFlyoutPortal extends React.Component<ComponentProps> {
   render() {
     if (this.el) {
       return ReactDOM.createPortal(
-        <Component {...this.props} availableEmbeddables={Object.keys(allowedEmbeddables)} />,
+        <Component
+          {...this.props}
+          availableEmbeddables={[...Object.keys(allowedEmbeddables), 'LOG_STREAM_EMBEDDABLE']}
+        />,
         this.el
       );
     }
