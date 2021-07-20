@@ -22,7 +22,6 @@ import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
-import { JOB_STATUSES as JobStatuses } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
@@ -58,45 +57,6 @@ interface State {
   enableLinks: boolean;
   badLicenseMessage: string;
 }
-
-const jobStatusLabelsMap = new Map<JobStatuses, string>([
-  [
-    JobStatuses.PENDING,
-    i18n.translate('xpack.reporting.jobStatuses.pendingText', {
-      defaultMessage: 'Pending',
-    }),
-  ],
-  [
-    JobStatuses.PROCESSING,
-    i18n.translate('xpack.reporting.jobStatuses.processingText', {
-      defaultMessage: 'Processing',
-    }),
-  ],
-  [
-    JobStatuses.COMPLETED,
-    i18n.translate('xpack.reporting.jobStatuses.completedText', {
-      defaultMessage: 'Completed',
-    }),
-  ],
-  [
-    JobStatuses.WARNINGS,
-    i18n.translate('xpack.reporting.jobStatuses.warningText', {
-      defaultMessage: 'Completed with warnings',
-    }),
-  ],
-  [
-    JobStatuses.FAILED,
-    i18n.translate('xpack.reporting.jobStatuses.failedText', {
-      defaultMessage: 'Failed',
-    }),
-  ],
-  [
-    JobStatuses.CANCELLED,
-    i18n.translate('xpack.reporting.jobStatuses.cancelledText', {
-      defaultMessage: 'Cancelled',
-    }),
-  ],
-]);
 
 class ReportListingUi extends Component<Props, State> {
   private isInitialJobsFetch: boolean;
@@ -378,76 +338,7 @@ class ReportListingUi extends Component<Props, State> {
             );
           }
 
-          let maxSizeReached;
-          if (record.max_size_reached) {
-            maxSizeReached = (
-              <span>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.maxSizeReachedText"
-                  defaultMessage=" - Max size reached"
-                />
-              </span>
-            );
-          }
-
-          let warnings;
-          if (record.warnings) {
-            warnings = (
-              <EuiText size="s">
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.reporting.listing.tableValue.statusDetail.warningsText"
-                    defaultMessage="Errors occurred: see job info for details."
-                  />
-                </EuiTextColor>
-              </EuiText>
-            );
-          }
-
-          let statusTimestamp;
-          if (status === JobStatuses.PROCESSING && record.started_at) {
-            statusTimestamp = this.formatDate(record.started_at);
-          } else if (
-            record.completed_at &&
-            ([
-              JobStatuses.COMPLETED,
-              JobStatuses.FAILED,
-              JobStatuses.WARNINGS,
-            ] as string[]).includes(status)
-          ) {
-            statusTimestamp = this.formatDate(record.completed_at);
-          }
-
-          let statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
-
-          if (status === JobStatuses.PROCESSING) {
-            statusLabel = statusLabel + ` (attempt ${record.attempts} of ${record.max_attempts})`;
-          }
-
-          if (statusTimestamp) {
-            return (
-              <div>
-                <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
-                  defaultMessage="{statusLabel} at {statusTimestamp}"
-                  values={{
-                    statusLabel,
-                    statusTimestamp: <span className="eui-textNoWrap">{statusTimestamp}</span>,
-                  }}
-                />
-                {maxSizeReached}
-                {warnings}
-              </div>
-            );
-          }
-
-          // unknown status
-          return (
-            <div>
-              {statusLabel}
-              {maxSizeReached}
-            </div>
-          );
+          return record.getStatusLabel();
         },
       },
       {
