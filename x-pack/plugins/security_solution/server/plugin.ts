@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
+import { once, merge } from 'lodash';
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
+import { estypes } from '@elastic/elasticsearch';
 
 import {
   CoreSetup,
@@ -89,6 +90,9 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
+import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
+import signalExtraFields from './lib/detection_engine/routes/index/signal_extra_fields.json';
+import { getSignalsTemplate } from './lib/detection_engine/routes/index/get_signals_template';
 import { getKibanaPrivilegesFeaturePrivileges } from './features';
 
 export interface SetupPlugins {
@@ -204,7 +208,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         if (!ruleDataService.isWriteEnabled()) {
           return;
         }
-
+        const aliases: Record<string, estypes.MappingProperty> = {};
+        Object.entries(aadFieldConversion).forEach(([key, value]) => {
+          aliases[key] = {
+            type: 'alias',
+            path: value,
+          };
+        });
         await ruleDataService.createOrUpdateComponentTemplate({
           name: componentTemplateName,
           body: {
@@ -212,6 +222,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               settings: {
                 number_of_shards: 1,
               },
+              // TODO: once https://github.com/elastic/kibana/pull/105096 is merged, add aliases into mappings.
+              // Until we add the actual fields to the mappings we can't add aliases for them
               mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
             },
           },
@@ -319,7 +331,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     compose(core, plugins, endpointContext);
 
-    core.getStartServices().then(([_, depsStart]) => {
+    core.getStartServices().then(([coreStart, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext
@@ -328,6 +340,84 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
       );
+      if (isRuleRegistryEnabled) {
+        const clusterClient = coreStart.elasticsearch.client.asInternalUser;
+        const updateExistingSignalsIndices = async () => {
+          const { body: existingSignalsTemplates } = await clusterClient.indices.getTemplate({
+            name: `${config.signalsIndex}-*`,
+          });
+          const fieldAliases: Record<string, unknown> = {};
+          Object.entries(aadFieldConversion).forEach(([key, value]) => {
+            fieldAliases[value] = {
+              type: 'alias',
+              path: key,
+            };
+          });
+          const existingTemplateNames = Object.keys(existingSignalsTemplates);
+          for (const existingTemplateName of existingTemplateNames) {
+            const spaceId = existingTemplateName.substr(config.signalsIndex.length + 1);
+            const { ruleDataService } = plugins.ruleRegistry;
+            const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts');
+            const aadIndexAliasName = `${alertsIndexPattern}-${spaceId}`;
+
+            const indexAliases = {
+              aliases: {
+                [aadIndexAliasName]: {
+                  is_write_index: false,
+                },
+              },
+            };
+            const signalsTemplate = getSignalsTemplate(existingTemplateName);
+            merge(signalsTemplate.mappings.properties, fieldAliases);
+            merge(signalsTemplate, indexAliases);
+
+            await clusterClient.indices
+              .putTemplate({
+                name: existingTemplateName,
+                body: signalsTemplate as Record<string, unknown>,
+              })
+              .catch((err) => {
+                this.logger.error(
+                  `Failed to install new legacy siem signals template: ${err.message}`
+                );
+              });
+            await clusterClient.indices
+              .putAlias({
+                index: `${existingTemplateName}-*`,
+                name: aadIndexAliasName,
+                body: {
+                  is_write_index: false,
+                },
+              })
+              .catch((err) => {
+                this.logger.error(
+                  `Failed to add alerts as data alias to existing signals indices: ${err.message}`
+                );
+              });
+          }
+          // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
+          // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
+          // mapping) or else this call will fail and not update ANY signals indices
+          const newMapping = {
+            properties: {
+              ...signalExtraFields,
+              ...fieldAliases,
+            },
+          };
+          await clusterClient.indices
+            .putMapping({
+              index: `${config.signalsIndex}*`,
+              body: newMapping,
+              allow_no_indices: true,
+            } as estypes.IndicesPutMappingRequest)
+            .catch((err) => {
+              this.logger.error(
+                `Failed to insert alerts as data field aliases to signals indices: ${err.message}`
+              );
+            });
+        };
+        updateExistingSignalsIndices();
+      }
     });
 
     this.telemetryEventsSender.setup(plugins.telemetry, plugins.taskManager);
