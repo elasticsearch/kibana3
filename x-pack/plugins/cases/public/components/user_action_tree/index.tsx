@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { first } from 'rxjs/operators';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,8 +23,8 @@ import { isRight } from 'fp-ts/Either';
 import * as i18n from './translations';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
-import { useCurrentUser } from '../../common/lib/kibana';
-import { AddComment, AddCommentRefObject } from '../add_comment';
+import { useCurrentUser, useKibana } from '../../common/lib/kibana';
+import { AddComment } from '../add_comment';
 import {
   ActionConnector,
   ActionsCommentRequestRt,
@@ -55,6 +56,7 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
+import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -75,6 +77,11 @@ export interface UserActionTreeProps {
   updateCase: (newCase: Case) => void;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
+}
+
+interface DraftComment {
+  commentId: string;
+  comment: string;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -149,33 +156,35 @@ export const UserActionTree = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
+    const commentRefs = useRef<Record<string, any>>({});
+    const {
+      application: { currentAppId$ },
+      embeddable,
+      storage,
+    } = useKibana().services;
     const { detailName: caseId, commentId, subCaseId } = useParams<{
       detailName: string;
       commentId?: string;
       subCaseId?: string;
     }>();
     const handlerTimeoutId = useRef(0);
-    const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
-    const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+    const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
       getManualAlertIdsWithNoRuleId(caseData.comments)
     );
 
-    const handleManageMarkdownEditId = useCallback(
-      (id: string) => {
-        if (!manageMarkdownEditIds.includes(id)) {
-          setManangeMardownEditIds([...manageMarkdownEditIds, id]);
-        } else {
-          setManangeMardownEditIds(manageMarkdownEditIds.filter((myId) => id !== myId));
-        }
-      },
-      [manageMarkdownEditIds]
-    );
+    const handleManageMarkdownEditId = useCallback((id: string) => {
+      setManageMarkdownEditIds((prevManageMarkdownEditIds) =>
+        !prevManageMarkdownEditIds.includes(id)
+          ? prevManageMarkdownEditIds.concat(id)
+          : prevManageMarkdownEditIds.filter((myId) => id !== myId)
+      );
+    }, []);
 
     const handleSaveComment = useCallback(
       ({ id, version }: { id: string; version: string }, content: string) => {
@@ -220,8 +229,8 @@ export const UserActionTree = React.memo(
       (quote: string) => {
         const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
 
-        if (addCommentRef && addCommentRef.current) {
-          addCommentRef.current.addQuote(`> ${addCarrots} \n`);
+        if (commentRefs.current[NEW_ID]) {
+          commentRefs.current[NEW_ID].addQuote(`> ${addCarrots} \n`);
         }
 
         handleOutlineComment('add-comment');
@@ -240,6 +249,7 @@ export const UserActionTree = React.memo(
     const MarkdownDescription = useMemo(
       () => (
         <UserActionMarkdown
+          ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
           id={DESCRIPTION_ID}
           content={caseData.description}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
@@ -255,9 +265,10 @@ export const UserActionTree = React.memo(
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
+          id={NEW_ID}
           caseId={caseId}
           userCanCrud={userCanCrud}
-          ref={addCommentRef}
+          ref={(element) => (commentRefs.current[NEW_ID] = element)}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
@@ -357,6 +368,7 @@ export const UserActionTree = React.memo(
                     }),
                     children: (
                       <UserActionMarkdown
+                        ref={(element) => (commentRefs.current[comment.id] = element)}
                         id={comment.id}
                         content={comment.comment}
                         isEditable={manageMarkdownEditIds.includes(comment.id)}
@@ -628,6 +640,59 @@ export const UserActionTree = React.memo(
       : [];
 
     const comments = [...userActions, ...bottomActions];
+
+    useEffect(() => {
+      const setInitialLensComment = async () => {
+        const currentAppId = await currentAppId$.pipe(first()).toPromise();
+
+        if (!currentAppId) {
+          return;
+        }
+
+        const incomingEmbeddablePackage = embeddable
+          ?.getStateTransfer()
+          .getIncomingEmbeddablePackage(currentAppId);
+
+        if (incomingEmbeddablePackage) {
+          let draftComment: DraftComment;
+          if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
+            try {
+              draftComment = JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID));
+
+              if (draftComment?.commentId) {
+                setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
+                  if (
+                    ![NEW_ID, DESCRIPTION_ID].includes(draftComment?.commentId) &&
+                    !prevManageMarkdownEditIds.includes(draftComment?.commentId)
+                  ) {
+                    return [draftComment?.commentId];
+                  }
+                  return prevManageMarkdownEditIds;
+                });
+
+                if (
+                  commentRefs.current &&
+                  commentRefs.current[draftComment.commentId] &&
+                  commentRefs.current[draftComment.commentId].editor?.textarea &&
+                  commentRefs.current[draftComment.commentId].editor?.toolbar
+                ) {
+                  commentRefs.current[draftComment.commentId].setComment(draftComment.comment);
+                  const lensPluginButton = commentRefs.current[
+                    draftComment.commentId
+                  ].editor?.toolbar?.querySelector(`[aria-label="${i18n.INSERT_LENS}"]`);
+                  if (lensPluginButton) {
+                    lensPluginButton.click();
+                    storage.remove(DRAFT_COMMENT_STORAGE_ID);
+                  }
+                }
+              }
+              // eslint-disable-next-line no-empty
+            } catch (e) {}
+          }
+        }
+      };
+      setInitialLensComment();
+    }, [currentAppId$, embeddable, manageMarkdownEditIds, storage]);
 
     return (
       <>
