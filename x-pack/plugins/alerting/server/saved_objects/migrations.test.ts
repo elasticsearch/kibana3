@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
 import uuid from 'uuid';
 import { getMigrations, isAnyActionSupportIncidents } from './migrations';
 import { RawAlert } from '../types';
@@ -13,88 +14,132 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { migrationMocks } from 'src/core/server/mocks';
 
 const migrationContext = migrationMocks.createContext();
-const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+const encryptedSavedObjectsSetupNoError = encryptedSavedObjectsMock.createSetup();
+const encryptedSavedObjectsSetupThrowsError = encryptedSavedObjectsMock.createSetup();
+
+let clock: sinon.SinonFakeTimers;
+
+beforeAll(() => {
+  clock = sinon.useFakeTimers();
+  encryptedSavedObjectsSetupNoError.createMigration.mockImplementation((_, migration) => migration);
+  encryptedSavedObjectsSetupThrowsError.createMigration.mockImplementation(() => () => {
+    throw new Error(`Can't migrate!`);
+  });
+});
+beforeEach(() => clock.reset());
+afterAll(() => clock.restore());
+
+function testMigrationWhenNoEsoErrors(
+  rule: SavedObjectUnsanitizedDoc<Partial<RawAlert>>,
+  expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>>,
+  version: string
+) {
+  // should migrate correctly when no decrypt errors
+  expect(
+    getMigrations(encryptedSavedObjectsSetupNoError)[version](rule, migrationContext)
+  ).toMatchObject(expectedMigratedRule);
+}
+
+function testMigrationWhenEsoThrowsError(
+  rule: SavedObjectUnsanitizedDoc<Partial<RawAlert>>,
+  expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>>,
+  version: string
+) {
+  // should log error when decryption throws error but migrated correctly
+  expect(
+    getMigrations(encryptedSavedObjectsSetupThrowsError)[version](rule, migrationContext)
+  ).toMatchObject(expectedMigratedRule);
+  expect(migrationContext.log.error).toHaveBeenCalledWith(
+    `encryptedSavedObject ${version} migration failed for rule ${rule.id} with error: Can't migrate!`,
+    {
+      migrations: {
+        ruleDocument: rule,
+      },
+    }
+  );
+}
 
 describe('7.10.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
-  test('marks alerts as legacy', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData({});
-    expect(migration710(alert, migrationContext)).toMatchObject({
-      ...alert,
+  test('marks rules as legacy', () => {
+    const rule = getMockData({});
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         meta: {
           versionApiKeyLastmodified: 'pre-7.10.0',
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.10.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.10.0');
   });
 
   test('migrates the consumer for metrics', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData({
+    const rule = getMockData({
       consumer: 'metrics',
     });
-    expect(migration710(alert, migrationContext)).toMatchObject({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         consumer: 'infrastructure',
         meta: {
           versionApiKeyLastmodified: 'pre-7.10.0',
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.10.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.10.0');
   });
 
   test('migrates the consumer for siem', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData({
+    const rule = getMockData({
       consumer: 'securitySolution',
     });
-    expect(migration710(alert, migrationContext)).toMatchObject({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         consumer: 'siem',
         meta: {
           versionApiKeyLastmodified: 'pre-7.10.0',
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.10.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.10.0');
   });
 
   test('migrates the consumer for alerting', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData({
+    const rule = getMockData({
       consumer: 'alerting',
     });
-    expect(migration710(alert, migrationContext)).toMatchObject({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         consumer: 'alerts',
         meta: {
           versionApiKeyLastmodified: 'pre-7.10.0',
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.10.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.10.0');
   });
 
   test('migrates PagerDuty actions to set a default dedupkey of the AlertId', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData({
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.pagerduty',
           group: 'default',
+          actionRef: '',
           params: {
             summary: 'fired {{alertInstanceId}}',
             eventAction: 'resolve',
@@ -104,14 +149,15 @@ describe('7.10.0', () => {
         },
       ],
     });
-    expect(migration710(alert, migrationContext)).toMatchObject({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         actions: [
           {
             actionTypeId: '.pagerduty',
             group: 'default',
+            actionRef: '',
             params: {
               summary: 'fired {{alertInstanceId}}',
               eventAction: 'resolve',
@@ -122,16 +168,19 @@ describe('7.10.0', () => {
           },
         ],
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.10.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.10.0');
   });
 
   test('skips PagerDuty actions with a specified dedupkey', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData({
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.pagerduty',
           group: 'default',
+          actionRef: '',
           params: {
             summary: 'fired {{alertInstanceId}}',
             eventAction: 'trigger',
@@ -142,14 +191,15 @@ describe('7.10.0', () => {
         },
       ],
     });
-    expect(migration710(alert, migrationContext)).toMatchObject({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         actions: [
           {
             actionTypeId: '.pagerduty',
             group: 'default',
+            actionRef: '',
             params: {
               summary: 'fired {{alertInstanceId}}',
               eventAction: 'trigger',
@@ -160,16 +210,18 @@ describe('7.10.0', () => {
           },
         ],
       },
-    });
+    };
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.10.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.10.0');
   });
 
   test('skips PagerDuty actions with an eventAction of "trigger"', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData({
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.pagerduty',
           group: 'default',
+          actionRef: '',
           params: {
             summary: 'fired {{alertInstanceId}}',
             eventAction: 'trigger',
@@ -179,10 +231,10 @@ describe('7.10.0', () => {
         },
       ],
     });
-    expect(migration710(alert, migrationContext)).toMatchObject({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         meta: {
           versionApiKeyLastmodified: 'pre-7.10.0',
         },
@@ -190,6 +242,7 @@ describe('7.10.0', () => {
           {
             actionTypeId: '.pagerduty',
             group: 'default',
+            actionRef: '',
             params: {
               summary: 'fired {{alertInstanceId}}',
               eventAction: 'trigger',
@@ -199,148 +252,101 @@ describe('7.10.0', () => {
           },
         ],
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.10.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.10.0');
   });
 
   test('creates execution status', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData();
-    const dateStart = Date.now();
-    const migratedAlert = migration710(alert, migrationContext);
-    const dateStop = Date.now();
-    const dateExecutionStatus = Date.parse(
-      migratedAlert.attributes.executionStatus.lastExecutionDate
-    );
-
-    expect(dateStart).toBeLessThanOrEqual(dateExecutionStatus);
-    expect(dateStop).toBeGreaterThanOrEqual(dateExecutionStatus);
-
-    expect(migratedAlert).toMatchObject({
-      ...alert,
+    const rule = getMockData();
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         executionStatus: {
-          lastExecutionDate: migratedAlert.attributes.executionStatus.lastExecutionDate,
+          lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'pending',
           error: null,
         },
       },
-    });
-  });
-});
+    };
 
-describe('7.10.0 migrates with failure', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementationOnce(() => () => {
-      throw new Error(`Can't migrate!`);
-    });
-  });
-
-  test('should show the proper exception', () => {
-    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
-    const alert = getMockData({
-      consumer: 'alerting',
-    });
-    const res = migration710(alert, migrationContext);
-    expect(res).toMatchObject({
-      ...alert,
-      attributes: {
-        ...alert.attributes,
-      },
-    });
-    expect(migrationContext.log.error).toHaveBeenCalledWith(
-      `encryptedSavedObject 7.10.0 migration failed for alert ${alert.id} with error: Can't migrate!`,
-      {
-        migrations: {
-          alertDocument: {
-            ...alert,
-            attributes: {
-              ...alert.attributes,
-            },
-          },
-        },
-      }
-    );
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.10.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.10.0');
   });
 });
 
 describe('7.11.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
-  test('add updatedAt field to alert - set to SavedObject updated_at attribute', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const alert = getMockData({}, true);
-    expect(migration711(alert, migrationContext)).toEqual({
-      ...alert,
+  test('add updatedAt field to rule - set to SavedObject updated_at attribute', () => {
+    const rule = getMockData({}, true);
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
-        updatedAt: alert.updated_at,
+        ...rule.attributes,
+        updatedAt: rule.updated_at,
         notifyWhen: 'onActiveAlert',
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.11.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.11.0');
   });
 
-  test('add updatedAt field to alert - set to createdAt when SavedObject updated_at is not defined', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const alert = getMockData({});
-    expect(migration711(alert, migrationContext)).toEqual({
-      ...alert,
+  test('add updatedAt field to rule - set to createdAt when SavedObject updated_at is not defined', () => {
+    const rule = getMockData({});
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
-        updatedAt: alert.attributes.createdAt,
+        ...rule.attributes,
+        updatedAt: rule.attributes.createdAt,
         notifyWhen: 'onActiveAlert',
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.11.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.11.0');
   });
 
   test('add notifyWhen=onActiveAlert when throttle is null', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const alert = getMockData({});
-    expect(migration711(alert, migrationContext)).toEqual({
-      ...alert,
+    const rule = getMockData({});
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
-        updatedAt: alert.attributes.createdAt,
+        ...rule.attributes,
+        updatedAt: rule.attributes.createdAt,
         notifyWhen: 'onActiveAlert',
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.11.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.11.0');
   });
 
   test('add notifyWhen=onActiveAlert when throttle is set', () => {
-    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
-    const alert = getMockData({ throttle: '5m' });
-    expect(migration711(alert, migrationContext)).toEqual({
-      ...alert,
+    const rule = getMockData({ throttle: '5m' });
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
-        updatedAt: alert.attributes.createdAt,
+        ...rule.attributes,
+        updatedAt: rule.attributes.createdAt,
         notifyWhen: 'onThrottleInterval',
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.11.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.11.0');
   });
 });
 
 describe('7.11.2', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-
   test('transforms connectors that support incident correctly', () => {
-    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
-    const alert = getMockData({
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.jira',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -364,6 +370,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.resilient',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -385,6 +392,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.servicenow',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -401,15 +409,15 @@ describe('7.11.2', () => {
         },
       ],
     });
-
-    expect(migration7112(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         actions: [
           {
             actionTypeId: '.jira',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
@@ -434,6 +442,7 @@ describe('7.11.2', () => {
           {
             actionTypeId: '.resilient',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
@@ -456,6 +465,7 @@ describe('7.11.2', () => {
           {
             actionTypeId: '.servicenow',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
@@ -473,12 +483,14 @@ describe('7.11.2', () => {
           },
         ],
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.11.2');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.11.2');
   });
 
   test('it transforms only subAction=pushToService', () => {
-    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
-    const alert = getMockData({
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.jira',
@@ -492,16 +504,17 @@ describe('7.11.2', () => {
       ],
     });
 
-    expect(migration7112(alert, migrationContext)).toEqual(alert);
+    testMigrationWhenNoEsoErrors(rule, rule, '7.11.2');
+    testMigrationWhenEsoThrowsError(rule, rule, '7.11.2');
   });
 
   test('it does not transforms other connectors', () => {
-    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
-    const alert = getMockData({
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.server-log',
           group: 'threshold met',
+          actionRef: '',
           params: {
             level: 'info',
             message: 'log message',
@@ -511,6 +524,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.servicenow',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -527,16 +541,16 @@ describe('7.11.2', () => {
         },
       ],
     });
-
-    expect(migration7112(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         actions: [
-          alert.attributes.actions![0],
+          rule.attributes.actions![0],
           {
             actionTypeId: '.servicenow',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
@@ -554,7 +568,10 @@ describe('7.11.2', () => {
           },
         ],
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.11.2');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.11.2');
   });
 
   test.each(['.jira', '.servicenow', '.resilient'])(
@@ -574,9 +591,8 @@ describe('7.11.2', () => {
     expect(isAnyActionSupportIncidents(doc)).toBe(false);
   });
 
-  test('it does not transforms alerts when the right structure connectors is already applied', () => {
-    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
-    const alert = getMockData({
+  test('it does not transforms rules when the right structure connectors is already applied', () => {
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.server-log',
@@ -608,16 +624,17 @@ describe('7.11.2', () => {
       ],
     });
 
-    expect(migration7112(alert, migrationContext)).toEqual(alert);
+    testMigrationWhenNoEsoErrors(rule, rule, '7.11.2');
+    testMigrationWhenEsoThrowsError(rule, rule, '7.11.2');
   });
 
   test('if incident attribute is an empty object, copy back the related attributes from subActionParams back to incident', () => {
-    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
-    const alert = getMockData({
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.server-log',
           group: 'threshold met',
+          actionRef: '',
           params: {
             level: 'info',
             message: 'log message',
@@ -627,6 +644,7 @@ describe('7.11.2', () => {
         {
           actionTypeId: '.servicenow',
           group: 'threshold met',
+          actionRef: '',
           params: {
             subAction: 'pushToService',
             subActionParams: {
@@ -643,16 +661,16 @@ describe('7.11.2', () => {
         },
       ],
     });
-
-    expect(migration7112(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         actions: [
-          alert.attributes.actions![0],
+          rule.attributes.actions![0],
           {
             actionTypeId: '.servicenow',
             group: 'threshold met',
+            actionRef: '',
             params: {
               subAction: 'pushToService',
               subActionParams: {
@@ -670,12 +688,14 @@ describe('7.11.2', () => {
           },
         ],
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.11.2');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.11.2');
   });
 
   test('custom action does not get migrated/loss', () => {
-    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
-    const alert = getMockData({
+    const rule = getMockData({
       actions: [
         {
           actionTypeId: '.mike',
@@ -697,20 +717,14 @@ describe('7.11.2', () => {
       ],
     });
 
-    expect(migration7112(alert, migrationContext)).toEqual(alert);
+    testMigrationWhenNoEsoErrors(rule, rule, '7.11.2');
+    testMigrationWhenEsoThrowsError(rule, rule, '7.11.2');
   });
 });
 
 describe('7.13.0', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    encryptedSavedObjectsSetup.createMigration.mockImplementation(
-      (shouldMigrateWhenPredicate, migration) => migration
-    );
-  });
-  test('security solution alerts get migrated and remove null values', () => {
-    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
-    const alert = getMockData({
+  test('security solution rules get migrated and remove null values', () => {
+    const rule = getMockData({
       alertTypeId: 'siem.signals',
       params: {
         author: ['Elastic'],
@@ -758,11 +772,10 @@ describe('7.13.0', () => {
         },
       },
     });
-
-    expect(migration713(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         params: {
           author: ['Elastic'],
           description:
@@ -801,12 +814,14 @@ describe('7.13.0', () => {
           },
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.13.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.13.0');
   });
 
-  test('non-null values in security solution alerts are not modified', () => {
-    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
-    const alert = getMockData({
+  test('non-null values in security solution rules are not modified', () => {
+    const rule = getMockData({
       alertTypeId: 'siem.signals',
       params: {
         author: ['Elastic'],
@@ -869,12 +884,12 @@ describe('7.13.0', () => {
       },
     });
 
-    expect(migration713(alert, migrationContext)).toEqual(alert);
+    testMigrationWhenNoEsoErrors(rule, rule, '7.13.0');
+    testMigrationWhenEsoThrowsError(rule, rule, '7.13.0');
   });
 
-  test('security solution threshold alert with string in threshold.field is migrated to array', () => {
-    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
-    const alert = getMockData({
+  test('security solution threshold rule with string in threshold.field is migrated to array', () => {
+    const rule = getMockData({
       alertTypeId: 'siem.signals',
       params: {
         threshold: {
@@ -883,11 +898,10 @@ describe('7.13.0', () => {
         },
       },
     });
-
-    expect(migration713(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         params: {
           threshold: {
             field: ['host.id'],
@@ -900,12 +914,14 @@ describe('7.13.0', () => {
           threat: [],
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.13.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.13.0');
   });
 
-  test('security solution threshold alert with empty string in threshold.field is migrated to empty array', () => {
-    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
-    const alert = getMockData({
+  test('security solution threshold rule with empty string in threshold.field is migrated to empty array', () => {
+    const rule = getMockData({
       alertTypeId: 'siem.signals',
       params: {
         threshold: {
@@ -914,11 +930,10 @@ describe('7.13.0', () => {
         },
       },
     });
-
-    expect(migration713(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         params: {
           threshold: {
             field: [],
@@ -931,12 +946,14 @@ describe('7.13.0', () => {
           threat: [],
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.13.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.13.0');
   });
 
-  test('security solution threshold alert with array in threshold.field and cardinality is left alone', () => {
-    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
-    const alert = getMockData({
+  test('security solution threshold rule with array in threshold.field and cardinality is left alone', () => {
+    const rule = getMockData({
       alertTypeId: 'siem.signals',
       params: {
         threshold: {
@@ -951,11 +968,10 @@ describe('7.13.0', () => {
         },
       },
     });
-
-    expect(migration713(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         params: {
           threshold: {
             field: ['host.id'],
@@ -973,23 +989,24 @@ describe('7.13.0', () => {
           threat: [],
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.13.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.13.0');
   });
 
-  test('security solution ML alert with string in machineLearningJobId is converted to an array', () => {
-    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
-    const alert = getMockData({
+  test('security solution ML rule with string in machineLearningJobId is converted to an array', () => {
+    const rule = getMockData({
       alertTypeId: 'siem.signals',
       params: {
         anomalyThreshold: 20,
         machineLearningJobId: 'my_job_id',
       },
     });
-
-    expect(migration713(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         params: {
           anomalyThreshold: 20,
           machineLearningJobId: ['my_job_id'],
@@ -999,23 +1016,24 @@ describe('7.13.0', () => {
           threat: [],
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.13.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.13.0');
   });
 
-  test('security solution ML alert with an array in machineLearningJobId is preserved', () => {
-    const migration713 = getMigrations(encryptedSavedObjectsSetup)['7.13.0'];
-    const alert = getMockData({
+  test('security solution ML rule with an array in machineLearningJobId is preserved', () => {
+    const rule = getMockData({
       alertTypeId: 'siem.signals',
       params: {
         anomalyThreshold: 20,
         machineLearningJobId: ['my_job_id', 'my_other_job_id'],
       },
     });
-
-    expect(migration713(alert, migrationContext)).toEqual({
-      ...alert,
+    const expectedMigratedRule: SavedObjectUnsanitizedDoc<Partial<RawAlert>> = {
+      ...rule,
       attributes: {
-        ...alert.attributes,
+        ...rule.attributes,
         params: {
           anomalyThreshold: 20,
           machineLearningJobId: ['my_job_id', 'my_other_job_id'],
@@ -1025,7 +1043,10 @@ describe('7.13.0', () => {
           threat: [],
         },
       },
-    });
+    };
+
+    testMigrationWhenNoEsoErrors(rule, expectedMigratedRule, '7.13.0');
+    testMigrationWhenEsoThrowsError(rule, expectedMigratedRule, '7.13.0');
   });
 });
 
