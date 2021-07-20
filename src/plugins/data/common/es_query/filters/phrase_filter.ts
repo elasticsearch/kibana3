@@ -70,6 +70,20 @@ export const buildPhraseFilter = (
       script: getPhraseScript(field, value),
     };
   } else {
+
+    // Build query differently if the index pattern is type of rollup
+    if(indexPattern.type == 'rollup'){
+      return {
+        meta: { index: indexPattern.id },
+        query: {
+          term: {
+            [field.name]: convertedValue,
+          },
+        },
+      } as PhraseFilter;
+    }
+
+    else{
     return {
       meta: { index: indexPattern.id },
       query: {
@@ -79,6 +93,7 @@ export const buildPhraseFilter = (
       },
     } as PhraseFilter;
   }
+}
 };
 
 export const getPhraseScript = (field: IndexPatternFieldBase, value: string) => {
