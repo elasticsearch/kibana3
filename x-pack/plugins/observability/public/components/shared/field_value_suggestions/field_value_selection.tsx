@@ -71,6 +71,7 @@ export function FieldValueSelection({
   selectedValue,
   excludedValue,
   compressed = true,
+  allowExclusions = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
@@ -142,7 +143,7 @@ export function FieldValueSelection({
       .filter((opt) => opt?.checked === 'off')
       .map(({ label: labelN }) => labelN);
 
-    return isEqual(selectedValue ?? [], currSelected) && isEqual(excludedValue, currExcluded);
+    return isEqual(selectedValue ?? [], currSelected) && isEqual(excludedValue ?? [], currExcluded);
   };
 
   return (
@@ -174,7 +175,7 @@ export function FieldValueSelection({
           options={options}
           onChange={onChange}
           isLoading={loading && !query && options.length === 0}
-          allowExclusions={true}
+          allowExclusions={allowExclusions}
         >
           {(list, search) => (
             <div style={{ width: 240 }}>

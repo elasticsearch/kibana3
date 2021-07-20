@@ -24,6 +24,8 @@ interface CommonProps {
   asFilterButton?: boolean;
   showCount?: boolean;
   allowAllValuesSelection?: boolean;
+  isSyntheticsData?: boolean;
+  allowExclusions?: boolean;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {

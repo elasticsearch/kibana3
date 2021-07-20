@@ -8,17 +8,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FiltersExpressionSelectContainer, StatusExpressionSelect } from '../monitor_expressions';
+import { isEmpty } from 'lodash';
+import { FiltersExpressionsSelect, StatusExpressionSelect } from '../monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
 import { AvailabilityExpressionSelect } from '../monitor_expressions/availability_expression_select';
 import { AlertQueryBar } from '../alert_query_bar/query_bar';
 import { useGetUrlParams } from '../../../../hooks';
+import { FILTER_FIELDS } from '../../../../../common/constants';
 
 export interface AlertMonitorStatusProps {
   alertParams: { [key: string]: any };
   enabled: boolean;
-  hasFilters: boolean;
   isOldAlert: boolean;
   snapshotCount: number;
   snapshotLoading?: boolean;
@@ -30,15 +31,24 @@ export interface AlertMonitorStatusProps {
   };
 }
 
+const hasFilters = (filters: any) => {
+  if (isEmpty(filters)) {
+    return false;
+  }
+
+  let hasFilter = false;
+
+  Object.entries(FILTER_FIELDS).forEach(([_, field]) => {
+    if (!isEmpty(filters[field])) {
+      hasFilter = true;
+    }
+  });
+
+  return hasFilter;
+};
+
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
-  const {
-    alertParams,
-    hasFilters,
-    isOldAlert,
-    setAlertParams,
-    snapshotCount,
-    snapshotLoading,
-  } = props;
+  const { alertParams, isOldAlert, setAlertParams, snapshotCount, snapshotLoading } = props;
 
   const alertFilters = alertParams?.filters ?? {};
   const [newFilters, setNewFilters] = useState<string[]>(
@@ -94,7 +104,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         }}
       />
 
-      <FiltersExpressionSelectContainer
+      <FiltersExpressionsSelect
         alertParams={alertParams}
         newFilters={newFilters}
         onRemoveFilter={(removeFilter: string) => {
@@ -110,8 +120,8 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <StatusExpressionSelect
         alertParams={alertParams}
-        hasFilters={hasFilters}
         setAlertParams={setAlertParams}
+        hasFilters={hasFilters(alertParams?.filters)}
       />
 
       <EuiHorizontalRule />
@@ -120,6 +130,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         alertParams={alertParams}
         isOldAlert={isOldAlert}
         setAlertParams={setAlertParams}
+        hasFilters={hasFilters(alertParams?.filters)}
       />
 
       <EuiSpacer size="m" />
