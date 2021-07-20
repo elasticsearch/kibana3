@@ -16,6 +16,7 @@ import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
+import { ContextualLocator } from '../contextual_locator';
 
 interface TypeOptions {
   charByChar: boolean;
@@ -39,7 +40,7 @@ export class WebElementWrapper {
 
   public static create(
     webElement: WebElement | WebElementWrapper,
-    locator: By | null,
+    locator: By | ContextualLocator | null,
     driver: WebDriver,
     timeout: number,
     fixedHeaderHeight: number,
@@ -63,7 +64,7 @@ export class WebElementWrapper {
 
   constructor(
     public _webElement: WebElement,
-    private locator: By | null,
+    private locator: By | ContextualLocator | null,
     private driver: WebDriver,
     private timeout: number,
     private fixedHeaderHeight: number,
@@ -122,7 +123,10 @@ export class WebElementWrapper {
       );
 
       await delay(200);
-      this._webElement = await this.driver.findElement(this.locator);
+      this._webElement = await (this.locator instanceof ContextualLocator
+        ? this.locator.relocate()
+        : this.driver.findElement(this.locator));
+
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
   }
@@ -186,6 +190,19 @@ export class WebElementWrapper {
       await wrapper.scrollIntoViewIfNecessary(topOffset);
       await wrapper._webElement.click();
     });
+  }
+
+  /**
+   * Clicks on this element, with the specified number of retries.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#click
+   *
+   * @return {Promise<void>}
+   */
+  public async clickWithRetries(retries: number, topOffset?: number) {
+    await this.retryCall(async function click(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary(topOffset);
+      await wrapper._webElement.click();
+    }, retries);
   }
 
   /**
