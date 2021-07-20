@@ -10,7 +10,9 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 import type { TGridProps } from '../types';
+
 import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
 
 const TimelineLazy = lazy(() => import('../components'));
@@ -39,6 +41,15 @@ export const getLoadingPanelLazy = (props: LoadingPanelProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <LoadingPanelLazy {...props} />
+    </Suspense>
+  );
+};
+
+const AddToCaseLazy = lazy(() => import('../components/actions/timeline/cases/add_to_case_action'));
+export const getAddToCaseLazy = (props: AddToCaseActionProps) => {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <AddToCaseLazy {...props} />
     </Suspense>
   );
 };
