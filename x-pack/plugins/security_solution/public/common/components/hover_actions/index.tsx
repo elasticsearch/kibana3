@@ -40,6 +40,7 @@ AdditionalContent.displayName = 'AdditionalContent';
 
 const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
   padding: ${(props) => (props.$showTopN ? 'none' : props.theme.eui.paddingSizes.s)};
+  display: flex;
 
   &:focus-within {
     .timelines__hoverActionButton,
@@ -72,17 +73,17 @@ const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean }>`
 interface Props {
   additionalContent?: React.ReactNode;
   dataType?: string;
-  draggableId?: DraggableId;
+  draggableIds?: DraggableId[];
   field: string;
-  isObjectArray: boolean;
   goGetTimelineId?: (args: boolean) => void;
+  isObjectArray: boolean;
   onFilterAdded?: () => void;
   ownFocus: boolean;
   showTopN: boolean;
   timelineId?: string | null;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
-  value?: string[] | string | null;
+  values?: string[] | string | null;
 }
 
 /** Returns a value for the `disabled` prop of `EuiFocusTrap` */
@@ -104,7 +105,7 @@ export const HoverActions: React.FC<Props> = React.memo(
   ({
     additionalContent = null,
     dataType,
-    draggableId,
+    draggableIds,
     field,
     goGetTimelineId,
     isObjectArray,
@@ -114,7 +115,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     timelineId,
     toggleColumn,
     toggleTopN,
-    value,
+    values,
   }) => {
     const kibana = useKibana();
     const { timelines } = kibana.services;
@@ -172,17 +173,37 @@ export const HoverActions: React.FC<Props> = React.memo(
         : SourcererScopeName.default;
     const { browserFields } = useSourcererScope(activeScope);
 
-    const handleStartDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
+    const handleStartDragToTimeline = (() => {
+      const handleStartDragToTimelineFns = draggableIds?.map((draggableId) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        return useGetHandleStartDragToTimeline({ draggableId, field });
+      });
+      return () => handleStartDragToTimelineFns?.forEach((dragFn) => dragFn());
+    })();
 
-    const handleFilterForValue = useCallback(
-      () => filterForValueFn({ field, value, filterManager, onFilterAdded }),
-      [filterForValueFn, field, value, filterManager, onFilterAdded]
-    );
+    const handleFilterForValue = useCallback(() => {
+      if (values) {
+        if (Array.isArray(values)) {
+          values.forEach((val) =>
+            filterForValueFn({ field, value: val, filterManager, onFilterAdded })
+          );
+        } else {
+          filterForValueFn({ field, value: values, filterManager, onFilterAdded });
+        }
+      }
+    }, [filterForValueFn, field, values, filterManager, onFilterAdded]);
 
-    const handleFilterOutValue = useCallback(
-      () => filterOutValueFn({ field, value, filterManager, onFilterAdded }),
-      [filterOutValueFn, field, value, filterManager, onFilterAdded]
-    );
+    const handleFilterOutValue = useCallback(() => {
+      if (values) {
+        if (Array.isArray(values)) {
+          values.forEach((val) =>
+            filterOutValueFn({ field, value: val, filterManager, onFilterAdded })
+          );
+        } else {
+          filterOutValueFn({ field, value: values, filterManager, onFilterAdded });
+        }
+      }
+    }, [filterOutValueFn, field, values, filterManager, onFilterAdded]);
 
     const handleToggleColumn = useCallback(
       () => (toggleColumn ? columnToggleFn({ toggleColumn, field }) : null),
@@ -268,7 +289,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       ]
     );
 
-    const showFilters = !showTopN && value != null;
+    const showFilters = !showTopN && values != null;
 
     return (
       <StyledHoverActionsContainer onKeyDown={onKeyDown} ref={panelRef} $showTopN={showTopN}>
@@ -292,14 +313,14 @@ export const HoverActions: React.FC<Props> = React.memo(
                 onClick={handleFilterForValue}
                 ownFocus={ownFocus}
                 showTooltip
-                value={value}
+                value={values}
               />
               <FilterOutValueButton
                 field={field}
                 onClick={handleFilterOutValue}
                 ownFocus={ownFocus}
                 showTooltip
-                value={value}
+                value={values}
               />
             </>
           )}
@@ -310,17 +331,17 @@ export const HoverActions: React.FC<Props> = React.memo(
               isObjectArray={isObjectArray}
               onClick={handleToggleColumn}
               ownFocus={ownFocus}
-              value={value}
+              value={values}
             />
           )}
 
-          {showFilters && draggableId != null && (
+          {showFilters && draggableIds != null && (
             <AddToTimelineButton
               field={field}
               onClick={handleStartDragToTimeline}
               ownFocus={ownFocus}
               showTooltip
-              value={value}
+              value={values}
             />
           )}
           {allowTopN({
@@ -334,11 +355,17 @@ export const HoverActions: React.FC<Props> = React.memo(
               ownFocus={ownFocus}
               showTopN={showTopN}
               timelineId={timelineId}
-              value={value}
+              value={values}
             />
           )}
           {!showTopN && (
-            <CopyButton field={field} isHoverAction ownFocus={ownFocus} showTooltip value={value} />
+            <CopyButton
+              field={field}
+              isHoverAction
+              ownFocus={ownFocus}
+              showTooltip
+              value={values}
+            />
           )}
         </EuiFocusTrap>
       </StyledHoverActionsContainer>
