@@ -7,10 +7,17 @@
  */
 
 export {
-  LocatorDefinition,
-  LocatorPublic,
-  useLocatorUrl,
-  RedirectOptions,
-  formatSearchParams,
-  parseSearchParams,
-} from './url_service';
+  DASHBOARD_APP_LOCATOR,
+  DashboardAppLocator,
+  DashboardAppLocatorDefinition,
+  DashboardAppLocatorDependencies,
+  DashboardAppLocatorParams,
+} from './app_locator';
+
+export {
+  DASHBOARD_SHARE_LOCATOR,
+  DashboardShareLocator,
+  DashboardShareLocatorDefinition,
+  DashboardShareLocatorDependencies,
+  DashboardShareLocatorParams,
+} from './share_locator';

@@ -21,6 +21,7 @@ describe('Ingest pipeline locator', () => {
           throw new Error('not implemented');
         },
         useUrl: () => '',
+        getRedirectUrl: jest.fn(),
         telemetry: jest.fn(),
         extract: jest.fn(),
         inject: jest.fn(),

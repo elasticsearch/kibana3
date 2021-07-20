@@ -8,7 +8,7 @@
 
 import type { SerializableState } from 'src/plugins/kibana_utils/common';
 import { i18n } from '@kbn/i18n';
-import type { RedirectOptions } from '../redirect_manager';
+import type { RedirectOptions } from '..';
 
 /**
  * Parses redirect endpoint URL path search parameters. Expects them in the

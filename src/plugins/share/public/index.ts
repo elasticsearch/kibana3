@@ -9,7 +9,7 @@
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 
 export { LocatorDefinition, LocatorPublic, KibanaLocation } from '../common/url_service';
-export { parseSearchParams, formatSearchParams } from './url_service';
+export { parseSearchParams, formatSearchParams } from '../common/url_service';
 
 export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
 
@@ -33,10 +33,12 @@ export {
 
 export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
 
+import { PluginInitializerContext } from 'kibana/public';
 import { SharePlugin } from './plugin';
 
 export { KibanaURL } from './kibana_url';
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
 
-export const plugin = () => new SharePlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new SharePlugin(initializerContext);
