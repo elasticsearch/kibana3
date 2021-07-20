@@ -78,15 +78,19 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
   comments?: ExternalServiceCommentResponse[];
 }
 
-export type ExternalServiceParams = Record<string, unknown>;
+export interface ExternalServiceParamsCreate {
+  incident: Incident & Record<string, unknown>;
+}
+
+export type ExternalServiceParamsUpdate = ExternalServiceParamsCreate & { incidentId: string };
 
 export interface ExternalService {
   getChoices: (fields: string[]) => Promise<GetChoicesResponse>;
-  getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
+  getIncident: (id: string) => Promise<ServiceNowIncident>;
   getFields: () => Promise<GetCommonFieldsResponse>;
-  createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
-  updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
-  findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
+  createIncident: (params: ExternalServiceParamsCreate) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: (params: ExternalServiceParamsUpdate) => Promise<ExternalServiceIncidentResponse>;
+  findIncidents: (params?: Record<string, string>) => Promise<ServiceNowIncident>;
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
@@ -158,12 +162,20 @@ export interface GetChoicesHandlerArgs {
   params: ExecutorSubActionGetChoicesParams;
 }
 
+export interface ServiceNowIncident {
+  sys_id: string;
+  number: string;
+  sys_created_on: string;
+  sys_updated_on: string;
+  [x: string]: unknown;
+}
+
 export interface ExternalServiceApi {
   getChoices: (args: GetChoicesHandlerArgs) => Promise<GetChoicesResponse>;
   getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
-  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<ServiceNowIncident>;
 }
 
 export interface ExternalServiceCommentResponse {
@@ -179,4 +191,37 @@ export interface ResponseError {
     detail: TypeNullOrUndefined<string>;
   }>;
   status: TypeNullOrUndefined<string>;
+}
+
+export interface ImportSetApiResponseSuccess {
+  import_set: string;
+  staging_table: string;
+  result: Array<{
+    display_name: string;
+    display_value: string;
+    record_link: string;
+    status: string;
+    sys_id: string;
+    table: string;
+    transform_map: string;
+  }>;
+}
+
+export interface ImportSetApiResponseError {
+  import_set: string;
+  staging_table: string;
+  result: Array<{
+    error_message: string;
+    status_message: string;
+    status: string;
+    transform_map: string;
+  }>;
+}
+
+export type ImportSetApiResponse = ImportSetApiResponseSuccess | ImportSetApiResponseError;
+export interface GetApplicationInfoResponse {
+  id: string;
+  name: string;
+  scope: string;
+  version: string;
 }

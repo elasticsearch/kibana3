@@ -27,6 +27,7 @@ const validateConnector = async (
   const translations = await import('./translations');
   const configErrors = {
     apiUrl: new Array<string>(),
+    isLegacy: new Array<string>(),
   };
   const secretsErrors = {
     username: new Array<string>(),
@@ -136,7 +137,7 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
     selectMessage: SERVICENOW_SIR_DESC,
     actionTypeTitle: SERVICENOW_SIR_TITLE,
     validateConnector,
-    actionConnectorFields: lazy(() => import('./servicenow_connectors')),
+    actionConnectorFields: lazy(() => import('./servicenow_connectors_sir')),
     validateParams: async (
       actionParams: ServiceNowSIRActionParams
     ): Promise<GenericValidationResult<unknown>> => {

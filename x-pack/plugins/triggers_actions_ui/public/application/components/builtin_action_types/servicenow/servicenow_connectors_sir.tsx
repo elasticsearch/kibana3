@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 
 import {
   EuiFieldText,
@@ -25,28 +25,14 @@ import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
-import { DeprecatedCallout } from './deprecated_callout';
-import { useGetAppInfo } from './use_get_app_info';
-import { ApplicationRequiredCallout } from './application_required_callout';
-import { isRESTApiError } from './helpers';
 
-const ServiceNowConnectorFields: React.FC<
+// TODO: Remove when SN SIR has its own SN Store application.
+
+const ServiceNowConnectorSIRFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({
-  action,
-  editActionSecrets,
-  editActionConfig,
-  errors,
-  consumer,
-  readOnly,
-  setCallbacks,
-  isEdit,
-}) => {
-  const {
-    docLinks,
-    notifications: { toasts },
-  } = useKibana().services;
-  const { apiUrl, isLegacy } = action.config;
+> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
+  const { docLinks } = useKibana().services;
+  const { apiUrl } = action.config;
 
   const isApiUrlInvalid: boolean =
     errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
@@ -67,36 +53,6 @@ const ServiceNowConnectorFields: React.FC<
     (key: string, value: string) => editActionSecrets(key, value),
     [editActionSecrets]
   );
-
-  const { fetchAppInfo, isLoading } = useGetAppInfo({ toastNotifications: toasts });
-
-  const [applicationRequired, setApplicationRequired] = useState<boolean>(false);
-
-  const beforeActionConnectorSave = useCallback(async () => {
-    if (!isLegacy) {
-      try {
-        const res = await fetchAppInfo(action);
-        if (isRESTApiError(res)) {
-          setApplicationRequired(true);
-          return;
-        }
-      } catch (e) {
-        // We need to throw here so the connector will be not be saved.
-        throw e;
-      }
-    }
-  }, [action, fetchAppInfo, isLegacy]);
-
-  const afterActionConnectorSave = useCallback(async () => {
-    // TODO: Implement
-  }, []);
-
-  useEffect(() => setCallbacks({ beforeActionConnectorSave, afterActionConnectorSave }), [
-    afterActionConnectorSave,
-    beforeActionConnectorSave,
-    setCallbacks,
-  ]);
-
   return (
     <>
       <EuiFlexGroup>
@@ -129,7 +85,6 @@ const ServiceNowConnectorFields: React.FC<
                   editActionConfig('apiUrl', '');
                 }
               }}
-              disabled={isLoading}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -178,7 +133,6 @@ const ServiceNowConnectorFields: React.FC<
                   editActionSecrets('username', '');
                 }
               }}
-              disabled={isLoading}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -206,16 +160,13 @@ const ServiceNowConnectorFields: React.FC<
                   editActionSecrets('password', '');
                 }
               }}
-              disabled={isLoading}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isLegacy && <DeprecatedCallout />}
-      {applicationRequired && <ApplicationRequiredCallout />}
     </>
   );
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ServiceNowConnectorFields as default };
+export { ServiceNowConnectorSIRFields as default };
