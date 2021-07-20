@@ -39,13 +39,21 @@ import { useRuleWithFallback } from '../../../detections/containers/detection_en
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
+import { EventCode } from '../../../../common/ecs/event';
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
   padding: 24px 4px 4px;
   word-break: break-word;
 `;
 
-const fields = [
+interface AlertSummaryField {
+  id: string;
+  label?: string;
+  linkField?: string;
+  fieldType?: string;
+}
+
+const defaultAlertSummaryFields: AlertSummaryField[] = [
   { id: 'signal.status' },
   { id: '@timestamp' },
   {
@@ -64,6 +72,18 @@ const fields = [
   { id: 'signal.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
   { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
+
+function getEventFieldsToDisplay(alertCode?: string): AlertSummaryField[] {
+  switch (alertCode) {
+    // memory protection fields
+    case EventCode.MALICIOUS_THREAD:
+    case EventCode.MEMORY_SIGNATURE:
+      // TODO return the actual fields
+      return [{ id: 'signal.status' }, { id: '@timestamp' }];
+    default:
+      return defaultAlertSummaryFields;
+  }
+}
 
 const getDescription = ({
   contextId,
@@ -94,75 +114,81 @@ const getSummaryRows = ({
   timelineId: string;
   eventId: string;
 }) => {
-  return data != null
-    ? fields.reduce<SummaryRow[]>((acc, item) => {
-        const field = data.find((d) => d.field === item.id);
-        if (!field) {
-          return acc;
-        }
-        const linkValueField =
-          item.linkField != null && data.find((d) => d.field === item.linkField);
-        const linkValue = getOr(null, 'originalValue.0', linkValueField);
-        const value = getOr(null, 'originalValue.0', field);
-        const category = field.category;
-        const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
-        const description = {
-          contextId: timelineId,
-          eventId,
-          fieldName: item.id,
-          value,
-          fieldType: item.fieldType ?? fieldType,
-          linkValue: linkValue ?? undefined,
-        };
+  if (data === null) {
+    return [];
+  }
 
-        if (item.id === 'signal.threshold_result.terms') {
-          try {
-            const terms = getOr(null, 'originalValue', field);
-            const parsedValue = terms.map((term: string) => JSON.parse(term));
-            const thresholdTerms = (parsedValue ?? []).map(
-              (entry: { field: string; value: string }) => {
-                return {
-                  title: `${entry.field} [threshold]`,
-                  description: {
-                    ...description,
-                    value: entry.value,
-                  },
-                };
-              }
-            );
-            return [...acc, ...thresholdTerms];
-          } catch (err) {
-            return acc;
-          }
-        }
+  const eventCodeField = data.find(
+    (item) => item.category === 'event' && item.field === 'event.code'
+  );
+  const alertCode = eventCodeField?.values?.[0];
+  const fields = getEventFieldsToDisplay(alertCode);
+  return fields.reduce<SummaryRow[]>((acc, item) => {
+    const field = data.find((d) => d.field === item.id);
+    if (!field) {
+      return acc;
+    }
+    const linkValueField = item.linkField != null && data.find((d) => d.field === item.linkField);
+    const linkValue = getOr(null, 'originalValue.0', linkValueField);
+    const value = getOr(null, 'originalValue.0', field);
+    const category = field.category;
+    const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
+    const description = {
+      contextId: timelineId,
+      eventId,
+      fieldName: item.id,
+      value,
+      fieldType: item.fieldType ?? fieldType,
+      linkValue: linkValue ?? undefined,
+    };
 
-        if (item.id === 'signal.threshold_result.cardinality') {
-          try {
-            const parsedValue = JSON.parse(value);
-            return [
-              ...acc,
-              {
-                title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
-                description: {
-                  ...description,
-                  value: `count(${parsedValue.field}) == ${parsedValue.value}`,
-                },
+    if (item.id === 'signal.threshold_result.terms') {
+      try {
+        const terms = getOr(null, 'originalValue', field);
+        const parsedValue = terms.map((term: string) => JSON.parse(term));
+        const thresholdTerms = (parsedValue ?? []).map(
+          (entry: { field: string; value: string }) => {
+            return {
+              title: `${entry.field} [threshold]`,
+              description: {
+                ...description,
+                value: entry.value,
               },
-            ];
-          } catch (err) {
-            return acc;
+            };
           }
-        }
+        );
+        return [...acc, ...thresholdTerms];
+      } catch (err) {
+        return acc;
+      }
+    }
 
+    if (item.id === 'signal.threshold_result.cardinality') {
+      try {
+        const parsedValue = JSON.parse(value);
         return [
           ...acc,
           {
-            title: item.label ?? item.id,
-            description,
+            title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
+            description: {
+              ...description,
+              value: `count(${parsedValue.field}) == ${parsedValue.value}`,
+            },
           },
         ];
-      }, [])
-    : [];
+      } catch (err) {
+        return acc;
+      }
+    }
+
+    return [
+      ...acc,
+      {
+        title: item.label ?? item.id,
+        description,
+      },
+    ];
+  }, []);
 };
 
 const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(getDescription);
