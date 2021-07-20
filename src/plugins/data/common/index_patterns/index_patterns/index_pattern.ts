@@ -8,7 +8,12 @@
 
 import _, { each, reject } from 'lodash';
 import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
-import type { RuntimeField } from '../types';
+import type {
+  EnhancedRuntimeField,
+  RuntimeField,
+  RuntimeObject,
+  RuntimeObjectWithSubFields,
+} from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -77,6 +82,7 @@ export class IndexPattern implements IIndexPattern {
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
   private runtimeFieldMap: Record<string, RuntimeField>;
+  private runtimeObjectMap: Record<string, RuntimeObject>;
 
   /**
    * prevents errors when index pattern exists before indices
@@ -120,6 +126,7 @@ export class IndexPattern implements IIndexPattern {
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.runtimeObjectMap = spec.runtimeObjectMap || {};
   }
 
   /**
@@ -194,12 +201,67 @@ export class IndexPattern implements IIndexPattern {
       };
     });
 
+    const runtimeFields = {
+      ...this.getComputedRuntimeFields(),
+      ...this.getComputedRuntimeObjects(),
+    };
+
     return {
       storedFields: ['*'],
       scriptFields,
       docvalueFields,
-      runtimeFields: this.runtimeFieldMap,
+      runtimeFields,
     };
+  }
+
+  private getComputedRuntimeFields() {
+    // Runtime fields which are **not** created from a parent object
+    return Object.entries(this.runtimeFieldMap).reduce((acc, [name, field]) => {
+      const { type, script, parent } = field;
+      if (parent !== undefined) {
+        return acc;
+      }
+      return {
+        ...acc,
+        [name]: { type, script },
+      };
+    }, {});
+  }
+
+  /**
+   * This method will need to be updated once ES support the "object" type
+   * We will need to add an aditional "fields" prop with the subFields.
+   *
+   * This is what ES will be expecting for runtime objects
+   * https://github.com/elastic/elasticsearch/issues/68203
+   *
+   * {
+   *   "objectName": {
+   *     "type": "object",
+   *     "script": "emit(...)" // script that emits multiple values
+   *     "fields": {  // map of the subFields
+   *       "field_1": {
+   *         "type": "ip"
+   *       },
+   *       "field_2": {
+   *         "type": "ip"
+   *       },
+   *     }
+   *   }
+   * }
+   *
+   * @returns A map of runtime objects
+   */
+  private getComputedRuntimeObjects() {
+    // Only return the script and set its type to 'object'
+    return Object.entries(this.runtimeObjectMap).reduce((acc, [name, runtimeObject]) => {
+      const { script } = runtimeObject;
+      return {
+        ...acc,
+        // [name]: { type: 'object', script, fields: { ... } }, // 'object' not supported yet ES side
+        [name]: { type: 'keyword', script }, // Temp to make demo work
+      };
+    }, {});
   }
 
   /**
@@ -218,6 +280,7 @@ export class IndexPattern implements IIndexPattern {
       type: this.type,
       fieldFormats: this.fieldFormatMap,
       runtimeFieldMap: this.runtimeFieldMap,
+      runtimeObjectMap: this.runtimeObjectMap,
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
@@ -324,6 +387,7 @@ export class IndexPattern implements IIndexPattern {
       : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
+    const runtimeObjectMap = this.runtimeObjectMap;
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
@@ -337,6 +401,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      runtimeObjectMap: runtimeObjectMap ? JSON.stringify(runtimeObjectMap) : undefined,
     };
   }
 
@@ -364,22 +429,38 @@ export class IndexPattern implements IIndexPattern {
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-  addRuntimeField(name: string, runtimeField: RuntimeField) {
+  addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): IndexPatternField {
+    const { type, script, parent, customLabel, format, popularity } = enhancedRuntimeField;
+
+    const runtimeField: RuntimeField = { type, script, parent };
+
+    let fieldCreated: IndexPatternField;
     const existingField = this.getFieldByName(name);
     if (existingField) {
       existingField.runtimeField = runtimeField;
+      fieldCreated = existingField;
     } else {
-      this.fields.add({
+      fieldCreated = this.fields.add({
         name,
         runtimeField,
-        type: castEsToKbnFieldTypeName(runtimeField.type),
+        type: castEsToKbnFieldTypeName(type),
         aggregatable: true,
         searchable: true,
-        count: 0,
+        count: popularity ?? 0,
         readFromDocValues: false,
       });
     }
     this.runtimeFieldMap[name] = runtimeField;
+
+    this.setFieldCustomLabel(name, customLabel);
+
+    if (format) {
+      this.setFieldFormat(name, format);
+    } else {
+      this.deleteFieldFormat(name);
+    }
+
+    return fieldCreated;
   }
 
   /**
@@ -429,6 +510,100 @@ export class IndexPattern implements IIndexPattern {
       }
     }
     delete this.runtimeFieldMap[name];
+  }
+
+  /**
+   * Add a runtime object and its subFields to the fields list
+   * @param name - The runtime object name
+   * @param runtimeObject - The runtime object definition
+   */
+  addRuntimeObject(name: string, runtimeObject: RuntimeObjectWithSubFields): IndexPatternField[] {
+    if (!runtimeObject.subFields || Object.keys(runtimeObject.subFields).length === 0) {
+      throw new Error(`Can't save runtime object [name = ${name}] without subfields.`);
+    }
+
+    this.removeRuntimeObject(name);
+
+    const { script, subFields } = runtimeObject;
+
+    const fieldsCreated: IndexPatternField[] = [];
+
+    for (const [subFieldName, subField] of Object.entries(subFields)) {
+      const field = this.addRuntimeField(`${name}.${subFieldName}`, { ...subField, parent: name });
+      fieldsCreated.push(field);
+    }
+
+    this.runtimeObjectMap[name] = {
+      name,
+      script,
+      subFields: Object.keys(subFields),
+    };
+
+    return fieldsCreated;
+  }
+
+  /**
+   * Returns runtime object if exists
+   * @param name
+   */
+  getRuntimeObject(name: string): RuntimeObject | null {
+    return this.runtimeObjectMap[name] ?? null;
+  }
+
+  /**
+   * Returns runtime object (if exists) with its subFields
+   * @param name
+   */
+  getRuntimeObjectWithSubFields(name: string): RuntimeObjectWithSubFields | null {
+    const existingRuntimeObject = this.runtimeObjectMap[name];
+
+    if (!existingRuntimeObject) {
+      return null;
+    }
+
+    const subFields = existingRuntimeObject.subFields.reduce((acc, subFieldName) => {
+      const field = this.getFieldByName(subFieldName);
+
+      if (!field) {
+        // This condition should never happen
+        return acc;
+      }
+
+      const runtimeField: EnhancedRuntimeField = {
+        type: 'object',
+        parent: name,
+        customLabel: field.customLabel,
+        popularity: field.count,
+        format: this.getFormatterForFieldNoDefault(field.name)?.toJSON(),
+      };
+
+      return {
+        ...acc,
+        [subFieldName]: runtimeField,
+      };
+    }, {} as Record<string, EnhancedRuntimeField>);
+
+    return {
+      ...existingRuntimeObject,
+      subFields,
+    };
+  }
+
+  /**
+   * Remove a runtime object with its associated subFields
+   * @param name - Object runtime name to remove
+   */
+  removeRuntimeObject(name: string) {
+    const existingRuntimeObject = this.getRuntimeObject(name);
+
+    if (!!existingRuntimeObject) {
+      // Remove all previous subFields
+      for (const subFieldName of existingRuntimeObject.subFields) {
+        this.removeRuntimeField(`${name}.${subFieldName}`);
+      }
+
+      delete this.runtimeObjectMap[name];
+    }
   }
 
   /**

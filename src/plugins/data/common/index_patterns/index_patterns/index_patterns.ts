@@ -11,7 +11,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
-import type { RuntimeField } from '../types';
+import type { RuntimeField, RuntimeObject } from '../types';
 import { IndexPattern } from './index_pattern';
 import {
   createEnsureDefaultIndexPattern,
@@ -359,6 +359,7 @@ export class IndexPatternsService {
         sourceFilters,
         fieldFormatMap,
         runtimeFieldMap,
+        runtimeObjectMap,
         typeMeta,
         type,
         fieldAttrs,
@@ -373,6 +374,9 @@ export class IndexPatternsService {
     const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
     const parsedRuntimeFieldMap: Record<string, RuntimeField> = runtimeFieldMap
       ? JSON.parse(runtimeFieldMap)
+      : {};
+    const parsedRuntimeObjectMap: Record<string, RuntimeObject> = runtimeObjectMap
+      ? JSON.parse(runtimeObjectMap)
       : {};
 
     return {
@@ -389,6 +393,7 @@ export class IndexPatternsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
+      runtimeObjectMap: parsedRuntimeObjectMap,
     };
   };
 

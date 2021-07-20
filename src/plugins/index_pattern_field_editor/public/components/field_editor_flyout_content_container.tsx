@@ -15,7 +15,6 @@ import {
   IndexPatternField,
   IndexPattern,
   DataPublicPluginStart,
-  RuntimeType,
   UsageCollectionStart,
 } from '../shared_imports';
 import { Field, PluginStart, InternalFieldType } from '../types';
@@ -39,7 +38,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (field: IndexPatternField) => void;
+  onSave: (fields: IndexPatternField[]) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -91,26 +90,58 @@ export const FieldEditorFlyoutContentContainer = ({
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  const saveRuntimeObject = useCallback(
+    (updatedField: Field): IndexPatternField[] => {
+      if (field?.type !== undefined && field?.type !== 'object') {
+        // A previous runtime field is now a runtime object
+        indexPattern.removeRuntimeField(field.name);
+      } else if (field?.name && field.name !== updatedField.name) {
+        // rename an existing runtime object
+        indexPattern.removeRuntimeObject(field.name);
+      }
+
+      // --- Temporary hack to create a runtime object ---
+      const runtimeName = 'aaaObject';
+      const tempRuntimeObject = {
+        name: runtimeName,
+        script: updatedField.script!,
+        subFields: {
+          field_a: updatedField,
+          field_b: updatedField,
+          field_c: updatedField,
+        },
+      };
+      return indexPattern.addRuntimeObject(runtimeName, tempRuntimeObject);
+      // --- end temporary hack ---
+    },
+    [field?.name, field?.type, indexPattern]
+  );
+
+  const saveRuntimeField = useCallback(
+    (updatedField: Field): [IndexPatternField] => {
+      if (field?.type !== undefined && field?.type === 'object') {
+        // A previous runtime object is now a runtime field
+        indexPattern.removeRuntimeObject(field.name);
+      } else if (field?.name && field.name !== updatedField.name) {
+        // rename an existing runtime field
+        indexPattern.removeRuntimeField(field.name);
+      }
+
+      const fieldCreated = indexPattern.addRuntimeField(updatedField.name, updatedField);
+      return [fieldCreated];
+    },
+    [field?.name, field?.type, indexPattern]
+  );
+
   const saveField = useCallback(
     async (updatedField: Field) => {
       setIsSaving(true);
-
-      const { script } = updatedField;
 
       if (fieldTypeToProcess === 'runtime') {
         try {
           usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
           // eslint-disable-next-line no-empty
         } catch {}
-        // rename an existing runtime field
-        if (field?.name && field.name !== updatedField.name) {
-          indexPattern.removeRuntimeField(field.name);
-        }
-
-        indexPattern.addRuntimeField(updatedField.name, {
-          type: updatedField.type as RuntimeType,
-          script,
-        });
       } else {
         try {
           usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
@@ -118,32 +149,22 @@ export const FieldEditorFlyoutContentContainer = ({
         } catch {}
       }
 
-      const editedField = indexPattern.getFieldByName(updatedField.name);
-
       try {
-        if (!editedField) {
-          throw new Error(
-            `Unable to find field named '${updatedField.name}' on index pattern '${indexPattern.title}'`
-          );
-        }
+        const editedFields: IndexPatternField[] =
+          // updatedField.type === 'object'
+          // --> always "true" to demo the creation of runtime objects
+          true ? saveRuntimeObject(updatedField) : saveRuntimeField(updatedField);
 
-        indexPattern.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
-        editedField.count = updatedField.popularity || 0;
-        if (updatedField.format) {
-          indexPattern.setFieldFormat(updatedField.name, updatedField.format);
-        } else {
-          indexPattern.deleteFieldFormat(updatedField.name);
-        }
+        await indexPatternService.updateSavedObject(indexPattern);
 
-        await indexPatternService.updateSavedObject(indexPattern).then(() => {
-          const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
-            defaultMessage: "Saved '{fieldName}'",
-            values: { fieldName: updatedField.name },
-          });
-          notifications.toasts.addSuccess(message);
-          setIsSaving(false);
-          onSave(editedField);
+        const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+          defaultMessage: "Saved '{fieldName}'",
+          values: { fieldName: updatedField.name },
         });
+        notifications.toasts.addSuccess(message);
+
+        setIsSaving(false);
+        onSave(editedFields);
       } catch (e) {
         const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
           defaultMessage: 'Failed to save field changes',
@@ -158,8 +179,9 @@ export const FieldEditorFlyoutContentContainer = ({
       indexPatternService,
       notifications,
       fieldTypeToProcess,
-      field?.name,
       usageCollection,
+      saveRuntimeField,
+      saveRuntimeObject,
     ]
   );
 

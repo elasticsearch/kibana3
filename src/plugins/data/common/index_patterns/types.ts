@@ -18,12 +18,32 @@ import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
 export interface RuntimeField {
   type: RuntimeType;
   script?: {
     source: string;
   };
+  parent?: string;
 }
+
+export interface EnhancedRuntimeField extends RuntimeField {
+  format?: SerializedFieldFormat;
+  customLabel?: string;
+  popularity?: number;
+}
+
+export interface RuntimeObject {
+  name: string;
+  script: {
+    source: string;
+  };
+  subFields: string[];
+}
+
+export type RuntimeObjectWithSubFields = Omit<RuntimeObject, 'subFields'> & {
+  subFields: Record<string, EnhancedRuntimeField>;
+};
 
 /**
  * @deprecated
@@ -62,6 +82,7 @@ export interface IndexPatternAttributes {
   fieldFormatMap?: string;
   fieldAttrs?: string;
   runtimeFieldMap?: string;
+  runtimeObjectMap?: string;
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -203,6 +224,7 @@ export interface FieldSpec extends IndexPatternFieldBase {
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
+  parent?: string;
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
@@ -233,6 +255,7 @@ export interface IndexPatternSpec {
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
   runtimeFieldMap?: Record<string, RuntimeField>;
+  runtimeObjectMap?: Record<string, RuntimeObject>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }
