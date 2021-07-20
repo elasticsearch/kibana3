@@ -651,6 +651,196 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 0,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": undefined,
+                                    "content_type": undefined,
+                                    "created_at": "2020-04-14T21:01:13.064Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k90e51pk1ieucbae0c3t8wo2",
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": false,
+                                    "jobtype": "printable_pdf",
+                                    "kibana_id": undefined,
+                                    "kibana_name": undefined,
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 720,
+                                        "width": 1080,
+                                      },
+                                      "id": "preserve_layout",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "canvas workpad",
+                                    "size": undefined,
+                                    "started_at": undefined,
+                                    "status": "pending",
+                                    "timeout": 300000,
+                                    "title": "My Canvas Workpad",
+                                    "warnings": undefined,
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              />
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
@@ -1922,6 +2112,196 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 1,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": undefined,
+                                    "content_type": undefined,
+                                    "created_at": "2020-04-14T21:01:13.064Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k90e51pk1ieucbae0c3t8wo1",
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": false,
+                                    "jobtype": "printable_pdf",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 720,
+                                        "width": 1080,
+                                      },
+                                      "id": "preserve_layout",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "canvas workpad",
+                                    "size": undefined,
+                                    "started_at": "2020-04-14T21:01:14.526Z",
+                                    "status": "processing",
+                                    "timeout": 300000,
+                                    "title": "My Canvas Workpad",
+                                    "warnings": undefined,
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              />
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
@@ -3193,6 +3573,196 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 1,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": "2020-04-14T20:19:14.748Z",
+                                    "content_type": "application/pdf",
+                                    "created_at": "2020-04-14T20:19:02.977Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k90cmthd1gv8cbae0c2le8bo",
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": false,
+                                    "jobtype": "printable_pdf",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 720,
+                                        "width": 1080,
+                                      },
+                                      "id": "preserve_layout",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "canvas workpad",
+                                    "size": 80262,
+                                    "started_at": "2020-04-14T20:19:04.073Z",
+                                    "status": "completed",
+                                    "timeout": 300000,
+                                    "title": "My Canvas Workpad",
+                                    "warnings": undefined,
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              />
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
@@ -4390,29 +4960,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                             2020-04-14 @ 01:21 PM
                           </span>
                         </FormattedMessage>
-                        <EuiText
-                          size="s"
-                        >
-                          <div
-                            className="euiText euiText--small"
-                          >
-                            <EuiTextColor
-                              color="subdued"
-                            >
-                              <span
-                                className="euiTextColor euiTextColor--subdued"
-                              >
-                                <FormattedMessage
-                                  defaultMessage="Errors occurred: see job info for details."
-                                  id="xpack.reporting.listing.tableValue.statusDetail.warningsText"
-                                  values={Object {}}
-                                >
-                                  Errors occurred: see job info for details.
-                                </FormattedMessage>
-                              </span>
-                            </EuiTextColor>
-                          </div>
-                        </EuiText>
                       </div>
                     </div>
                   </td>
@@ -4538,6 +5085,255 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 1,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": "2020-04-14T17:21:08.223Z",
+                                    "content_type": "application/pdf",
+                                    "created_at": "2020-04-14T17:20:27.326Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k906958e1d4wcbae0c9hip1a",
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": false,
+                                    "jobtype": "printable_pdf",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 720,
+                                        "width": 1080,
+                                      },
+                                      "id": "preserve_layout",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "canvas workpad",
+                                    "size": 49468,
+                                    "started_at": "2020-04-14T17:20:29.444Z",
+                                    "status": "completed_with_warnings",
+                                    "timeout": 300000,
+                                    "title": "My Canvas Workpad",
+                                    "warnings": Array [
+                                      "An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. TimeoutError: waiting for selector \\"[data-shared-item],[data-shared-items-count]\\" failed: timeout 30000ms exceeded",
+                                    ],
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              >
+                                <EuiPopover
+                                  anchorPosition="downRight"
+                                  button={
+                                    <EuiButtonIcon
+                                      aria-label="Warnings"
+                                      iconType="alert"
+                                      onClick={[Function]}
+                                    />
+                                  }
+                                  closePopover={[Function]}
+                                  display="inlineBlock"
+                                  hasArrow={true}
+                                  id="warnings_popover"
+                                  isOpen={false}
+                                  ownFocus={true}
+                                  panelPaddingSize="m"
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownRight"
+                                    id="warnings_popover"
+                                  >
+                                    <div
+                                      className="euiPopover__anchor"
+                                    >
+                                      <EuiButtonIcon
+                                        aria-label="Warnings"
+                                        iconType="alert"
+                                        onClick={[Function]}
+                                      >
+                                        <button
+                                          aria-label="Warnings"
+                                          className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                          disabled={false}
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiButtonIcon__icon"
+                                            color="inherit"
+                                            size="m"
+                                            type="alert"
+                                          >
+                                            <span
+                                              aria-hidden="true"
+                                              className="euiButtonIcon__icon"
+                                              color="inherit"
+                                              data-euiicon-type="alert"
+                                              size="m"
+                                            />
+                                          </EuiIcon>
+                                        </button>
+                                      </EuiButtonIcon>
+                                    </div>
+                                  </div>
+                                </EuiPopover>
+                              </ReportWarningsButton>
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
@@ -4731,7 +5527,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 }
                               >
                                 <EuiToolTip
-                                  content="Download report"
+                                  content={
+                                    <ul>
+                                      <li>
+                                        An error occurred when trying to read the page for visualization panel info. You may need to increase 'xpack.reporting.capture.timeouts.waitForElements'. TimeoutError: waiting for selector "[data-shared-item],[data-shared-items-count]" failed: timeout 30000ms exceeded
+                                      </li>
+                                    </ul>
+                                  }
                                   delay="regular"
                                   position="top"
                                 >
@@ -5862,6 +6664,196 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 1,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": "2020-04-14T17:19:53.244Z",
+                                    "content_type": "application/pdf",
+                                    "created_at": "2020-04-14T17:19:31.379Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k9067y2a1d4wcbae0cad38n0",
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": false,
+                                    "jobtype": "printable_pdf",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 720,
+                                        "width": 1080,
+                                      },
+                                      "id": "preserve_layout",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "canvas workpad",
+                                    "size": 80262,
+                                    "started_at": "2020-04-14T17:19:39.883Z",
+                                    "status": "completed",
+                                    "timeout": 300000,
+                                    "title": "My Canvas Workpad",
+                                    "warnings": undefined,
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              />
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
@@ -7180,6 +8172,196 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 1,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": "2020-04-14T17:19:36.822Z",
+                                    "content_type": "application/pdf",
+                                    "created_at": "2020-04-14T17:19:23.578Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k9067s1m1d4wcbae0cdnvcms",
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": false,
+                                    "jobtype": "printable_pdf",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 720,
+                                        "width": 1080,
+                                      },
+                                      "id": "preserve_layout",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "canvas workpad",
+                                    "size": 80262,
+                                    "started_at": "2020-04-14T17:19:25.247Z",
+                                    "status": "completed",
+                                    "timeout": 300000,
+                                    "title": "My Canvas Workpad",
+                                    "warnings": undefined,
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              />
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
@@ -8498,6 +9680,196 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 1,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": "2020-04-14T17:18:03.910Z",
+                                    "content_type": "application/pdf",
+                                    "created_at": "2020-04-14T17:17:47.752Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k9065q3s1d4wcbae0c00fxlh",
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": false,
+                                    "jobtype": "printable_pdf",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 720,
+                                        "width": 1080,
+                                      },
+                                      "id": "preserve_layout",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "canvas workpad",
+                                    "size": 80262,
+                                    "started_at": "2020-04-14T17:17:50.379Z",
+                                    "status": "completed",
+                                    "timeout": 300000,
+                                    "title": "My Canvas Workpad",
+                                    "warnings": undefined,
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              />
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
@@ -9816,6 +11188,196 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 1,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": "2020-04-14T17:13:03.719Z",
+                                    "content_type": "application/pdf",
+                                    "created_at": "2020-04-14T17:12:51.985Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k905zdw11d34cbae0c3y6tzh",
+                                    "index": ".reporting-2020.04.12",
+                                    "isDeprecated": false,
+                                    "jobtype": "printable_pdf",
+                                    "kibana_id": "5b2de169-2785-441b-ae8c-186a1936b17d",
+                                    "kibana_name": "spicy.local",
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 720,
+                                        "width": 1080,
+                                      },
+                                      "id": "preserve_layout",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "canvas workpad",
+                                    "size": 80262,
+                                    "started_at": "2020-04-14T17:12:52.431Z",
+                                    "status": "completed",
+                                    "timeout": 300000,
+                                    "title": "My Canvas Workpad",
+                                    "warnings": undefined,
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              />
                               <ReportDownloadButton
                                 apiClient={
                                   Object {
@@ -11134,6 +12696,196 @@ exports[`ReportListing Report job listing with some items 1`] = `
                               onBlur={[Function]}
                               onFocus={[Function]}
                             >
+                              <ReportWarningsButton
+                                apiClient={
+                                  Object {
+                                    "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
+                                    "total": [Function],
+                                  }
+                                }
+                                ilmPolicyContextValue={
+                                  Object {
+                                    "isLoading": false,
+                                    "recheckStatus": [Function],
+                                    "status": undefined,
+                                  }
+                                }
+                                intl={
+                                  Object {
+                                    "defaultFormats": Object {},
+                                    "defaultLocale": "en",
+                                    "formatDate": [Function],
+                                    "formatHTMLMessage": [Function],
+                                    "formatMessage": [Function],
+                                    "formatNumber": [Function],
+                                    "formatPlural": [Function],
+                                    "formatRelative": [Function],
+                                    "formatTime": [Function],
+                                    "formats": Object {
+                                      "date": Object {
+                                        "full": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "weekday": "long",
+                                          "year": "numeric",
+                                        },
+                                        "long": Object {
+                                          "day": "numeric",
+                                          "month": "long",
+                                          "year": "numeric",
+                                        },
+                                        "medium": Object {
+                                          "day": "numeric",
+                                          "month": "short",
+                                          "year": "numeric",
+                                        },
+                                        "short": Object {
+                                          "day": "numeric",
+                                          "month": "numeric",
+                                          "year": "2-digit",
+                                        },
+                                      },
+                                      "number": Object {
+                                        "currency": Object {
+                                          "style": "currency",
+                                        },
+                                        "percent": Object {
+                                          "style": "percent",
+                                        },
+                                      },
+                                      "relative": Object {
+                                        "days": Object {
+                                          "units": "day",
+                                        },
+                                        "hours": Object {
+                                          "units": "hour",
+                                        },
+                                        "minutes": Object {
+                                          "units": "minute",
+                                        },
+                                        "months": Object {
+                                          "units": "month",
+                                        },
+                                        "seconds": Object {
+                                          "units": "second",
+                                        },
+                                        "years": Object {
+                                          "units": "year",
+                                        },
+                                      },
+                                      "time": Object {
+                                        "full": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "long": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                          "timeZoneName": "short",
+                                        },
+                                        "medium": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                          "second": "numeric",
+                                        },
+                                        "short": Object {
+                                          "hour": "numeric",
+                                          "minute": "numeric",
+                                        },
+                                      },
+                                    },
+                                    "formatters": Object {
+                                      "getDateTimeFormat": [Function],
+                                      "getMessageFormat": [Function],
+                                      "getNumberFormat": [Function],
+                                      "getPluralFormat": [Function],
+                                      "getRelativeFormat": [Function],
+                                    },
+                                    "locale": "en",
+                                    "messages": Object {},
+                                    "now": [Function],
+                                    "onError": [Function],
+                                    "textComponent": Symbol(react.fragment),
+                                    "timeZone": null,
+                                  }
+                                }
+                                license$={
+                                  Object {
+                                    "subscribe": [Function],
+                                  }
+                                }
+                                navigateToUrl={[MockFunction]}
+                                pollConfig={
+                                  Object {
+                                    "jobCompletionNotifier": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                    "jobsRefresh": Object {
+                                      "interval": 5000,
+                                      "intervalErrorMultiplier": 3,
+                                    },
+                                  }
+                                }
+                                record={
+                                  Job {
+                                    "attempts": 1,
+                                    "browserTimezone": "America/Phoenix",
+                                    "browser_type": "chromium",
+                                    "completed_at": "2020-04-09T19:10:10.049Z",
+                                    "content_type": "image/png",
+                                    "created_at": "2020-04-09T19:09:52.139Z",
+                                    "created_by": "elastic",
+                                    "csv_contains_formulas": undefined,
+                                    "id": "k8t4ylcb07mi9d006214ifyg",
+                                    "index": ".reporting-2020.04.05",
+                                    "isDeprecated": false,
+                                    "jobtype": "PNG",
+                                    "kibana_id": "f2e59b4e-f79b-4a48-8a7d-6d50a3c1d914",
+                                    "kibana_name": "spicy.local",
+                                    "layout": Object {
+                                      "dimensions": Object {
+                                        "height": 1575,
+                                        "width": 1423,
+                                      },
+                                      "id": "png",
+                                    },
+                                    "max_attempts": 1,
+                                    "max_size_reached": undefined,
+                                    "objectType": "visualization",
+                                    "size": 123456789,
+                                    "started_at": "2020-04-09T19:09:54.570Z",
+                                    "status": "completed",
+                                    "timeout": 300000,
+                                    "title": "count",
+                                    "warnings": undefined,
+                                  }
+                                }
+                                redirect={[MockFunction]}
+                                toasts={
+                                  Object {
+                                    "add": [MockFunction],
+                                    "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
+                                  }
+                                }
+                                urlService={
+                                  Object {
+                                    "locators": Object {
+                                      "get": [Function],
+                                    },
+                                  }
+                                }
+                              />
                               <ReportDownloadButton
                                 apiClient={
                                   Object {

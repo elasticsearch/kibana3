@@ -31,30 +31,11 @@ export const ReportDownloadButton: FunctionComponent<Props> = (props: Props) => 
     />
   );
 
-  if (record.csv_contains_formulas) {
-    return (
-      <EuiToolTip
-        position="top"
-        content={intl.formatMessage({
-          id: 'xpack.reporting.listing.table.csvContainsFormulas',
-          defaultMessage:
-            'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
-        })}
-      >
-        {button}
-      </EuiToolTip>
-    );
-  }
+  const warnings = record.getWarnings();
 
-  if (record.max_size_reached) {
+  if (warnings) {
     return (
-      <EuiToolTip
-        position="top"
-        content={intl.formatMessage({
-          id: 'xpack.reporting.listing.table.maxSizeReachedTooltip',
-          defaultMessage: 'Max size reached, contains partial data.',
-        })}
-      >
+      <EuiToolTip position="top" content={warnings}>
         {button}
       </EuiToolTip>
     );
