@@ -16,9 +16,9 @@ import {
   getConditionalHeaders,
   getFullUrls,
   omitBlockedHeaders,
+  getCustomLogo,
 } from '../../common';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { getCustomLogo } from '../lib/get_custom_logo';
 import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<
@@ -46,6 +46,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
         const urls = getFullUrls(config, job);
 
         const { browserTimezone, layout, title } = job;
+
         if (apmGetAssets) apmGetAssets.end();
 
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');

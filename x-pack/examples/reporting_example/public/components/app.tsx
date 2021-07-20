@@ -21,6 +21,8 @@ import {
   EuiPopover,
   EuiText,
   EuiTitle,
+  EuiCodeBlock,
+  EuiSpacer,
 } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
@@ -31,7 +33,13 @@ import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CoreStart } from '../../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
 import { constants, ReportingStart } from '../../../../../x-pack/plugins/reporting/public';
-import { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
+import type { JobParamsPDF } from '../../../../plugins/reporting/server/export_types/printable_pdf/types';
+import type { JobParamsPDFV2 } from '../../../../plugins/reporting/server/export_types/printable_pdf_v2/types';
+import type { JobParamsPNGV2 } from '../../../../plugins/reporting/server/export_types/png_v2/types';
+
+import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
+
+import { MyForwardableState } from '../types';
 
 interface ReportingExampleAppDeps {
   basename: string;
@@ -40,6 +48,7 @@ interface ReportingExampleAppDeps {
   navigation: NavigationPublicPluginStart;
   reporting: ReportingStart;
   screenshotMode: ScreenshotModePluginSetup;
+  forwardedParams?: MyForwardableState;
 }
 
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
@@ -50,8 +59,14 @@ export const ReportingExampleApp = ({
   http,
   reporting,
   screenshotMode,
+  forwardedParams,
 }: ReportingExampleAppDeps) => {
   const { getDefaultLayoutSelectors } = reporting;
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('forwardedParams', forwardedParams);
+  }, [forwardedParams]);
 
   // Context Menu
   const [isPopoverOpen, setPopover] = useState(false);
@@ -86,16 +101,61 @@ export const ReportingExampleApp = ({
     };
   };
 
+  const getPDFJobParamsDefaultV2 = (): JobParamsPDFV2 => {
+    return {
+      layout: {
+        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        selectors: getDefaultLayoutSelectors(),
+      },
+      locatorParams: [
+        { id: REPORTING_EXAMPLE_LOCATOR_ID, version: '0.5.0', params: { myTestState: {} } },
+      ],
+      objectType: 'develeloperExample',
+      title: 'Reporting Developer Example',
+      forceNow: new Date().toISOString(),
+    };
+  };
+
+  const getPNGJobParamsDefaultV2 = (): JobParamsPNGV2 => {
+    return {
+      layout: {
+        id: constants.LAYOUT_TYPES.PRESERVE_LAYOUT,
+        selectors: getDefaultLayoutSelectors(),
+      },
+      locatorParams: {
+        id: REPORTING_EXAMPLE_LOCATOR_ID,
+        version: '1',
+        params: { myTestState: {} },
+      },
+      objectType: 'develeloperExample',
+      title: 'Reporting Developer Example',
+      forceNow: new Date().toISOString(),
+    };
+  };
+
   const panels = [
-    { id: 0, items: [{ name: 'PDF Reports', icon: 'document', panel: 1 }] },
+    {
+      id: 0,
+      items: [
+        { name: 'PDF Reports', icon: 'document', panel: 1 },
+        { name: 'PNG Reports', icon: 'document', panel: 7 },
+      ],
+    },
     {
       id: 1,
       initialFocusedItemIndex: 1,
       title: 'PDF Reports',
       items: [
         { name: 'No Layout Option', icon: 'document', panel: 2 },
+        { name: 'V2 No Layout Option', icon: 'document', panel: 4 },
         { name: 'Canvas Layout Option', icon: 'canvasApp', panel: 3 },
       ],
+    },
+    {
+      id: 7,
+      initialFocusedItemIndex: 0,
+      title: 'PNG Reports',
+      items: [{ name: 'V2 No Layout Option', icon: 'document', panel: 5 }],
     },
     {
       id: 2,
@@ -118,6 +178,26 @@ export const ReportingExampleApp = ({
         />
       ),
     },
+    {
+      id: 4,
+      title: 'V2 No Layout Option',
+      content: (
+        <reporting.components.ReportingPanelPDFV2
+          getJobParams={getPDFJobParamsDefaultV2}
+          onClose={closePopover}
+        />
+      ),
+    },
+    {
+      id: 5,
+      title: 'V2 No Layout Option',
+      content: (
+        <reporting.components.ReportingPanelPNGV2
+          getJobParams={getPNGJobParamsDefaultV2}
+          onClose={closePopover}
+        />
+      ),
+    },
   ];
 
   return (
@@ -132,9 +212,11 @@ export const ReportingExampleApp = ({
             </EuiPageHeader>
             <EuiPageContent>
               <EuiPageContentBody>
+                <EuiTitle>
+                  <h2>Example of a Sharing menu using components from Reporting</h2>
+                </EuiTitle>
+                <EuiSpacer />
                 <EuiText>
-                  <p>Example of a Sharing menu using components from Reporting</p>
-
                   <EuiPopover
                     id="contextMenuExample"
                     button={<EuiButton onClick={onButtonClick}>Share</EuiButton>}
@@ -148,8 +230,29 @@ export const ReportingExampleApp = ({
 
                   <EuiHorizontalRule />
 
-                  <div data-shared-items-container data-shared-items-count="4">
+                  <div data-shared-items-container data-shared-items-count="5">
                     <EuiFlexGroup gutterSize="l">
+                      <EuiFlexItem data-shared-item>
+                        {forwardedParams ? (
+                          <>
+                            <EuiText>
+                              <p>
+                                <strong>Forwarded app state</strong>
+                              </p>
+                            </EuiText>
+                            <EuiCodeBlock>{JSON.stringify(forwardedParams)}</EuiCodeBlock>
+                          </>
+                        ) : (
+                          <>
+                            <EuiText>
+                              <p>
+                                <strong>No forwarded app state found</strong>
+                              </p>
+                            </EuiText>
+                            <EuiCodeBlock>{'{}'}</EuiCodeBlock>
+                          </>
+                        )}
+                      </EuiFlexItem>
                       {logos.map((item, index) => (
                         <EuiFlexItem key={index} data-shared-item>
                           <EuiCard

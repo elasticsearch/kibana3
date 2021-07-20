@@ -21,6 +21,7 @@ import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
 import { ReportTaskParams } from './lib/tasks';
+import { LocatorParams } from '../common/types';
 
 /*
  * Plugin Contract
@@ -29,11 +30,11 @@ import { ReportTaskParams } from './lib/tasks';
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface ReportingStartDeps {
@@ -115,3 +116,10 @@ export interface ReportingRequestHandlerContext {
  * @internal
  */
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
+
+type Url = string;
+type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
+/**
+ * @internal
+ */
+export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;

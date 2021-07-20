@@ -5,5 +5,5 @@
   "server": false,
   "ui": true,
   "optionalPlugins": [],
-  "requiredPlugins": ["reporting", "developerExamples", "navigation", "screenshotMode"]
+  "requiredPlugins": ["reporting", "developerExamples", "navigation", "screenshotMode", "share"]
 }

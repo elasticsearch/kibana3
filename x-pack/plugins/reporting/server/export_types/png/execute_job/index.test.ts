@@ -14,11 +14,11 @@ import {
   createMockConfigSchema,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { generatePngObservableFactory } from '../lib/generate_png';
+import { generatePngObservableFactory } from '../../common';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from './';
 
-jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
+jest.mock('../../common/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 
 let mockReporting: ReportingCore;
 

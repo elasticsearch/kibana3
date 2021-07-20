@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
+
 export interface PageSizeParams {
   pageMarginTop: number;
   pageMarginBottom: number;
@@ -63,6 +65,11 @@ export interface ReportSource {
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: {
     headers: string; // encrypted headers
+    /**
+     * PDF V2 reports will contain locators parameters (see {@link LocatorPublic}) that will be converted to {@link KibanaLocation}s when
+     * generating a report
+     */
+    locatorParams?: LocatorParams[];
     isDeprecated?: boolean; // set to true when the export type is being phased out
   } & BaseParams;
   meta: { objectType: string; layout?: string }; // for telemetry
@@ -99,6 +106,7 @@ export interface ReportDocument extends ReportDocumentHead {
 
 export interface BaseParams {
   browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
+
   layout?: LayoutParams;
   objectType: string;
   title: string;
@@ -168,6 +176,12 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
+
+export interface LocatorParams<P extends SerializableState = SerializableState> {
+  id: string;
+  version: string;
+  params: P;
+}
 
 export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
 
