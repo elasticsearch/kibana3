@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './kbn_client';
+export { JourneyKibanaServerService } from './journey_kibana_server_service';
+export { JourneyNavigationService } from './journey_navigation_service';

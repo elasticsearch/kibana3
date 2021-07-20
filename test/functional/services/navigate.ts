@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './kbn_client';
+import { FtrService } from '../ftr_provider_context';
+
+export class NavigateService extends FtrService {
+  toApp() {}
+
+  toUrl() {}
+
+  toUrlWithBrowserHistory() {}
+}

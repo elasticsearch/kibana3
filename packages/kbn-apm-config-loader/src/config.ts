@@ -9,6 +9,7 @@
 import { join } from 'path';
 import { merge } from 'lodash';
 import { execSync } from 'child_process';
+
 // deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils/target/path';
 import { readFileSync } from 'fs';
@@ -114,12 +115,20 @@ export class ApmConfiguration {
       config.active = true;
     }
 
+    if (process.env.ELASTIC_APM_LOG_UNCAUGHT_EXCEPTIONS) {
+      config.logUncaughtExceptions = process.env.ELASTIC_APM_LOG_UNCAUGHT_EXCEPTIONS === 'true';
+    }
+
     if (process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV) {
       config.environment = process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV;
     }
 
     if (process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE) {
       config.transactionSampleRate = parseFloat(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE);
+    }
+
+    if (process.env.ELASTIC_APM_SERVER_URL) {
+      config.serverUrl = process.env.ELASTIC_APM_SERVER_URL;
     }
 
     return config;

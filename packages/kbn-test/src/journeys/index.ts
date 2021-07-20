@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './kbn_client';
+export * from './journey_service';
+export * from './cli';
+export * from './services';

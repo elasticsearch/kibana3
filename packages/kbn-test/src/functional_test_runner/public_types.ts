@@ -38,7 +38,7 @@ export type ProvidedType<T extends (...args: any[]) => any> = MaybeAsyncInstance
  * Convert a map of providers to a map of the instance types they provide, also converting
  * promise types into the async instances that other providers will receive.
  */
-type ProvidedTypeMap<T extends {}> = {
+export type ProvidedTypeMap<T extends {}> = {
   [K in keyof T]: T[K] extends new (...args: any[]) => infer X
     ? X
     : T[K] extends (...args: any[]) => any

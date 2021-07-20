@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { services as commonServiceProviders } from '../../common/services';
+import {
+  services as commonServiceProviders,
+  servicesCompatibleWithJourneys as commonServicesCompatibleWithJourneys,
+} from '../../common/services';
 
 import { AppsMenuService } from './apps_menu';
 import {
@@ -73,6 +76,40 @@ export const services = {
   embedding: EmbeddingService,
   renderable: RenderableService,
   browser: BrowserProvider,
+  pieChart: PieChartService,
+  inspector: InspectorService,
+  fieldEditor: FieldEditorService,
+  vegaDebugInspector: VegaDebugInspectorViewService,
+  appsMenu: AppsMenuService,
+  globalNav: GlobalNavService,
+  toasts: ToastsService,
+  savedQueryManagementComponent: SavedQueryManagementComponentService,
+  elasticChart: ElasticChartService,
+  supertest: KibanaSupertestProvider,
+  managementMenu: ManagementMenuService,
+  monacoEditor: MonacoEditorService,
+  menuToggle: MenuToggleService,
+};
+
+export const serviceCompatibleWithJourneys = {
+  ...commonServicesCompatibleWithJourneys,
+
+  filterBar: FilterBarService,
+  queryBar: QueryBarService,
+  find: FindProvider,
+  testSubjects: TestSubjects,
+  docTable: DocTableService,
+  listingTable: ListingTableService,
+  dashboardVisualizations: DashboardVisualizationsService,
+  dashboardExpect: DashboardExpectService,
+  dashboardAddPanel: DashboardAddPanelService,
+  dashboardReplacePanel: DashboardReplacePanelService,
+  dashboardPanelActions: DashboardPanelActionsService,
+  flyout: FlyoutService,
+  comboBox: ComboBoxService,
+  dataGrid: DataGridService,
+  embedding: EmbeddingService,
+  renderable: RenderableService,
   pieChart: PieChartService,
   inspector: InspectorService,
   fieldEditor: FieldEditorService,

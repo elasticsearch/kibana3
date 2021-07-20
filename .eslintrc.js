@@ -119,6 +119,7 @@ const DEV_DIRECTORIES = [
   'fixtures',
   'ftr_e2e',
   'integration_tests',
+  'journeys',
   'manual_tests',
   'mock',
   'storybook',
