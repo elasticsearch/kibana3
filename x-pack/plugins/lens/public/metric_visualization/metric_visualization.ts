@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export type { MetricState, MetricConfig } from '../../common/expressions';
 export * from './expression';
 export * from './visualization';

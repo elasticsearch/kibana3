@@ -8,17 +8,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
-import {
+import type {
   IInterpreterRenderHandlers,
   ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/public';
-import { LensMultiTable, FormatFactory, LensFilterEvent } from '../types';
-import { PieExpressionProps, PieExpressionArgs } from './types';
+import { Position } from '@elastic/charts';
+import type { LensFilterEvent } from '../types';
 import { PieComponent } from './render_function';
-import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import type { FormatFactory, LensMultiTable } from '../../common';
+import type { PieExpressionProps, PieExpressionArgs } from '../../common/expressions';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export interface PieRender {
   type: 'render';

@@ -28,23 +28,24 @@ import {
   LabelOverflowConstraint,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  ExpressionFunctionDefinition,
+import type {
   ExpressionRenderDefinition,
   Datatable,
   DatatableRow,
+  ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
+import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
+import type { LensMultiTable, FormatFactory } from '../../common';
 import {
-  LensMultiTable,
-  FormatFactory,
-  ILensInterpreterRenderHandlers,
-  LensFilterEvent,
-  LensBrushEvent,
-} from '../types';
-import { XYArgs, SeriesType, visualizationTypes, LayerArgs } from './types';
+  fittingFunctionDefinitions,
+  LayerArgs,
+  SeriesType,
+  XYArgs,
+} from '../../common/expressions';
+import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
@@ -54,7 +55,7 @@ import {
   SeriesLayer,
 } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
-import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
+import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
 import { getXDomain, XyEndzones } from './x_domain';
@@ -84,18 +85,6 @@ export interface XYRender {
   as: 'lens_xy_chart_renderer';
   value: XYChartProps;
 }
-
-export type XYChartRenderProps = XYChartProps & {
-  chartsThemeService: ChartsPluginSetup['theme'];
-  paletteService: PaletteRegistry;
-  formatFactory: FormatFactory;
-  timeZone: string;
-  minInterval: number | undefined;
-  onClickValue: (data: LensFilterEvent['data']) => void;
-  onSelectRange: (data: LensBrushEvent['data']) => void;
-  renderMode: RenderMode;
-  syncColors: boolean;
-};
 
 export const xyChart: ExpressionFunctionDefinition<
   'lens_xy_chart',
@@ -228,6 +217,18 @@ export const xyChart: ExpressionFunctionDefinition<
       },
     };
   },
+};
+
+export type XYChartRenderProps = XYChartProps & {
+  chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: PaletteRegistry;
+  formatFactory: FormatFactory;
+  timeZone: string;
+  minInterval: number | undefined;
+  onClickValue: (data: LensFilterEvent['data']) => void;
+  onSelectRange: (data: LensBrushEvent['data']) => void;
+  renderMode: RenderMode;
+  syncColors: boolean;
 };
 
 export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {

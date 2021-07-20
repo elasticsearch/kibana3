@@ -9,17 +9,17 @@ import './expression.scss';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  ExpressionFunctionDefinition,
+import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
+  ExpressionFunctionDefinition,
 } from '../../../../../src/plugins/expressions/public';
-import { MetricConfig } from './types';
-import { FormatFactory, LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartMetric } from '../assets/chart_metric';
+import type { FormatFactory, LensMultiTable } from '../../common';
+import type { MetricConfig } from '../../common/expressions';
 
 export interface MetricChartProps {
   data: LensMultiTable;

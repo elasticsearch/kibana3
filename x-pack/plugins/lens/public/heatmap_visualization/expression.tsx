@@ -9,160 +9,31 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { Position } from '@elastic/charts';
-import {
-  ExpressionFunctionDefinition,
-  IInterpreterRenderHandlers,
-} from '../../../../../src/plugins/expressions';
-import { FormatFactory, LensBrushEvent, LensFilterEvent, LensMultiTable } from '../types';
-import {
-  FUNCTION_NAME,
-  HEATMAP_GRID_FUNCTION,
-  LEGEND_FUNCTION,
-  LENS_HEATMAP_RENDERER,
-} from './constants';
 import type {
-  HeatmapExpressionArgs,
-  HeatmapExpressionProps,
-  HeatmapGridConfig,
-  HeatmapGridConfigResult,
-  HeatmapRender,
-  LegendConfigResult,
-} from './types';
-import { HeatmapLegendConfig } from './types';
-import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
+  IInterpreterRenderHandlers,
+  ExpressionFunctionDefinition,
+} from '../../../../../src/plugins/expressions';
+import type { LensBrushEvent, LensFilterEvent } from '../types';
+import type { FormatFactory, LensMultiTable } from '../../common';
+import { LENS_HEATMAP_RENDERER } from './constants';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { HeatmapChartReportable } from './chart_component';
 
-export const heatmapGridConfig: ExpressionFunctionDefinition<
-  typeof HEATMAP_GRID_FUNCTION,
-  null,
-  HeatmapGridConfig,
-  HeatmapGridConfigResult
-> = {
-  name: HEATMAP_GRID_FUNCTION,
-  aliases: [],
-  type: HEATMAP_GRID_FUNCTION,
-  help: `Configure the heatmap layout `,
-  inputTypes: ['null'],
-  args: {
-    // grid
-    strokeWidth: {
-      types: ['number'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.strokeWidth.help', {
-        defaultMessage: 'Specifies the grid stroke width',
-      }),
-      required: false,
-    },
-    strokeColor: {
-      types: ['string'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.strokeColor.help', {
-        defaultMessage: 'Specifies the grid stroke color',
-      }),
-      required: false,
-    },
-    cellHeight: {
-      types: ['number'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.cellHeight.help', {
-        defaultMessage: 'Specifies the grid cell height',
-      }),
-      required: false,
-    },
-    cellWidth: {
-      types: ['number'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.cellWidth.help', {
-        defaultMessage: 'Specifies the grid cell width',
-      }),
-      required: false,
-    },
-    // cells
-    isCellLabelVisible: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.isCellLabelVisible.help', {
-        defaultMessage: 'Specifies whether or not the cell label is visible.',
-      }),
-    },
-    // Y-axis
-    isYAxisLabelVisible: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.isYAxisLabelVisible.help', {
-        defaultMessage: 'Specifies whether or not the Y-axis labels are visible.',
-      }),
-    },
-    yAxisLabelWidth: {
-      types: ['number'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.yAxisLabelWidth.help', {
-        defaultMessage: 'Specifies the width of the Y-axis labels.',
-      }),
-      required: false,
-    },
-    yAxisLabelColor: {
-      types: ['string'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.yAxisLabelColor.help', {
-        defaultMessage: 'Specifies the color of the Y-axis labels.',
-      }),
-      required: false,
-    },
-    // X-axis
-    isXAxisLabelVisible: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.heatmapChart.config.isXAxisLabelVisible.help', {
-        defaultMessage: 'Specifies whether or not the X-axis labels are visible.',
-      }),
-    },
-  },
-  fn(input, args) {
-    return {
-      type: HEATMAP_GRID_FUNCTION,
-      ...args,
-    };
-  },
-};
+import { HEATMAP_LEGEND_FUNCTION, HEATMAP_GRID_FUNCTION } from '../../common/expressions';
+import type { HeatmapExpressionArgs, HeatmapExpressionProps, HeatmapRender } from './types';
 
-/**
- * TODO check if it's possible to make a shared function
- * based on the XY chart
- */
-export const heatmapLegendConfig: ExpressionFunctionDefinition<
-  typeof LEGEND_FUNCTION,
-  null,
-  HeatmapLegendConfig,
-  LegendConfigResult
-> = {
-  name: LEGEND_FUNCTION,
-  aliases: [],
-  type: LEGEND_FUNCTION,
-  help: `Configure the heatmap chart's legend`,
-  inputTypes: ['null'],
-  args: {
-    isVisible: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.heatmapChart.legend.isVisible.help', {
-        defaultMessage: 'Specifies whether or not the legend is visible.',
-      }),
-    },
-    position: {
-      types: ['string'],
-      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: i18n.translate('xpack.lens.heatmapChart.legend.position.help', {
-        defaultMessage: 'Specifies the legend position.',
-      }),
-    },
-  },
-  fn(input, args) {
-    return {
-      type: LEGEND_FUNCTION,
-      ...args,
-    };
-  },
-};
+export { heatmapGridConfig, heatmapLegendConfig } from '../../common/expressions';
+
+export const HEATMAP_FUNCTION = 'lens_heatmap';
+export const HEATMAP_FUNCTION_RENDERER = 'lens_heatmap_renderer';
 
 export const heatmap: ExpressionFunctionDefinition<
-  typeof FUNCTION_NAME,
+  typeof HEATMAP_FUNCTION,
   LensMultiTable,
   HeatmapExpressionArgs,
   HeatmapRender
 > = {
-  name: FUNCTION_NAME,
+  name: HEATMAP_FUNCTION,
   type: 'render',
   help: i18n.translate('xpack.lens.heatmap.expressionHelpLabel', {
     defaultMessage: 'Heatmap renderer',
@@ -200,7 +71,7 @@ export const heatmap: ExpressionFunctionDefinition<
       types: ['palette'],
     },
     legend: {
-      types: [LEGEND_FUNCTION],
+      types: [HEATMAP_LEGEND_FUNCTION],
       help: i18n.translate('xpack.lens.heatmapChart.legend.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
@@ -216,7 +87,7 @@ export const heatmap: ExpressionFunctionDefinition<
   fn(data: LensMultiTable, args: HeatmapExpressionArgs) {
     return {
       type: 'render',
-      as: LENS_HEATMAP_RENDERER,
+      as: HEATMAP_FUNCTION_RENDERER,
       value: {
         data,
         args,

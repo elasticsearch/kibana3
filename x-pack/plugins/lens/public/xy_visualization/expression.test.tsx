@@ -21,25 +21,25 @@ import {
 import { PaletteOutput } from 'src/plugins/charts/public';
 import {
   calculateMinInterval,
-  xyChart,
   XYChart,
-  XYChartProps,
   XYChartRenderProps,
+  xyChart,
+  XYChartProps,
 } from './expression';
-import { LensMultiTable } from '../types';
+import type { LensMultiTable } from '../../common';
+import {
+  layerConfig,
+  legendConfig,
+  tickLabelsConfig,
+  gridlinesConfig,
+  XYArgs,
+  LegendConfig,
+  LayerArgs,
+  AxesSettingsConfig,
+} from '../../common/expressions';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
-import {
-  XYArgs,
-  LegendConfig,
-  legendConfig,
-  layerConfig,
-  LayerArgs,
-  AxesSettingsConfig,
-  tickLabelsConfig,
-  gridlinesConfig,
-} from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
